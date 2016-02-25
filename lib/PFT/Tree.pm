@@ -33,13 +33,18 @@ use PFT::Conf;
 
 sub new {
     my $cls = shift;
+    my $given = shift;
     my $opts = shift;
 
-    my $root = PFT::Conf::locate(shift);
-    my $self = bless { root => $root }, $cls;
-    $opts->{create} and $self->_create();
-
-    $self
+    if (defined(my $root = PFT::Conf::locate($given))) {
+        bless { root => $root }, $cls;
+    } elsif ($opts->{create}) {
+        my $self = bless { root => $given }, $cls;
+        $self->_create();
+        $self;
+    } else {
+        croak "Cannot find tree in $given"
+    }
 }
 
 sub _create {
