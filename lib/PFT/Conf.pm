@@ -222,4 +222,8 @@ sub save_to {
 
 =cut
 
+use overload
+    '""' => sub { 'PFT::Conf[ ' . (shift->{_root} || '?') . ' ]' },
+;
+
 1;
