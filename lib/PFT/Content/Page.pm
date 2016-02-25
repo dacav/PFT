@@ -101,6 +101,7 @@ sub set_header {
     }
 
     my $fh = $self->open('w');
+    binmode $fh, ':encoding(' . $hdr->encoding . ')';
     $hdr->dump($fh);
     print $fh $_ foreach @lines;
 }
