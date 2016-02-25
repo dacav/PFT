@@ -1,7 +1,14 @@
 Changes
 COPYING
 ignore.txt
+Makefile.PL
+MANIFEST			This list of files
+README
+LICENSE
+README.md
+
 lib/PFT.pm
+lib/PFT/Conf.pm
 lib/PFT/Tree.pm
 lib/PFT/Backends/HTML.pm
 lib/PFT/Backends/Base.pm
@@ -13,11 +20,7 @@ lib/PFT/Content/Base.pm
 lib/PFT/Content/File.pm
 lib/PFT/Map.pm
 lib/PFT/Header.pm
-Makefile.PL
-MANIFEST			This list of files
-README
-LICENSE
-README.md
+
 t/check-date.t
 t/check-header.t
 t/pod.t
@@ -26,5 +29,6 @@ t/check-files.t
 t/check-contenttree.t
 t/manifest.t
 t/00-load.t
+t/check-conf.t
 t/pod-coverage.t
 t/check-backend.t
