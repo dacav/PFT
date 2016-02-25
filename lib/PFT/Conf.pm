@@ -27,7 +27,8 @@ PFT::Conf - Configuration parser for PFT
 
 use Carp;
 
-use File::Spec;
+use Cwd;
+use File::Spec::Functions qw/updir catfile catdir rootdir/;
 use File::Path qw/make_path/;
 use File::Basename qw/dirname/;
 use YAML::Tiny qw/DumpFile LoadFile/;
@@ -90,7 +91,7 @@ sub new_load {
     my $cls = shift;
 
     my $root = shift;
-    my $cfg = LoadFile(File::Spec->catfile($root, $CONF_NAME));
+    my $cfg = LoadFile(catfile($root, $CONF_NAME));
     my $self;
 
     (
@@ -135,13 +136,33 @@ sub new_load {
     bless $self, $cls;
 }
 
+sub new_load_locate {
+    my $cls = shift;
+    my $start = shift() || Cwd::cwd;
+    my $root;
+
+    my $cur = $start;
+    while ($cur ne rootdir and !defined($root)) {
+        if (-e catfile($cur, $CONF_NAME)) {
+            $root = Cwd::abs_path($cur)
+        } else {
+            $cur = catdir($cur, updir);
+        }
+    }
+
+    croak "Not a PFT site (or any parent up to $start)"
+        unless defined $root;
+
+    $cls->new_load($root);
+}
+
 sub save_to {
     my $self = shift;
     my $root = shift;
 
     make_path(dirname $root);
 
-    DumpFile(File::Spec->catfile($root, $CONF_NAME), {
+    DumpFile(catfile($root, $CONF_NAME), {
         Author => $self->{author},
         Template => $self->{template},
         SiteTitle => $self->{site_title},
