@@ -17,6 +17,7 @@ PFT::Tree - Filesystem tree mapping a PFT site
 =head1 SYNOPSIS
 
     PFT::Tree->new($basedir);
+    PFT::Tree->new($basedir, {create => 1});
 
 =head1 DESCRIPTION
 
@@ -32,15 +33,16 @@ use PFT::Conf;
 
 sub new {
     my $cls = shift;
+    my $opts = shift;
 
-    my $root = PFT::Conf::locate(shift) or Cwd::abs_path(Cwd::getcwd);
+    my $root = PFT::Conf::locate(shift);
     my $self = bless { root => $root }, $cls;
-    $self->_init();
+    $opts->{create} and $self->_create();
 
     $self
 }
 
-sub _init {
+sub _create {
     my $self = shift;
     make_path map({ $self->$_ } qw/
         dir_content
@@ -49,7 +51,13 @@ sub _init {
     /), {
         #verbose => 1,
         mode => 0711,
+    };
+
+    unless (PFT::Conf::isroot(my $root = $self->{root})) {
+        PFT::Conf->new_default_env->save_to($root);
     }
+
+    $self->content(create => 1);
 }
 
 =head2 Properties
@@ -70,7 +78,7 @@ Returns a PFT::Content object.
 
 =cut
 
-sub content { PFT::Content->new(shift->dir_content) }
+sub content { PFT::Content->new(shift->dir_content, {@_}) }
 
 =item conf
 
@@ -78,16 +86,7 @@ Returns a PFT::Conf object
 
 =cut
 
-sub conf {
-    my $root = shift->{root};
-    if (PFT::Conf::isroot($root)) {
-        PFT::Conf->new_load($root)
-    } else {
-        my $conf = PFT::Conf->new_default_env;
-        $conf->save_to($root);
-        $conf;
-    }
-}
+sub conf { PFT::Conf->new_load(shift->{root}) }
 
 =back
 

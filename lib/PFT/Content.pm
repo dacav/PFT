@@ -14,9 +14,8 @@ PFT::Content - Filesytem tree mapping content
 
 =head1 SYNOPSIS
 
-    use PFT::Content;
-
-    my $tree = PFT::Content->new($basedir);
+    PFT::Content->new($basedir);
+    PFT::Content->new($basedir, {create => 1});
 
 =head1 DESCRIPTION
 
@@ -47,13 +46,14 @@ use PFT::Header;
 sub new {
     my $cls = shift;
     my $base = shift;
+    my $opts = shift;
 
     my $self = bless { base => $base }, $cls;
-    $self->_init();
+    $opts->{create} and $self->_create();
     $self;
 }
 
-sub _init {
+sub _create {
     my $self = shift;
     make_path map({ $self->$_ } qw/
         dir_blog

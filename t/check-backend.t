@@ -18,7 +18,7 @@ use PFT::Tree;
 use PFT::Backends::HTML;
 
 my $root = File::Temp->newdir();
-my $tree = PFT::Tree->new("$root");
+my $tree = PFT::Tree->new($root, {create => 1});
 
 # Populating
 do { 
