@@ -156,6 +156,17 @@ sub new_load_locate {
     $cls->new_load($root);
 }
 
+=head2 Methods
+
+=over 1
+
+=item save_to
+
+Save the configuration to a file. This will also update the inner root
+reference, so the intsance will point to the saved file.
+
+=cut
+
 sub save_to {
     my $self = shift;
     my $root = shift;
@@ -188,5 +199,9 @@ sub save_to {
     });
     $self->{_root} = $root;
 }
+
+=back
+
+=cut
 
 1;
