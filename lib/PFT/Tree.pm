@@ -26,13 +26,14 @@ use File::Spec;
 use File::Path qw/make_path/;
 
 use PFT::Content;
+use PFT::Conf;
 
 use Carp;
 
 sub new {
     my $cls = shift;
 
-    my $self = bless { base => shift }, $cls;
+    my $self = bless { root => PFT::Conf::locate(shift) }, $cls;
     $self->_init();
     $self->{content} = PFT::Content->new($self->dir_content);
 
@@ -59,9 +60,9 @@ sub _init {
 
 =cut
 
-sub dir_content { File::Spec->catdir(shift->{base}, 'content') }
-sub dir_templates { File::Spec->catdir(shift->{base}, 'templates') }
-sub dir_inject { File::Spec->catdir(shift->{base}, 'inject') }
+sub dir_content { File::Spec->catdir(shift->{root}, 'content') }
+sub dir_templates { File::Spec->catdir(shift->{root}, 'templates') }
+sub dir_inject { File::Spec->catdir(shift->{root}, 'inject') }
 
 =item content
 
