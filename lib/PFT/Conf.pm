@@ -151,9 +151,10 @@ sub isroot {
 }
 
 sub locate {
-    my $cur = shift() || Cwd::cwd;
+    my $cur = shift || Cwd::getcwd;
     my $root;
 
+    croak "Not a directory: $cur" unless -d $cur;
     until ($cur eq rootdir or defined($root)) {
         if (isroot($cur)) {
             $root = $cur
