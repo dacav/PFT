@@ -168,7 +168,7 @@ sub title { shift->{title} }
 sub author { shift->{author} }
 sub template { shift->{template} }
 sub encoding { shift->{encoding} }
-sub tags { shift->{tags} }
+sub tags { wantarray ? @{shift->{tags}} : shift->{tags} }
 sub date { shift->{date} }
 sub opts { shift->{opts} }
 

@@ -72,7 +72,7 @@ do {
 do {
     my $ts = ['One tag', 'Two ~ tags'];
     my $h = PFT::Header->new(title => 'x', tags => $ts);
-    is_deeply($h->tags, $ts, 'Full tags');
+    is_deeply(scalar($h->tags), $ts, 'Full tags');
     is_deeply([$h->slug_tags], ['one-tag', 'two-tags'], 'Slug tags');
 };
 
