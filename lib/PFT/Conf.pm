@@ -25,6 +25,8 @@ PFT::Conf - Configuration parser for PFT
     PFT::Conf::locate()             # Locate root
     PFT::Conf::locate($cwd)
 
+    PFT::Conf::isroot($path)        # Check if location exists under path.
+
 =head1 DESCRIPTION
 
 =cut
@@ -95,9 +97,8 @@ sub new_load {
     my $cls = shift;
 
     my $root = shift;
-    my $conf_file = catfile($root, $CONF_NAME);
-    croak "$root is not a PFT site: $conf_file is missing"
-        unless -e $conf_file;
+    my $conf_file = isroot($root)
+        or croak "$root is not a PFT site: $CONF_NAME is missing";
 
     my $cfg = LoadFile($conf_file);
     my $self;
@@ -144,12 +145,17 @@ sub new_load {
     bless $self, $cls;
 }
 
+sub isroot {
+    my $f = catfile(shift, $CONF_NAME);
+    -e $f ? $f : undef
+}
+
 sub locate {
     my $cur = shift() || Cwd::cwd;
     my $root;
 
     until ($cur eq rootdir or defined($root)) {
-        if (-e catfile($cur, $CONF_NAME)) {
+        if (isroot($cur)) {
             $root = $cur
         } else {
             $cur = Cwd::abs_path catdir($cur, updir)
