@@ -20,6 +20,10 @@ PFT::Conf - Configuration parser for PFT
     PFT::Conf->new_default_env()    # Using sensible defaults
     PFT::Conf->new_load($root)      # Load from conf file in directory
     PFT::Conf->new_load_locate()    # Load from conf file, find directory
+    PFT::Conf->new_load_locate($cwd)
+
+    PFT::Conf::locate()             # Locate root
+    PFT::Conf::locate($cwd)
 
 =head1 DESCRIPTION
 
@@ -91,7 +95,11 @@ sub new_load {
     my $cls = shift;
 
     my $root = shift;
-    my $cfg = LoadFile(catfile($root, $CONF_NAME));
+    my $conf_file = catfile($root, $CONF_NAME);
+    croak "$root is not a PFT site: $conf_file is missing"
+        unless -e $conf_file;
+
+    my $cfg = LoadFile($conf_file);
     my $self;
 
     (
@@ -136,20 +144,23 @@ sub new_load {
     bless $self, $cls;
 }
 
-sub new_load_locate {
-    my $cls = shift;
-    my $start = shift() || Cwd::cwd;
+sub locate {
+    my $cur = shift() || Cwd::cwd;
     my $root;
 
-    my $cur = $start;
-    while ($cur ne rootdir and !defined($root)) {
+    until ($cur eq rootdir or defined($root)) {
         if (-e catfile($cur, $CONF_NAME)) {
-            $root = Cwd::abs_path($cur)
+            $root = $cur
         } else {
-            $cur = catdir($cur, updir);
+            $cur = Cwd::abs_path catdir($cur, updir)
         }
     }
+    $root;
+}
 
+sub new_load_locate {
+    my $cls = shift;
+    my $root = locate(my $start = shift);
     croak "Not a PFT site (or any parent up to $start)"
         unless defined $root;
 
