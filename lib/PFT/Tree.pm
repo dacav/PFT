@@ -24,18 +24,18 @@ PFT::Tree - Filesystem tree mapping a PFT site
 
 use File::Spec;
 use File::Path qw/make_path/;
+use Carp;
+use Cwd;
 
 use PFT::Content;
 use PFT::Conf;
 
-use Carp;
-
 sub new {
     my $cls = shift;
 
-    my $self = bless { root => PFT::Conf::locate(shift) }, $cls;
+    my $root = PFT::Conf::locate(shift) or Cwd::abs_path(Cwd::getcwd);
+    my $self = bless { root => $root }, $cls;
     $self->_init();
-    $self->{content} = PFT::Content->new($self->dir_content);
 
     $self
 }
@@ -66,9 +66,28 @@ sub dir_inject { File::Spec->catdir(shift->{root}, 'inject') }
 
 =item content
 
+Returns a PFT::Content object.
+
 =cut
 
-sub content { shift->{content} }
+sub content { PFT::Content->new(shift->dir_content) }
+
+=item conf
+
+Returns a PFT::Conf object
+
+=cut
+
+sub conf {
+    my $root = shift->{root};
+    if (PFT::Conf::isroot($root)) {
+        PFT::Conf->new_load($root)
+    } else {
+        my $conf = PFT::Conf->new_default_env;
+        $conf->save_to($root);
+        $conf;
+    }
+}
 
 =back
 
