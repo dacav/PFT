@@ -17,8 +17,8 @@ PFT::Header - Header for PFT content textfiles
     use PFT::Header;
 
     my $hdr = PFT::Header->new(
-        title => $title,        # mandatory
-        author => $author,
+        title => $title,        # mandatory, decoded
+        author => $author,      # optional, decoded
         template => $template,
         encoding => $encoding,  # defaults 'utf-8'
         tags => $tags,          # defaults []
@@ -114,36 +114,29 @@ sub load {
 
     my $enc = $hdr->{Encoding} || $DEFAULT_ENC;
 
-    my $decode = sub {
-        my $v = $hdr->{$_[0]};
-        croak "Conf '$_[0]' is mandatory" if $_[1] && !defined $v;
-        croak "Conf '$_[0]' must be a string" if ref $v;
-        decode($enc, $v)
-    };
+    my $decode = sub { decode($enc, shift) };
 
     my $date;
     $hdr->{Date} and $date = eval {
-        PFT::Date->from_string($hdr->{Date})
+        PFT::Date->from_string($decode->($hdr->{Date}))
     };
     croak $@ =~ s/ at .*$//rs if $@;
 
     my $self = {
-        title => $decode->(Title => 1),
-        author => $decode->(Author => 0),
-        template => exists $hdr->{Template}
-            ? $decode->(Template => 0)
-            : undef,
-        tags => do {
+        title => $decode->($hdr->{Title}),
+        author => $decode->($hdr->{Author}),
+        template => $decode->($hdr->{Template}),
+        tags => [ do {
             my $tags = $hdr->{Tags};
-            ref $tags eq 'ARRAY' ? $tags
-                : defined $tags ? [$tags]
-                : []
-        },
+            ref $tags eq 'ARRAY' ? map($decode->($_), @$tags)
+                : defined $tags ? $decode->($tags)
+                : ()
+        }],
         encoding => $enc,
         date => $date,
-        opts => exists $hdr->{Options}
-            ? $hdr->{Options}
-            : undef,
+        opts => !exists $hdr->{Options} ? undef : {
+            map { $decode->($_) } %{$hdr->{Options}}
+        },
     };
     $params_check->($self);
 
@@ -218,6 +211,18 @@ sub dec {
         : decode($enc, shift)
 }
 
+=item binmode
+
+Call binmode on the given file descriptor with the encoding defined by the
+header.
+
+=cut
+
+sub binmode {
+    my $enc = shift->{encoding};
+    binmode shift, ":encoding($enc)";
+}
+
 =item set_date
 
 =cut
@@ -246,7 +251,8 @@ sub dump {
                 $type ? $type : 'Scalar'
     }
     my $tags = $self->tags;
-    print $to encode($self->encoding, YAML::Tiny::Dump {
+    $self->binmode($to);
+    print $to YAML::Tiny::Dump({
         Title => $self->title,
         Author => $self->author,
         Encoding => $self->encoding,
@@ -254,7 +260,7 @@ sub dump {
         Tags => @$tags ? $tags : undef,
         Date => $self->date ? $self->date->repr('-') : undef,
         Options => $self->opts,
-    }), "---\n"
+    }), "---\n";
 }
 
 =back

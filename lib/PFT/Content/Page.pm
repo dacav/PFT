@@ -75,7 +75,7 @@ sub read {
     my $fh = $self->open('r');
     my $h = eval { PFT::Header->load($fh) };
     croak $@ =~ s/ at .*$//rs if $@;
-    binmode $fh, ':encoding(' . $h->encoding . ')';
+    $h->binmode($fh);
 
     wantarray ? ($h, $fh) : $fh;
 }
@@ -101,7 +101,7 @@ sub set_header {
     }
 
     my $fh = $self->open('w');
-    binmode $fh, ':encoding(' . $hdr->encoding . ')';
+    $hdr->binmode($fh);
     $hdr->dump($fh);
     print $fh $_ foreach @lines;
 }
