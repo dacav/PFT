@@ -58,11 +58,11 @@ sub header {
 
 =item read
 
-Read the page. In scalar context returns an open file descriptor
-configured with the correct `binmode` according to the header.
+Read the page.
 
-In list context returns the header and the same descriptor. Returns undef
-if the file does not exist.
+In scalar context returns an open file descriptor configured with the
+correct `binmode` according to the header.  In list context returns the
+header and the same descriptor. Returns undef if the file does not exist.
 
 Croaks if the header is broken.
 

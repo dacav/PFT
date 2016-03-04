@@ -21,6 +21,17 @@ PFT::Tree - Filesystem tree mapping a PFT site
 
 =head1 DESCRIPTION
 
+The structure is the following:
+
+    ├── build
+    ├── content
+    │   └── ...
+    ├── inject
+    ├── pft.yaml
+    └── templates
+
+Where the C<content> directory is handled with a PFT::Content instance.
+
 =cut
 
 use File::Spec;

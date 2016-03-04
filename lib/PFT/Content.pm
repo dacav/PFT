@@ -21,16 +21,12 @@ PFT::Content - Filesytem tree mapping content
 
 The structure is the following:
 
-    ├── build
-    ├── content
-    │   ├── attachments
-    │   ├── blog
-    │   ├── pages
-    │   ├── pics
-    │   └── tags
-    ├── inject
-    ├── pft.yaml
-    └── templates
+    content
+    ├── attachments
+    ├── blog
+    ├── pages
+    ├── pics
+    └── tags
 
 =cut
 
