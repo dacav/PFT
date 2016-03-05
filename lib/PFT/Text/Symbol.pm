@@ -66,11 +66,11 @@ sub scan_html {
 
     my $pair = qr/":(\w+):([^"]*)"/;
     my $img = qr/<img\s*[^>]*src=\s*$pair([^>]*)>/;
-    my $a = qr/<a\s*[^>]*href=\s*$pair([^>]*)>/;
+    my $ahr = qr/<a\s*[^>]*href=\s*$pair([^>]*)>/;
 
     my $text = join '', @_;
     my @out;
-    for my $reg ($img, $a) {
+    for my $reg ($img, $ahr) {
         while ($text =~ /\W$reg/smg) {
             my $len = length($1) + length($2) + 2; # +2 for ::
             my $start = pos($text) - $len - length($3) - 2; # -2 for ">
@@ -84,7 +84,7 @@ sub scan_html {
         }
     }
 
-    @out;
+    sort { $a->start <=> $b->start } @out;
 }
 
 1;
