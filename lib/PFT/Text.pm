@@ -36,45 +36,6 @@ sub new {
     }, $cls;
 }
 
-package PFT::Text::Symbol;
-
-sub new {
-    bless [
-        $_[1],               # keyword
-        [split /\//, $_[2]], # args list
-        $_[3],               # start
-        $_[4],               # len
-    ], $_[0]
-}
-sub keyword { shift->[0] }
-sub args { @{shift->[1]} }
-sub start { shift->[2] }
-sub len { shift->[3] }
-
-package PFT::Text;
-
-sub _locate_symbols {
-    # NOTE: this is for internal use, yet not lexically scoped, as
-    # required by unittest.
-
-    my $pair = qr/":(\w+):([^"]*)"/;
-    my $img = qr/<img\s*[^>]*src=\s*$pair([^>]*)>/;
-    my $a = qr/<a\s*[^>]*href=\s*$pair([^>]*)>/;
-
-    my $text = join '', @_;
-    my @out;
-    for my $reg ($img, $a) {
-        while ($text =~ /\W$reg/smg) {
-            my $len = length($1) + length($2) + 2; # +2 for ::
-            my $start = pos($text) - $len - length($3) - 2; # -2 for ">
-
-            push @out, PFT::Text::Symbol->new($1, $2, $start, $len)
-        }
-    }
-
-    @out;
-}
-
 =head2 Properties
 
 =over 1

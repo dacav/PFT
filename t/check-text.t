@@ -11,7 +11,7 @@ use Test::More; #tests => 1;
 use File::Spec;
 use File::Temp qw/tempdir/;
 
-use PFT::Text;
+use PFT::Text::Symbol;
 use PFT::Content;
 use PFT::Header;
 
@@ -34,19 +34,23 @@ use Text::MultiMarkdown 'markdown';
 my $html = markdown(join '', <::DATA>);
 close ::DATA;
 
-#print "Found $1:$2 at start $start, len $len\n",
-#      "   ", substr($text, $start - 10, $len + 10) =~ s/\n/\$/rgs, "\n",
-#      "   ", ' ' x 10, '^', "\n";
-
-diag $html;
-
-my @syms = PFT::Text::_locate_symbols($html);
+my @syms = PFT::Text::Symbol->scan_html($html);
 foreach (@syms) {
     diag "Found ", $_->keyword, '(', join(', ', $_->args), ")\n";
     diag '   at start ', $_->start, ' len ', $_->len, "\n";
     diag "   ", substr($html, $_->start - 10, $_->len + 20) =~ s/\n/\$/rgs, "\n";
     diag "   ", '-' x 10, '^', $_->len > 2 ? ('.' x ($_->len - 2), "^\n") : "\n";
 }
+
+do {
+    my @snips = map{ '":'.$_->keyword.':'.join('/', $_->args).'"' } @syms;
+    my @found = map{ substr($html, $_->start - 1, $_->len + 2) } @syms;
+    is_deeply(\@snips, \@found, 'Symbols are Correct');
+};
+
+is(scalar @syms, 9, 'Symbols are Complete');
+
+done_testing();
 
 __END__
 # Hello there.

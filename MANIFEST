@@ -20,6 +20,8 @@ lib/PFT/Header.pm
 lib/PFT/Map.pm
 lib/PFT/Map/Node.pm
 lib/PFT/Tree.pm
+lib/PFT/Text.pm
+lib/PFT/Text/Symbol.pm
 
 t/00-load.t
 t/check-backend.t
@@ -30,6 +32,7 @@ t/check-files.t
 t/check-header.t
 t/check-map.t
 t/check-tree.t
+t/check-text.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
