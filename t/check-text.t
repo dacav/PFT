@@ -15,21 +15,6 @@ use PFT::Text::Symbol;
 use PFT::Content;
 use PFT::Header;
 
-#my $dir = tempdir(CLEANUP => 1);
-#
-#my $entry = PFT::Content->new(
-#    $dir, { create => 1 }
-#)->new_entry(
-#    PFT::Header->new(title => 'test')
-#);
-#
-#do {
-#    open my $fd, '>>:encoding(UTF-8)', $entry->path or die $!;
-#    print $fd <<"    END";
-#    END
-#    close $fd;
-#};
-
 use Text::MultiMarkdown 'markdown';
 my $html = markdown(join '', <::DATA>);
 close ::DATA;
