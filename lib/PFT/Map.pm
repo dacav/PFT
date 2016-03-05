@@ -113,8 +113,6 @@ sub _scan_tags {
 
 =cut
 
-use feature 'say';
-
 sub dump {
     my $node_dump = sub {
         my $node = shift;
