@@ -10,13 +10,14 @@ use Test::More; #tests => 1;
 
 use File::Spec;
 use File::Temp qw/tempdir/;
+use Encode;
 
 use PFT::Text::Symbol;
 use PFT::Content;
 use PFT::Header;
 
 use Text::MultiMarkdown 'markdown';
-my $html = markdown(join '', <::DATA>);
+my $html = markdown(decode('utf-8', join '', <::DATA>));
 close ::DATA;
 
 my @syms = PFT::Text::Symbol->scan_html($html);
