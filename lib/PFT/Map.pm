@@ -111,6 +111,10 @@ sub _scan_tags {
 
 =item dump
 
+Dump the nodes in a easy-to-display form, that is a list of dictionaries.
+
+This method is used mainly or solely for testing.
+
 =cut
 
 sub dump {

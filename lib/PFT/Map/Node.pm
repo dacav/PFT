@@ -41,10 +41,30 @@ sub new {
 
 =head2 Properties
 
+=over 1
+
+=item header
+
+Header associated with this node.
+
+This property is guarranteed to be defined, even if the node does not
+correspond to an existing page.
+
 =cut
 
 sub header { shift->{hdr} }
+
+=item page
+
+The page associated with this node. This property could return undefined
+for the nodes which do not correspond to any content. In this case we talk
+about I<virtual pages>, in that the node should be represented anyway in a
+compiled PFT site.
+
+=cut
+
 sub page { shift->{page} }
+
 sub id { shift->{id} }
 sub date { shift->{hdr}->date }
 sub next { shift->{next} }
@@ -97,6 +117,10 @@ sub _list {
 sub tags { shift->_list('tags') }
 sub tagged { shift->_list('tagged') }
 sub days { shift->_list('days') }
+
+=back
+
+=cut
 
 use overload
     '<=>' => sub {
