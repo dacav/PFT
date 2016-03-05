@@ -38,11 +38,14 @@ close ::DATA;
 #      "   ", substr($text, $start - 10, $len + 10) =~ s/\n/\$/rgs, "\n",
 #      "   ", ' ' x 10, '^', "\n";
 
-foreach (PFT::Text::_locate_symbols($html)) {
+diag $html;
+
+my @syms = PFT::Text::_locate_symbols($html);
+foreach (@syms) {
     diag "Found ", $_->keyword, '(', join(', ', $_->args), ")\n";
     diag '   at start ', $_->start, ' len ', $_->len, "\n";
     diag "   ", substr($html, $_->start - 10, $_->len + 20) =~ s/\n/\$/rgs, "\n";
-    diag "   ", '-' x 10, '^', '.' x ($_->len - 2), '^', "\n";
+    diag "   ", '-' x 10, '^', $_->len > 2 ? ('.' x ($_->len - 2), "^\n") : "\n";
 }
 
 __END__
@@ -62,7 +65,7 @@ Oh, there are also
 [lnk]: :foo:bar/baz
 
 <a 
-href=":x">
+href=":x:">
 Multiline links should be supported
 </a>
 

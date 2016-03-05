@@ -57,16 +57,19 @@ sub _locate_symbols {
     # NOTE: this is for internal use, yet not lexically scoped, as
     # required by unittest.
 
-    my $pair = qr/":(\w+):([^"]+)"/;
-    my $img = qr/<img\s+[^>]*src=\s*$pair([^>]*)>/;
+    my $pair = qr/":(\w+):([^"]*)"/;
+    my $img = qr/<img\s*[^>]*src=\s*$pair([^>]*)>/;
+    my $a = qr/<a\s*[^>]*href=\s*$pair([^>]*)>/;
 
     my $text = join '', @_;
     my @out;
-    while ($text =~ /\W$img/sg) {
-        my $len = length($1) + length($2) + 1;
-        my $start = pos($text) - $len - length($3) - 2; # -2: for " and >
+    for my $reg ($img, $a) {
+        while ($text =~ /\W$reg/smg) {
+            my $len = length($1) + length($2) + 2; # +2 for ::
+            my $start = pos($text) - $len - length($3) - 2; # -2 for ">
 
-        push @out, PFT::Text::Symbol->new($1, $2, $start, $len)
+            push @out, PFT::Text::Symbol->new($1, $2, $start, $len)
+        }
     }
 
     @out;
