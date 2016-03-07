@@ -73,8 +73,8 @@ sub read {
 
     return undef unless $self->exists;
     my $fh = $self->open('r');
-    my $h = eval { PFT::Header->load($fh) };
-    croak $@ =~ s/ at .*$//rs if $@;
+    my $h = eval { PFT::Header->load($fh) }
+        or croak $@ =~ s/ at .*$//rs;
     $h->binmode($fh);
 
     wantarray ? ($h, $fh) : $fh;
@@ -108,7 +108,7 @@ sub set_header {
 
 =item make_consistent
 
-Make page consistent with the filesystem tree
+Make page consistent with the filesystem tree.
 
 =cut
 
