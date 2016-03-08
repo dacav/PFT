@@ -46,18 +46,20 @@ sub new {
 use PFT::Map::Node;
 
 sub _mknod {
-    PFT::Map::Node->new(shift->{next} ++, @_ ? shift : $_);
+    PFT::Map::Node->new(shift->{next} ++, @_);
 }
 
 sub _scan_pages {
     my $self = shift;
-    push @{$self->{nodes}}, map $self->_mknod, $self->{tree}->pages_ls;
+    push @{$self->{nodes}}, map
+        $self->_mknod($_, kind => 'p'),
+        $self->{tree}->pages_ls;
 }
 
 sub _scan_blog {
     my $self = shift;
     my $tree = $self->{tree};
-    my @blog = map $self->_mknod, $tree->blog_ls;
+    my @blog = map $self->_mknod($_, kind => 'b'), $tree->blog_ls;
     my @months;
 
     my($prev, $prev_month);
@@ -70,7 +72,10 @@ sub _scan_blog {
             if (@months == 0 or $months[-1]->date <=> $m_date) {
                 my $m_hdr = PFT::Header->new(date => $m_date);
                 my $m_page = $tree->entry($m_hdr);
-                my $n = $self->_mknod($m_page->exists ? $m_page : $m_hdr);
+                my $n = $self->_mknod(
+                    $m_page->exists ? $m_page : $m_hdr,
+                    kind => 'm',
+                );
                 $n->prev($months[-1]) if @months;
                 push @months, $n;
             }
@@ -95,7 +100,8 @@ sub _scan_tags {
                 my $t_hdr = PFT::Header->new(title => $_);
                 my $t_page = $tree->tag($t_hdr);
                 $tags{$_} = $self->_mknod(
-                    $t_page->exists ? $t_page : $t_hdr
+                    $t_page->exists ? $t_page : $t_hdr,
+                    kind => 't',
                 );
             };
             $node->add_tag($t_node);

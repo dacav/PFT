@@ -36,7 +36,7 @@ sub new {
         ($page, $hdr) = ($from, $from->header);
     }
 
-    bless { id => $id, hdr => $hdr, page => $page }, $cls;
+    bless { id => $id, hdr => $hdr, page => $page, attrs => {@_} }, $cls;
 }
 
 =head2 Properties
@@ -68,6 +68,18 @@ sub page { shift->{page} }
 sub id { shift->{id} }
 sub date { shift->{hdr}->date }
 sub next { shift->{next} }
+
+=item attr
+
+Getter for arbitrary attribute, setted by constructor.
+
+=cut
+
+sub attr {
+    my $a = shift->{attrs};
+    my $k = shift;
+    exists $a->{$k} ? $a->{$k} : undef;
+}
 
 use WeakRef;
 
