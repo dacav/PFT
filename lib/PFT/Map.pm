@@ -63,29 +63,27 @@ sub _scan_blog {
     my $self = shift;
     my $tree = $self->{tree};
     my @blog = map $self->_mknod($_, 'b'), $tree->blog_ls;
-    my @months;
 
     my($prev, $prev_month);
     foreach (sort { $a->date <=> $b->date } @blog) {
         $_->prev($prev) if defined $prev;
 
-        my $m_node = do {
+        $_->month(do {
             my $m_date = $_->date->derive(d => undef);
 
-            if (@months == 0 or $months[-1]->date <=> $m_date) {
+            if (!defined($prev_month) or $prev_month->date <=> $m_date) {
                 my $m_hdr = PFT::Header->new(date => $m_date);
                 my $m_page = $tree->entry($m_hdr);
                 my $n = $self->_mknod(
                     $m_page->exists ? $m_page : $m_hdr,
                     'm',
                 );
-                $n->prev($months[-1]) if @months;
-                push @months, $n;
+                $n->prev($prev_month) if defined $prev_month;
+                $prev_month = $n;
             }
-            $months[-1]
-        };
+            $prev_month
+        });
 
-        $_->month($m_node);
         $prev = $_;
     }
 }
