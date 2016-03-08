@@ -25,6 +25,7 @@ Map of a PFT site
 
 =cut
 
+use PFT::Map::Node;
 use WeakRef;
 
 sub new {
@@ -33,8 +34,8 @@ sub new {
 
     my $self = bless {
         tree => $tree,
+        idx => {},
         next => 0,
-        nodes => [],
     }, $cls;
 
     $self->_scan_pages;
@@ -43,23 +44,25 @@ sub new {
     $self;
 }
 
-use PFT::Map::Node;
-
 sub _mknod {
-    PFT::Map::Node->new(shift->{next} ++, @_);
+    my $self = shift;
+    my $node = PFT::Map::Node->new(
+        shift,      # from: header | page
+        shift,      # kind p|b|m|t
+        $self->{next} ++,
+    );
+    $self->{idx}{$node->id} = $node;
 }
 
 sub _scan_pages {
     my $self = shift;
-    push @{$self->{nodes}}, map
-        $self->_mknod($_, kind => 'p'),
-        $self->{tree}->pages_ls;
+    $self->_mknod($_, 'p') foreach $self->{tree}->pages_ls;
 }
 
 sub _scan_blog {
     my $self = shift;
     my $tree = $self->{tree};
-    my @blog = map $self->_mknod($_, kind => 'b'), $tree->blog_ls;
+    my @blog = map $self->_mknod($_, 'b'), $tree->blog_ls;
     my @months;
 
     my($prev, $prev_month);
@@ -74,7 +77,7 @@ sub _scan_blog {
                 my $m_page = $tree->entry($m_hdr);
                 my $n = $self->_mknod(
                     $m_page->exists ? $m_page : $m_hdr,
-                    kind => 'm',
+                    'm',
                 );
                 $n->prev($months[-1]) if @months;
                 push @months, $n;
@@ -85,8 +88,6 @@ sub _scan_blog {
         $_->month($m_node);
         $prev = $_;
     }
-
-    push @{$self->{nodes}}, @blog, @months;
 }
 
 sub _scan_tags {
@@ -94,21 +95,19 @@ sub _scan_tags {
     my $tree = $self->{tree};
     my %tags;
 
-    for my $node (@{$self->{nodes}}) {
-        foreach (@{$node->header->tags}) {
+    for my $node (sort { $a <=> $b } values %{$self->{idx}}) {
+        foreach (sort @{$node->header->tags}) {
             my $t_node = exists $tags{$_} ? $tags{$_} : do {
                 my $t_hdr = PFT::Header->new(title => $_);
                 my $t_page = $tree->tag($t_hdr);
                 $tags{$_} = $self->_mknod(
                     $t_page->exists ? $t_page : $t_hdr,
-                    kind => 't',
+                    't',
                 );
             };
             $node->add_tag($t_node);
         }
     }
-
-    push @{$self->{nodes}}, sort { $a <=> $b } values %tags;
 }
 
 =head2 Methods
@@ -127,23 +126,31 @@ sub dump {
     my $node_dump = sub {
         my $node = shift;
         my %out = (
-            id => $node->id,
+            id => $node->seqnr,
             tt => $node->header->title || '<month>',
         );
 
-        if (defined(my $prev = $node->prev)) { $out{'<'} = $prev->id }
-        if (defined(my $next = $node->next)) { $out{'>'} = $next->id }
-        if (defined(my $month = $node->month)) { $out{'^'} = $month->id }
+        if (defined(my $prev = $node->prev)) { $out{'<'} = $prev->seqnr }
+        if (defined(my $next = $node->next)) { $out{'>'} = $next->seqnr }
+        if (defined(my $month = $node->month)) { $out{'^'} = $month->seqnr }
         if (defined(my $date = $node->header->date)) { $out{d} = "$date" }
-        if (my @l = $node->days) { $out{v} = [map{ $_->id } @l] }
-        if (my @l = $node->tags) { $out{t} = [map{ $_->id } @l] }
-        if (my @l = $node->tagged) { $out{'.'} = [map{ $_->id } @l] }
+        if (my @l = $node->days) {
+            $out{v} = [sort { $a <=> $b } map{ $_->seqnr } @l]
+        }
+        if (my @l = $node->tags) {
+            $out{t} = [sort { $a <=> $b } map{ $_->seqnr } @l]
+        }
+        if (my @l = $node->tagged) {
+            $out{'.'} = [sort { $a <=> $b } map{ $_->seqnr } @l]
+        }
 
         \%out
     };
 
     my $self = shift;
-    map $node_dump->($_), @{$self->{nodes}};
+    map{ $node_dump->($_) }
+        sort{ $a <=> $b }
+        values %{$self->{idx}}
 }
 
 =back

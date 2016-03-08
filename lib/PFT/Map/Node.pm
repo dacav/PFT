@@ -23,9 +23,7 @@ PFT::Map::Node - Node of a PFT site map
 use Carp;
 
 sub new {
-    my $cls = shift;
-    my $id = shift;
-    my $from = shift;
+    my($cls, $from, $kind, $seqnr) = @_;
 
     my($hdr, $page);
     if ($from->isa('PFT::Header')) {
@@ -36,7 +34,17 @@ sub new {
         ($page, $hdr) = ($from, $from->header);
     }
 
-    bless { id => $id, hdr => $hdr, page => $page, attrs => {@_} }, $cls;
+    bless {
+        id => do {
+            if ($kind eq 'b' || $kind eq 'm') {
+                $kind .= '.' . $hdr->date->repr('.')
+            }
+            $kind =~ /^m/ ? $kind : $kind . '.' . $hdr->slug
+        },
+        seqnr => $seqnr,
+        hdr => $hdr,
+        page => $page,
+    }, $cls;
 }
 
 =head2 Properties
@@ -64,22 +72,10 @@ compiled PFT site.
 =cut
 
 sub page { shift->{page} }
-
-sub id { shift->{id} }
 sub date { shift->{hdr}->date }
 sub next { shift->{next} }
-
-=item attr
-
-Getter for arbitrary attribute, setted by constructor.
-
-=cut
-
-sub attr {
-    my $a = shift->{attrs};
-    my $k = shift;
-    exists $a->{$k} ? $a->{$k} : undef;
-}
+sub seqnr { shift->{seqnr} }
+sub id { shift->{id} }
 
 use WeakRef;
 
@@ -137,7 +133,7 @@ sub days { shift->_list('days') }
 use overload
     '<=>' => sub {
         my($self, $oth, $swap) = @_;
-        my $out = $self->{id} <=> $oth->{id};
+        my $out = $self->{seqnr} <=> $oth->{seqnr};
         $swap ? -$out : $out;
     },
     '""' => sub {
