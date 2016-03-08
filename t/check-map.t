@@ -48,7 +48,11 @@ $tree->new_entry(PFT::Header->new(title => 'Month nr.3',
 ));
 $tree->new_tag(PFT::Header->new(title => 'Bar'));
 
-my @dumped = PFT::Map->new($tree)->dump;
+my $map = PFT::Map->new($tree);
+diag('Follows list of nodes:');
+diag('   ', $_->id) foreach $map->nodes;
+
+my @dumped = $map->dump;
 
 # main::expected is declared down in the file.
 is_deeply(\@main::expected, \@dumped, 'Deeply equal');

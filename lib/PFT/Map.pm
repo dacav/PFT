@@ -108,13 +108,21 @@ sub _scan_tags {
     }
 }
 
-=head2 Methods
+=head2 Properties
 
 =over
 
+=item nodes
+
+List the nodes
+
+=cut
+
+sub nodes { values shift->{idx} }
+
 =item dump
 
-Dump the nodes in a easy-to-display form, that is a list of dictionaries.
+Dump of the nodes in a easy-to-display form, that is a list of dictionaries.
 
 This method is used mainly or solely for testing.
 
