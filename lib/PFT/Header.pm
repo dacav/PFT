@@ -167,6 +167,8 @@ sub opts { shift->{opts} }
 
 my $slugify = sub {
     my $out = shift;
+    confess unless $out;
+
     $out =~ s/[\W_]/-/g;
     $out =~ s/--+/-/g;
     $out =~ s/-$//;
