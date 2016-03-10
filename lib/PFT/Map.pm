@@ -25,12 +25,15 @@ Map of a PFT site
 
 =cut
 
+use Carp;
 use PFT::Map::Node;
 use WeakRef;
 
 sub new {
     my $cls = shift;
     my $tree = shift;
+    confess 'want a PFT::Content, got ', ref($tree)
+        unless $tree->isa('PFT::Content');
 
     my $self = bless {
         tree => $tree,
