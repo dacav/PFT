@@ -16,6 +16,12 @@ PFT::Map::Node - Node of a PFT site map
 
 =head1 SYNOPSIS
 
+    my $node = PFT::Map::Node->($from, $kind, $seqid);
+
+C<$from> can either be a C<PFT::Header> or a C<PFT::Content::Page>.
+Valid vaulues for C<$kind> match C</^[bmpt]$/>. C<$seqid> is a numeric
+sequence number.
+
 =head1 DESCRIPTION
 
 =cut
@@ -33,13 +39,14 @@ sub new {
             unless $from->isa('PFT::Content::Page');
         ($page, $hdr) = ($from, $from->header);
     }
+    $kind =~ /^[bmpt]$/ or confess "Invalid kind $kind. Valid: b|m|p|t";
 
     bless {
+        kind => $kind,
         id => do {
-            if ($kind eq 'b' || $kind eq 'm') {
-                $kind .= '.' . $hdr->date->repr('.')
-            }
-            $kind =~ /^m/ ? $kind : $kind . '.' . $hdr->slug
+            my $id = $kind;
+            $id .= '.' . $hdr->date->repr('.') if $kind =~ '[bm]';
+            $kind eq 'm' ? $id : $id . '.' . $hdr->slug
         },
         seqnr => $seqnr,
         hdr => $hdr,
@@ -72,6 +79,8 @@ compiled PFT site.
 =cut
 
 sub page { shift->{page} }
+
+sub kind { shift->{kind} }
 sub date { shift->{hdr}->date }
 sub next { shift->{next} }
 sub seqnr { shift->{seqnr} }
