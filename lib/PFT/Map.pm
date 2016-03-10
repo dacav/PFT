@@ -121,7 +121,7 @@ List the nodes
 
 =cut
 
-sub nodes { values shift->{idx} }
+sub nodes { values %{shift->{idx}} }
 
 =item dump
 
