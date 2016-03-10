@@ -87,6 +87,7 @@ sub _create {
 sub dir_content { File::Spec->catdir(shift->{root}, 'content') }
 sub dir_templates { File::Spec->catdir(shift->{root}, 'templates') }
 sub dir_inject { File::Spec->catdir(shift->{root}, 'inject') }
+sub dir_build { File::Spec->catdir(shift->{root}, 'build') }
 
 =item content
 
