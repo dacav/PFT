@@ -27,6 +27,9 @@ The constructor expects a C<Content::Page> object as parameter.
 
 =cut
 
+use PFT::Text::Symbol;
+use Text::MultiMarkdown qw/markdown/;
+
 sub new {
     my $cls = shift;
     my $page = shift;
@@ -40,18 +43,27 @@ sub new {
 
 =over 1
 
+=item html
+
+=cut
+
+sub html {
+    my $self = shift;
+    return $self->{html} if exists $self->{html};
+    $self->{html} = markdown do {
+        my $fd = $self->{page}->read;
+        local $/ = undef;
+        <$fd>;
+    }
+}
+
 =item symbols
 
 =cut
 
 sub symbols {
     my $self = shift;
-    my $text = do {
-        my $fd = $self->{page}->read;
-        local $/ = undef;
-        <$fd>;
-    };
-
+    PFT::Text::Symbol->scan_html($self->html);
 }
 
 =back
