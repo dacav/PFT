@@ -16,17 +16,24 @@ PFT::Map::Node - Node of a PFT site map
 
 =head1 SYNOPSIS
 
-    my $node = PFT::Map::Node->($from, $kind, $seqid);
+    my $node = PFT::Map::Node->($from, $kind, $seqid, $resolver);
 
-C<$from> can either be a C<PFT::Header> or a C<PFT::Content::Page>.
-Valid vaulues for C<$kind> match C</^[bmpt]$/>. C<$seqid> is a numeric
-sequence number.
+=over 1
+
+=item C<$from> can either be a C<PFT::Header> or a C<PFT::Content::Page>;
+
+=item Valid vaulues for C<$kind> match C</^[bmpt]$/>;
+
+=item C<$seqid> is a numeric sequence number.
 
 =head1 DESCRIPTION
 
 =cut
 
 use Carp;
+use WeakRef;
+
+use PFT::Text;
 
 sub new {
     my($cls, $from, $kind, $seqnr) = @_;
@@ -86,7 +93,6 @@ sub next { shift->{next} }
 sub seqnr { shift->{seqnr} }
 sub id { shift->{id} }
 
-use WeakRef;
 
 sub prev {
     my $self = shift;
