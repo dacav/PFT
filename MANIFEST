@@ -8,8 +8,6 @@ LICENSE
 README.md
 
 lib/PFT.pm
-lib/PFT/Backends/Base.pm
-lib/PFT/Backends/HTML.pm
 lib/PFT/Conf.pm
 lib/PFT/Content.pm
 lib/PFT/Content/Base.pm
