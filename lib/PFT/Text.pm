@@ -16,7 +16,7 @@ PFT::Text - Wrapper around content text
 
 =head1 SYNOPSIS
 
-    PFT::Text->new($filehandler);
+    PFT::Text->new($page);
 
 =head1 DESCRIPTION
 
@@ -29,10 +29,14 @@ The constructor expects a C<Content::Page> object as parameter.
 
 use PFT::Text::Symbol;
 use Text::Markdown qw/markdown/;
+use Carp;
 
 sub new {
     my $cls = shift;
     my $page = shift;
+
+    confess 'Expecting PFT::Content::Page'
+        unless $page->isa('PFT::Content::Page');
 
     bless {
         page => $page,
