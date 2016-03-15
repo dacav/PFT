@@ -27,6 +27,7 @@ Map of a PFT site
 
 use Carp;
 use PFT::Map::Node;
+use PFT::Text;
 use WeakRef;
 
 sub new {
@@ -47,13 +48,22 @@ sub new {
     $self;
 }
 
+my $text_refs = sub {
+    my $node = shift;
+    for my $s (PFT::Text->new($node->page)->symbols) {
+        print "Need to resolve: $s\n";
+    }
+};
+
 sub _mknod {
     my $self = shift;
     my $node = PFT::Map::Node->new(
-        shift,      # from: header | page
-        shift,      # kind p|b|m|t
+        (my $from = shift),     # from: header | page
+        shift,                  # kind p|b|m|t
         $self->{next} ++,
     );
+
+    $text_refs->($node) if $from->isa('PFT::Content::Page');
     $self->{idx}{$node->id} = $node;
 }
 
