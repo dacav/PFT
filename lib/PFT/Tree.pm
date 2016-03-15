@@ -16,6 +16,7 @@ PFT::Tree - Filesystem tree mapping a PFT site
 
 =head1 SYNOPSIS
 
+    PFT::Tree->new();
     PFT::Tree->new($basedir);
     PFT::Tree->new($basedir, {create => 1});
 
