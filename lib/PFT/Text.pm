@@ -53,8 +53,7 @@ sub new {
 
 sub html {
     my $self = shift;
-    return $self->{html} if exists $self->{html};
-    $self->{html} = markdown do {
+    markdown do {
         my $fd = $self->{page}->read;
         local $/ = undef;
         <$fd>;
