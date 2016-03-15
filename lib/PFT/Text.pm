@@ -28,7 +28,7 @@ The constructor expects a C<Content::Page> object as parameter.
 =cut
 
 use PFT::Text::Symbol;
-use Text::MultiMarkdown qw/markdown/;
+use Text::Markdown qw/markdown/;
 
 sub new {
     my $cls = shift;

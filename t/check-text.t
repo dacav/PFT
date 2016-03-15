@@ -16,7 +16,7 @@ use PFT::Text::Symbol;
 use PFT::Content;
 use PFT::Header;
 
-use Text::MultiMarkdown 'markdown';
+use Text::Markdown 'markdown';
 my $html = markdown(decode('utf-8', join '', <::DATA>));
 close ::DATA;
 
