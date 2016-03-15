@@ -87,4 +87,14 @@ sub scan_html {
     sort { $a->start <=> $b->start } @out;
 }
 
+use overload
+    '""' => sub {
+        my $self = shift;
+        sprintf 'PFT::Text::Symbol[key:"%s", args:["%s"], start:%d, len:%d]',
+            $self->[0],
+            join('", "', @{$self->[1]}),
+            @{$self}[2, 3],
+    },
+;
+
 1;
