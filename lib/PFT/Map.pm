@@ -27,6 +27,7 @@ Map of a PFT site
 
 use Carp;
 use PFT::Map::Node;
+use PFT::Map::Resolver qw/resolve/;
 use PFT::Text;
 use WeakRef;
 
@@ -40,19 +41,33 @@ sub new {
         tree => $tree,
         idx => {},
         next => 0,
+        toresolve => [],
     }, $cls;
 
     $self->_scan_pages;
     $self->_scan_blog;
     $self->_scan_tags;
+    $self->_resolve;
     $self;
 }
 
-my $text_refs = sub {
-    my $node = shift;
-    for my $s (PFT::Text->new($node->page)->symbols) {
-        print "Need to resolve: $s\n";
+sub _resolve {
+    # Resolving items in $self->{toresolve}. They are inserted in _mknod.
+    my $self = shift;
+
+    for my $node (@{$self->{toresolve}}) {
+        for my $s (PFT::Text->new($node->page)->symbols) {
+            if (my $resolved = resolve($self, $node, $s)) {
+                confess 'Buggy resolver'
+                    unless $resolved->isa('PFT::Map::Node');
+                $node->add_outlink($resolved);
+            }
+            else {
+                print "Not yet solved: $s\n"
+            }
+        }
     }
+    delete $self->{toresolve}
 };
 
 sub _mknod {
@@ -63,7 +78,7 @@ sub _mknod {
         $self->{next} ++,
     );
 
-    $text_refs->($node) if $from->isa('PFT::Content::Page');
+    push @{$self->{toresolve}}, $node if $from->isa('PFT::Content::Page');
     $self->{idx}{$node->id} = $node;
 }
 

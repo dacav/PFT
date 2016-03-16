@@ -93,7 +93,6 @@ sub next { shift->{next} }
 sub seqnr { shift->{seqnr} }
 sub id { shift->{id} }
 
-
 sub prev {
     my $self = shift;
     return $self->{prev} unless @_;
@@ -129,6 +128,7 @@ sub _add {
     weaken($linked->{$kb}[-1]);
 }
 
+sub add_outlink { shift->_add(shift, 'olns', 'inls') }
 sub add_tag { shift->_add(shift, 'tags', 'tagged') }
 
 sub _list {
@@ -141,6 +141,8 @@ sub _list {
 sub tags { shift->_list('tags') }
 sub tagged { shift->_list('tagged') }
 sub days { shift->_list('days') }
+sub inlinks { shift->_list('ilns') }
+sub outlinks { shift->_list('olns') }
 
 =back
 
