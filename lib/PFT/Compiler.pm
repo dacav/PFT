@@ -1,4 +1,4 @@
-package PFT::Compiler;
+package PFT::Compiler v0.0.1;
 
 use v5.10;
 

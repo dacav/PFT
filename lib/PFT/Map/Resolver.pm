@@ -1,4 +1,4 @@
-package PFT::Map::Resolver;
+package PFT::Map::Resolver v0.0.1;
 
 use v5.10;
 
