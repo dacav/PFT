@@ -119,16 +119,17 @@ sub month {
     }
 }
 
-sub add_tag {
-    my $self = shift;
+sub _add {
+    my($self, $linked, $ka, $kb) = @_;
 
-    my $t = shift;
-    push @{$self->{tags}}, $t;
-    weaken($self->{tags}[-1]);
+    push @{$self->{$ka}}, $linked;
+    weaken($self->{$ka}[-1]);
 
-    push @{$t->{tagged}}, $self;
-    weaken($t->{tagged}[-1]);
+    push @{$linked->{$kb}}, $self;
+    weaken($linked->{$kb}[-1]);
 }
+
+sub add_tag { shift->_add(shift, 'tags', 'tagged') }
 
 sub _list {
     my($self, $name) = @_;
