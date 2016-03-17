@@ -61,8 +61,7 @@ sub new {
             # [a]ttachments and [i]mages have files
             $kind eq 'm'     ? $id :
             $kind =~ '[bpt]' ? $id . '.' . $hdr->slug :
-            $kind =~ '[ai]'  ? $id . '.' . $file->path :
-                   # TODO: $file->path is a bad idea. Define unique id.
+            $kind =~ '[ai]'  ? join '.', $id, $file->relpath :
             confess "What is '$id'?";
         },
         seqnr => $seqnr,

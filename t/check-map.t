@@ -48,7 +48,7 @@ $tree->new_entry(PFT::Header->new(title => 'Month nr.3',
 ));
 $tree->new_tag(PFT::Header->new(title => 'Bar'));
 $tree->attachment('foo', 'bar.txt')->touch;
-$tree->pic('baz')->touch;
+$tree->pic('baz', 'foo.png')->touch;
 
 my $map = PFT::Map->new($tree);
 diag('Follows list of nodes:');

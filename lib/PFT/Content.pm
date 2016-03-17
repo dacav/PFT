@@ -42,6 +42,10 @@ use PFT::Date;
 use PFT::Header;
 use PFT::Util;
 
+use constant {
+    path_sep => File::Spec->catfile('',''),  # portable '/'
+};
+
 sub new {
     my $cls = shift;
     my $base = shift;
@@ -244,12 +248,36 @@ copying a picture on the corresponding path).
 
 =cut
 
+sub _blob {
+    my $self = shift;
+    my $pfxlen = length(my $pfx = shift) + length(path_sep);
+    confess 'No path?' unless @_;
+
+    my $path = File::Spec->catfile($pfx, @_);
+    PFT::Content::Blob->new({
+        tree => $self,
+        path => $path,
+        relpath => [File::Spec->splitdir(substr($path, $pfxlen))],
+    })
+}
+
+sub _blob_ls {
+    my $self = shift;
+
+    my $pfxlen = length(my $pfx = shift) + length(path_sep);
+    map {
+        PFT::Content::Blob->new({
+            tree => $self,
+            path => $_,
+            relpath => [File::Spec->splitdir(substr($_, $pfxlen))],
+        })
+    }
+    PFT::Util::list_files($pfx)
+}
+
 sub pic {
     my $self = shift;
-    PFT::Content::Page->new({
-        tree => $self,
-        path => File::Spec->catfile($self->dir_pics, @_),
-    })
+    scalar $self->_blob($self->dir_pics, @_)
 }
 
 =item pics_ls
@@ -260,9 +288,7 @@ List all pictures
 
 sub pics_ls {
     my $self = shift;
-
-    map { PFT::Content::Blob->new({tree => $self, path => $_}) }
-        PFT::Util::list_files($self->dir_pics)
+    $self->_blob_ls($self->dir_pics)
 }
 
 =item attachment
@@ -276,10 +302,7 @@ copying a file on the corresponding path).
 
 sub attachment {
     my $self = shift;
-    PFT::Content::File->new({
-        tree => $self,
-        path => File::Spec->catfile($self->dir_attachments, @_),
-    })
+    $self->_blob($self->dir_attachments, @_)
 }
 
 =item attachments_ls
@@ -290,8 +313,7 @@ List all attachments
 
 sub attachments_ls {
     my $self = shift;
-    map { PFT::Content::Blob->new({tree => $self, path => $_}) }
-        PFT::Util::list_files($self->dir_attachments)
+    $self->_blob_ls($self->dir_attachments)
 }
 
 =item blog_back
