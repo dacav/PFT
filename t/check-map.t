@@ -47,6 +47,8 @@ $tree->new_entry(PFT::Header->new(title => 'Month nr.3',
     tags => ['bar'],
 ));
 $tree->new_tag(PFT::Header->new(title => 'Bar'));
+$tree->attachment('foo', 'bar.txt')->touch;
+$tree->pic('baz')->touch;
 
 my $map = PFT::Map->new($tree);
 diag('Follows list of nodes:');
@@ -56,6 +58,11 @@ my @dumped = $map->dump;
 
 # main::expected is declared down in the file.
 is_deeply(\@main::expected, \@dumped, 'Deeply equal');
+
+# in case of modification, you should check it manually the first time and
+# update the bottom part of this file.
+#use Data::Dumper;
+#diag(Dumper \@dumped);
 
 while (my($i, $node) = each @dumped) {
     exists $node->{'>'} and ok(($dumped[$node->{'>'}]->{'<'} == $i),
@@ -163,6 +170,14 @@ BEGIN {
         'id' => 10,
         'tt' => 'foo',
         '.' => [1, 3, 6],
+      },
+      {
+        'id' => 11,
+        'tt' => '<attachment>',
+      },
+      {
+        'id' => 12,
+        'tt' => '<picture>',
       }
     )
 }
