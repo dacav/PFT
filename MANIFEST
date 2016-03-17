@@ -20,6 +20,7 @@ lib/PFT/Map/Node.pm
 lib/PFT/Tree.pm
 lib/PFT/Text.pm
 lib/PFT/Text/Symbol.pm
+lib/PFT/Util.pm
 
 t/00-load.t
 t/check-backend.t
