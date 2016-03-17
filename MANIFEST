@@ -13,6 +13,7 @@ lib/PFT/Content.pm
 lib/PFT/Content/Base.pm
 lib/PFT/Content/File.pm
 lib/PFT/Content/Page.pm
+lib/PFT/Content/Picture.pm
 lib/PFT/Date.pm
 lib/PFT/Header.pm
 lib/PFT/Map.pm
