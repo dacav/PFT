@@ -21,6 +21,11 @@ This module contains general utility functions.
 =cut
 
 use File::Spec;
+use Exporter;
+
+our @EXPORT_OK = qw/
+    list_files
+/;
 
 =over 1
 
@@ -44,8 +49,8 @@ sub list_files {
         my $dn = pop @todo;
         opendir my $d, $dn or die "Opening $dn: $!";
         foreach (File::Spec->no_upwards(readdir $d)) {
-            if (-d) {
-                push @todo, File::Spec->catdir($dn, $_)
+            if (-d (my $dir = File::Spec->catdir($dn, $_))) {
+                push @todo, $dir
             } else {
                 push @out, File::Spec->catfile($dn, $_)
             }
