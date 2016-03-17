@@ -47,6 +47,8 @@ sub new {
     $self->_scan_pages;
     $self->_scan_blog;
     $self->_scan_tags;
+    $self->_scan_attach;
+    $self->_scan_pics;
     $self->_resolve;
     $self;
 }

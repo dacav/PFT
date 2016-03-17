@@ -36,8 +36,11 @@ use File::Basename qw/dirname basename/;
 use Carp;
 
 use PFT::Content::Page;
+use PFT::Content::File;
+use PFT::Content::Picture;
 use PFT::Date;
 use PFT::Header;
+use PFT::Util;
 
 sub new {
     my $cls = shift;
@@ -55,6 +58,8 @@ sub _create {
         dir_blog
         dir_pages
         dir_tags
+        dir_pics
+        dir_attachments
     /), {
         #verbose => 1,
         mode => 0711,
@@ -71,6 +76,8 @@ Quick accessors for directories
     $tree->dir_blog
     $tree->dir_pages
     $tree->dir_tags
+    $tree->dir_pics
+    $tree->dir_attachments
 
 Non-existing directories are created by the constructor.
 
@@ -80,6 +87,8 @@ sub dir_root { shift->{base} }
 sub dir_blog { File::Spec->catdir(shift->{base}, 'blog') }
 sub dir_pages { File::Spec->catdir(shift->{base}, 'pages') }
 sub dir_tags { File::Spec->catdir(shift->{base}, 'tags') }
+sub dir_pics { File::Spec->catdir(shift->{base}, 'pics') }
+sub dir_attachments { File::Spec->catdir(shift->{base}, 'attachments') }
 
 =head2 Methods
 
@@ -187,7 +196,7 @@ sub tag {
     })
 }
 
-sub _ls {
+sub _text_ls {
     my $self = shift;
 
     my @out;
@@ -212,7 +221,7 @@ List all blog entries
 
 sub blog_ls {
     my $self = shift;
-    $self->_ls(File::Spec->catfile($self->dir_blog, '*', '*'))
+    $self->_text_ls(File::Spec->catfile($self->dir_blog, '*', '*'))
 }
 
 =item pages_ls
@@ -223,7 +232,66 @@ List all pages
 
 sub pages_ls {
     my $self = shift;
-    $self->_ls(File::Spec->catfile($self->dir_pages, '*'))
+    $self->_text_ls(File::Spec->catfile($self->dir_pages, '*'))
+}
+
+=item pic
+
+Accepts a list of strings which will be joined into the path of a
+picture file.  Returns a C<PFT::Content::Picture> instance, which could
+correspond to a non-existing file. The caller might create it (e.g. by
+copying a picture on the corresponding path).
+
+=cut
+
+sub pic {
+    my $self = shift;
+    PFT::Content::Page->new({
+        tree => $self,
+        path => File::Spec->catfile($self->dir_pics, @_),
+    })
+}
+
+=item pics_ls
+
+List all pictures
+
+=cut
+
+sub pics_ls {
+    my $self = shift;
+
+    map { PFT::Content::Picture->new({tree => $self, path => $_}) }
+        PFT::Util::list_files($self->dir_pics)
+}
+
+=item attachment
+
+Accepts a list of strings which will be joined into the path of an
+attachment file.  Returns a C<PFT::Content::File> instance, which could
+correspond to a non-existing file. The caller might create it (e.g. by
+copying a file on the corresponding path).
+
+=cut
+
+sub attachment {
+    my $self = shift;
+    PFT::Content::File->new({
+        tree => $self,
+        path => File::Spec->catfile($self->dir_attachments, @_),
+    })
+}
+
+=item attachments_ls
+
+List all attachments
+
+=cut
+
+sub attachments_ls {
+    my $self = shift;
+    map { PFT::Content::File->new({tree => $self, path => $_}) }
+        PFT::Util::list_files($self->dir_attachments)
 }
 
 =item blog_back
