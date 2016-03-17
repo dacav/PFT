@@ -1,4 +1,4 @@
-package PFT::Content::Picture v0.0.1;
+package PFT::Content::Blob v0.0.1;
 
 use v5.10;
 
@@ -12,13 +12,13 @@ use utf8;
 
 =head1 NAME
 
-PFT::Content::Picture - Picture file
+PFT::Content::Blob - Binary file
 
 =head1 SYNOPSIS
 
-    use PFT::Content::Picture;
+    use PFT::Content::Blob;
 
-    my $p = PFT::Content::Picture->new({
+    my $p = PFT::Content::Blob->new({
         tree => $tree,
         path => $path,
     })

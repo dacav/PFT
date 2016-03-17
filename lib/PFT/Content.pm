@@ -37,7 +37,7 @@ use Carp;
 
 use PFT::Content::Page;
 use PFT::Content::File;
-use PFT::Content::Picture;
+use PFT::Content::Blob;
 use PFT::Date;
 use PFT::Header;
 use PFT::Util;
@@ -238,7 +238,7 @@ sub pages_ls {
 =item pic
 
 Accepts a list of strings which will be joined into the path of a
-picture file.  Returns a C<PFT::Content::Picture> instance, which could
+picture file.  Returns a C<PFT::Content::Blob> instance, which could
 correspond to a non-existing file. The caller might create it (e.g. by
 copying a picture on the corresponding path).
 
@@ -261,14 +261,14 @@ List all pictures
 sub pics_ls {
     my $self = shift;
 
-    map { PFT::Content::Picture->new({tree => $self, path => $_}) }
+    map { PFT::Content::Blob->new({tree => $self, path => $_}) }
         PFT::Util::list_files($self->dir_pics)
 }
 
 =item attachment
 
 Accepts a list of strings which will be joined into the path of an
-attachment file.  Returns a C<PFT::Content::File> instance, which could
+attachment file.  Returns a C<PFT::Content::Blob> instance, which could
 correspond to a non-existing file. The caller might create it (e.g. by
 copying a file on the corresponding path).
 
@@ -290,7 +290,7 @@ List all attachments
 
 sub attachments_ls {
     my $self = shift;
-    map { PFT::Content::File->new({tree => $self, path => $_}) }
+    map { PFT::Content::Blob->new({tree => $self, path => $_}) }
         PFT::Util::list_files($self->dir_attachments)
 }
 
