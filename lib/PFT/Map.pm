@@ -58,7 +58,7 @@ sub _resolve {
     my $self = shift;
 
     for my $node (@{$self->{toresolve}}) {
-        for my $s (PFT::Text->new($node->page)->symbols) {
+        for my $s (PFT::Text->new($node->file)->symbols) {
             if (my $resolved = resolve($self, $node, $s)) {
                 confess 'Buggy resolver'
                     unless $resolved->isa('PFT::Map::Node');
@@ -75,8 +75,8 @@ sub _resolve {
 sub _mknod {
     my $self = shift;
     my $node = PFT::Map::Node->new(
-        (my $from = shift),     # from: header | page
-        shift,                  # kind p|b|m|t
+        (my $from = shift),     # from: header | file
+        shift,                  # kind p|b|m|t|i|a
         $self->{next} ++,
     );
 
@@ -105,8 +105,7 @@ sub _scan_blog {
                 my $m_hdr = PFT::Header->new(date => $m_date);
                 my $m_page = $tree->entry($m_hdr);
                 my $n = $self->_mknod(
-                    $m_page->exists ? $m_page : $m_hdr,
-                    'm',
+                    $m_page->exists ? ($m_page, 'p') : ($m_hdr, 'm'),
                 );
                 $n->prev($prev_month) if defined $prev_month;
                 $prev_month = $n;
@@ -129,13 +128,22 @@ sub _scan_tags {
                 my $t_hdr = PFT::Header->new(title => $_);
                 my $t_page = $tree->tag($t_hdr);
                 $tags{$_} = $self->_mknod(
-                    $t_page->exists ? $t_page : $t_hdr,
-                    't',
+                    $t_page->exists ? ($t_page, 'p') : ($t_hdr, 't'),
                 );
             };
             $node->add_tag($t_node);
         }
     }
+}
+
+sub _scan_attach {
+    my $self = shift;
+    $self->_mknod($_, 'a') for $self->{tree}->attachments_ls;
+}
+
+sub _scan_pics {
+    my $self = shift;
+    $self->_mknod($_, 'i') for $self->{tree}->pics_ls;
 }
 
 =head2 Properties
@@ -163,13 +171,20 @@ sub dump {
         my $node = shift;
         my %out = (
             id => $node->seqnr,
-            tt => $node->header->title || '<month>',
+            tt => $node->kind =~ '[bpt]' ? $node->header->title :
+                  $node->kind eq 'm'     ? '<month>' :
+                  $node->kind eq 'a'     ? '<attachment>' :
+                  $node->kind eq 'i'     ? '<picture>' :
+                  confess "What is '", $node->kind, "'?",
         );
 
         if (defined(my $prev = $node->prev)) { $out{'<'} = $prev->seqnr }
         if (defined(my $next = $node->next)) { $out{'>'} = $next->seqnr }
         if (defined(my $month = $node->month)) { $out{'^'} = $month->seqnr }
-        if (defined(my $date = $node->header->date)) { $out{d} = "$date" }
+        if (defined($node->header)
+                and defined(my $date = $node->header->date)) {
+            $out{d} = "$date"
+        }
         if (my @l = $node->days) {
             $out{v} = [sort { $a <=> $b } map{ $_->seqnr } @l]
         }

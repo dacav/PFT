@@ -20,7 +20,7 @@ PFT::Map::Node - Node of a PFT site map
 
 =over 1
 
-=item C<$from> can either be a C<PFT::Header> or a C<PFT::Content::Page>;
+=item C<$from> can either be a C<PFT::Header> or a C<PFT::Content::Base>;
 
 =item Valid vaulues for C<$kind> match C</^[bmpt]$/>;
 
@@ -38,26 +38,36 @@ use PFT::Text;
 sub new {
     my($cls, $from, $kind, $seqnr) = @_;
 
-    my($hdr, $page);
+    my($hdr, $file);
     if ($from->isa('PFT::Header')) {
         $hdr = $from;
     } else {
-        confess 'Allowed only PFT::Header or PFT::Content::Page'
-            unless $from->isa('PFT::Content::Page');
-        ($page, $hdr) = ($from, $from->header);
+        confess 'Allowed only PFT::Header or PFT::Content::Base'
+            unless $from->isa('PFT::Content::File');
+        $file = $from;
+        $hdr = $from->header if $from->isa('PFT::Content::Page');
     }
-    $kind =~ /^[bmpt]$/ or confess "Invalid kind $kind. Valid: b|m|p|t";
+    $kind =~ /^[bmptia]$/
+        or confess "Invalid kind $kind. Valid: b|m|p|t|i|a";
 
     bless {
         kind => $kind,
         id => do {
             my $id = $kind;
             $id .= '.' . $hdr->date->repr('.') if $kind =~ '[bm]';
-            $kind eq 'm' ? $id : $id . '.' . $hdr->slug
+
+            # [m]onths have no slug;
+            # [b]log [p]ages and [t]ags do have headers
+            # [a]ttachments and [i]mages have files
+            $kind eq 'm'     ? $id :
+            $kind =~ '[bpt]' ? $id . '.' . $hdr->slug :
+            $kind =~ '[ai]'  ? $id . '.' . $file->path :
+                   # TODO: $file->path is a bad idea. Define unique id.
+            confess "What is '$id'?";
         },
         seqnr => $seqnr,
         hdr => $hdr,
-        page => $page,
+        file => $file,
     }, $cls;
 }
 
@@ -67,25 +77,25 @@ sub new {
 
 =item header
 
-Header associated with this node.
-
-This property is guarranteed to be defined, even if the node does not
-correspond to an existing page.
+Header associated with this node. This property could return undefined for
+the nodes which are associated with a non-textual content (like images or
+attachments). A header will exist for non-existent pages (like tags which
+do not have a tag page).
 
 =cut
 
 sub header { shift->{hdr} }
 
-=item page
+=item file
 
-The page associated with this node. This property could return undefined
+The file associated with this node. This property could return undefined
 for the nodes which do not correspond to any content. In this case we talk
-about I<virtual pages>, in that the node should be represented anyway in a
+about I<virtual files>, in that the node should be represented anyway in a
 compiled PFT site.
 
 =cut
 
-sub page { shift->{page} }
+sub file { shift->{file} }
 
 sub kind { shift->{kind} }
 sub date { shift->{hdr}->date }
