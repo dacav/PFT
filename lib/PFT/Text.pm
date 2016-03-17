@@ -53,11 +53,12 @@ sub new {
 
 sub html {
     my $self = shift;
-    markdown do {
+    my $md = do {
         my $fd = $self->{page}->read;
         local $/ = undef;
         <$fd>;
-    }
+    };
+    defined $md ? markdown($md) : ''
 }
 
 =item symbols
