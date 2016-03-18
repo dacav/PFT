@@ -50,7 +50,7 @@ sub new {
 
     exists $params->{path} or confess 'Missing param: path';
     my $path = $params->{path};
-    exists $params->{name} or $params->{name} = basename $path;
+    defined $params->{name} or $params->{name} = basename $path;
     my $self = $cls->SUPER::new($params);
 
     $self->{path} = File::Spec->rel2abs($path);
