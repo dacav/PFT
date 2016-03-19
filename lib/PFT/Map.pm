@@ -26,10 +26,13 @@ Map of a PFT site
 =cut
 
 use Carp;
+use WeakRef;
+use File::Spec;
+
 use PFT::Map::Node;
 use PFT::Map::Resolver qw/resolve/;
 use PFT::Text;
-use WeakRef;
+use PFT::Header;
 
 sub new {
     my $cls = shift;
@@ -60,8 +63,8 @@ sub _resolve {
     for my $node (@{$self->{toresolve}}) {
         for my $s (PFT::Text->new($node->file)->symbols) {
             if (my $resolved = resolve($self, $node, $s)) {
-                confess 'Buggy resolver'
-                    unless $resolved->isa('PFT::Map::Node');
+                $resolved->isa('PFT::Map::Node') or confess
+                    'Buggy resolver: got ', ref($resolved);
                 $node->add_outlink($resolved);
             }
             else {
@@ -157,6 +160,14 @@ List the nodes
 =cut
 
 sub nodes { values %{shift->{idx}} }
+
+=item treee
+
+The associated content tree
+
+=cut
+
+sub tree { shift->{tree} }
 
 =item dump
 
