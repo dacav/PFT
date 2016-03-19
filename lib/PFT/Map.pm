@@ -63,7 +63,7 @@ sub _resolve {
     for my $node (@{$self->{toresolve}}) {
         for my $s (PFT::Text->new($node->file)->symbols) {
             if (my $resolved = resolve($self, $node, $s)) {
-                $resolved->isa('PFT::Map::Node') or confess
+                $resolved->isa('PFT::Map::Node') or Carp::cluck
                     'Buggy resolver: got ', ref($resolved);
                 $node->add_outlink($resolved);
             }
