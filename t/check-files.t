@@ -8,7 +8,7 @@ use utf8;
 
 use feature qw/say/;
 
-use PFT::Content::Page;
+use PFT::Content::Entry;
 use PFT::Header;
 
 use Test::More;
@@ -17,7 +17,7 @@ use File::Spec;
 
 my $dir = File::Temp->newdir();
 
-my $page = PFT::Content::Page->new({
+my $page = PFT::Content::Entry->new({
     tree => undef,
     path => File::Spec->catfile($dir, 'foo'),
 });
@@ -54,7 +54,7 @@ do {
     $page->unlink;
     $page->set_header($header);
 
-    my $h2 = PFT::Content::Page->new({
+    my $h2 = PFT::Content::Entry->new({
         tree => undef,
         path => $page->path
     })->header;

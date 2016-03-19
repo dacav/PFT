@@ -1,4 +1,4 @@
-package PFT::Content::Page v0.0.1;
+package PFT::Content::Entry v0.0.1;
 
 use v5.10;
 
@@ -12,13 +12,13 @@ use utf8;
 
 =head1 NAME
 
-PFT::Content::Page - Content edited by user.
+PFT::Content::Entry - Content edited by user.
 
 =head1 SYNOPSIS
 
-    use PFT::Content::Page;
+    use PFT::Content::Entry;
 
-    my $p = PFT::Content::Page->new({
+    my $p = PFT::Content::Entry->new({
         tree => $tree,
         path => $path,
         name => $name, 

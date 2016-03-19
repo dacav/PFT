@@ -35,8 +35,8 @@ sub new {
     my $cls = shift;
     my $page = shift;
 
-    confess 'Expecting PFT::Content::Page'
-        unless $page->isa('PFT::Content::Page');
+    confess 'Expecting PFT::Content::Entry'
+        unless $page->isa('PFT::Content::Entry');
 
     bless {
         page => $page,

@@ -43,7 +43,7 @@ sub new {
         confess 'Allowed only PFT::Header or PFT::Content::Base'
             unless $from->isa('PFT::Content::File');
         $file = $from;
-        $hdr = $from->header if $from->isa('PFT::Content::Page');
+        $hdr = $from->header if $from->isa('PFT::Content::Entry');
     }
     $kind =~ /^[bmptia]$/
         or confess "Invalid kind $kind. Valid: b|m|p|t|i|a";

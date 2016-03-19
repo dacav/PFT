@@ -83,7 +83,7 @@ sub _mknod {
         $self->{next} ++,
     );
 
-    push @{$self->{toresolve}}, $node if $from->isa('PFT::Content::Page');
+    push @{$self->{toresolve}}, $node if $from->isa('PFT::Content::Entry');
     $self->{idx}{$node->id} = $node;
 }
 

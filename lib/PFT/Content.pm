@@ -35,7 +35,7 @@ use File::Path qw/make_path/;
 use File::Basename qw/dirname basename/;
 use Carp;
 
-use PFT::Content::Page;
+use PFT::Content::Entry;
 use PFT::Content::File;
 use PFT::Content::Blob;
 use PFT::Date;
@@ -127,7 +127,7 @@ sub entry {
     my $self = shift;
     my $hdr = shift;
 
-    PFT::Content::Page->new({
+    PFT::Content::Entry->new({
         tree => $self,
         path => $self->hdr_to_path($hdr),
         name => $hdr->title,
@@ -193,7 +193,7 @@ exist already.
 sub tag {
     my $self = shift;
     my $hdr = shift;
-    PFT::Content::Page->new({
+    PFT::Content::Entry->new({
         tree => $self,
         path => File::Spec->catfile($self->dir_tags, $hdr->slug),
         name => $hdr->title,
@@ -208,7 +208,7 @@ sub _text_ls {
         my $hdr = eval { PFT::Header->load($path) }
             or croak "Loading $path: " . $@ =~ s/ at .*$//rs;
 
-        push @out, PFT::Content::Page->new({
+        push @out, PFT::Content::Entry->new({
             tree => $self,
             path => $path,
             name => $hdr->title,
@@ -320,7 +320,7 @@ sub attachments_ls {
 
 Go back in blog history. Expects one optional argument as the number of
 steps backward in history. If such argument is not provided, it defaults
-to 0, returning the most recent entry. Returns a PFT::Content::Page
+to 0, returning the most recent entry. Returns a PFT::Content::Entry
 object.
 
 =cut
@@ -341,7 +341,7 @@ sub blog_back {
     my $h = eval { PFT::Header->load($path) };
     $h or croak "Loading $path: " . $@ =~ s/ at .*$//rs;
 
-    PFT::Content::Page->new({
+    PFT::Content::Entry->new({
         tree => $self,
         path => $path,
         name => $h->title,
