@@ -33,8 +33,6 @@ PFT::Map::Node - Node of a PFT site map
 use Carp;
 use WeakRef;
 
-use PFT::Text;
-
 sub new {
     my($cls, $from, $kind, $seqnr) = @_;
 
