@@ -35,9 +35,13 @@ use File::Path qw/make_path/;
 use File::Basename qw/dirname basename/;
 use Carp;
 
-use PFT::Content::Entry;
-use PFT::Content::File;
-use PFT::Content::Blob;
+use PFT::Content::Page;
+use PFT::Content::Blog;
+use PFT::Content::Picture;
+use PFT::Content::Attachment;
+use PFT::Content::Tag;
+use PFT::Content::Month;
+
 use PFT::Date;
 use PFT::Header;
 use PFT::Util;
@@ -127,11 +131,18 @@ sub entry {
     my $self = shift;
     my $hdr = shift;
 
-    PFT::Content::Entry->new({
+    my $params = {
         tree => $self,
         path => $self->hdr_to_path($hdr),
         name => $hdr->title,
-    })
+    };
+
+    my $d = $hdr->date;
+    defined $d
+        ? $d->complete
+            ? PFT::Content::Blog->new($params)
+            : PFT::Content::Month->new($params)
+        : PFT::Content::Page->new($params)
 }
 
 =item hdr_to_path
@@ -193,7 +204,7 @@ exist already.
 sub tag {
     my $self = shift;
     my $hdr = shift;
-    PFT::Content::Entry->new({
+    PFT::Content::Tag->new({
         tree => $self,
         path => File::Spec->catfile($self->dir_tags, $hdr->slug),
         name => $hdr->title,
@@ -208,11 +219,11 @@ sub _text_ls {
         my $hdr = eval { PFT::Header->load($path) }
             or croak "Loading $path: " . $@ =~ s/ at .*$//rs;
 
-        push @out, PFT::Content::Entry->new({
+        push @out, {
             tree => $self,
             path => $path,
             name => $hdr->title,
-        });
+        };
     }
     @out
 }
@@ -225,7 +236,14 @@ List all blog entries
 
 sub blog_ls {
     my $self = shift;
-    $self->_text_ls(File::Spec->catfile($self->dir_blog, '*', '*'))
+    map(
+        PFT::Content::Blog->new($_),
+        $self->_text_ls(File::Spec->catfile($self->dir_blog, '*', '*'))
+    ),
+    map(
+        PFT::Content::Month->new($_),
+        $self->_text_ls(File::Spec->catfile($self->dir_blog, '*.month'))
+    )
 }
 
 =item pages_ls
@@ -236,7 +254,8 @@ List all pages
 
 sub pages_ls {
     my $self = shift;
-    $self->_text_ls(File::Spec->catfile($self->dir_pages, '*'))
+    map PFT::Content::Page->new($_),
+        $self->_text_ls(File::Spec->catfile($self->dir_pages, '*'))
 }
 
 =item pic
@@ -254,11 +273,11 @@ sub _blob {
     confess 'No path?' unless @_;
 
     my $path = File::Spec->catfile($pfx, @_);
-    PFT::Content::Blob->new({
+    {
         tree => $self,
         path => $path,
         relpath => [File::Spec->splitdir(substr($path, $pfxlen))],
-    })
+    }
 }
 
 sub _blob_ls {
@@ -266,18 +285,16 @@ sub _blob_ls {
 
     my $pfxlen = length(my $pfx = shift) + length(path_sep);
     map {
-        PFT::Content::Blob->new({
-            tree => $self,
-            path => $_,
-            relpath => [File::Spec->splitdir(substr($_, $pfxlen))],
-        })
-    }
+        tree => $self,
+        path => $_,
+        relpath => [File::Spec->splitdir(substr($_, $pfxlen))],
+    },
     PFT::Util::list_files($pfx)
 }
 
 sub pic {
     my $self = shift;
-    scalar $self->_blob($self->dir_pics, @_)
+    PFT::Content::Picture->new($self->_blob($self->dir_pics, @_))
 }
 
 =item pics_ls
@@ -288,7 +305,7 @@ List all pictures
 
 sub pics_ls {
     my $self = shift;
-    $self->_blob_ls($self->dir_pics)
+    map PFT::Content::Picture->new($_), $self->_blob_ls($self->dir_pics)
 }
 
 =item attachment
@@ -302,7 +319,7 @@ copying a file on the corresponding path).
 
 sub attachment {
     my $self = shift;
-    $self->_blob($self->dir_attachments, @_)
+    PFT::Content::Attachment->new($self->_blob($self->dir_attachments, @_))
 }
 
 =item attachments_ls
@@ -313,14 +330,15 @@ List all attachments
 
 sub attachments_ls {
     my $self = shift;
-    $self->_blob_ls($self->dir_attachments)
+    map PFT::Content::Attachment->new($_),
+        $self->_blob_ls($self->dir_attachments)
 }
 
 =item blog_back
 
 Go back in blog history. Expects one optional argument as the number of
 steps backward in history. If such argument is not provided, it defaults
-to 0, returning the most recent entry. Returns a PFT::Content::Entry
+to 0, returning the most recent entry. Returns a PFT::Content::Blog
 object.
 
 =cut
@@ -341,7 +359,7 @@ sub blog_back {
     my $h = eval { PFT::Header->load($path) };
     $h or croak "Loading $path: " . $@ =~ s/ at .*$//rs;
 
-    PFT::Content::Entry->new({
+    PFT::Content::Blog->new({
         tree => $self,
         path => $path,
         name => $h->title,

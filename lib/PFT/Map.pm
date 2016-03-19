@@ -95,7 +95,8 @@ sub _scan_pages {
 sub _scan_blog {
     my $self = shift;
     my $tree = $self->{tree};
-    my @blog = map $self->_mknod($_, 'b'), $tree->blog_ls;
+    my @blog = map $self->_mknod($_, 'b'),
+        grep { !$_->isa('PFT::Content::Month') } $tree->blog_ls;
 
     my($prev, $prev_month);
     foreach (sort { $a->date <=> $b->date } @blog) {
