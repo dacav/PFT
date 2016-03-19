@@ -19,7 +19,22 @@ my $tree = PFT::Content->new("$root");
 
 # Populating
 
-$tree->new_entry(PFT::Header->new(title => 'A page'));
+$tree->pic('baz', 'foo.png')->touch;
+$tree->attachment('foo', 'bar.txt')->touch;
+do {
+    my $page = $tree->new_entry(PFT::Header->new(title => 'A page'));
+    my $f = $page->open('a+');
+    print $f <<'    EOF' =~ s/^    //rgms;
+    Hello.
+
+    This is a picture of me:
+
+    ![my ugly face](:pic:baz/foo.png)
+
+    [1]: :pic:baz/foo.png
+    EOF
+    close $f;
+};
 $tree->new_entry(PFT::Header->new(
     title => 'Another page',
     tags => ['foo', 'bar'],
@@ -47,12 +62,10 @@ $tree->new_entry(PFT::Header->new(title => 'Month nr.3',
     tags => ['bar'],
 ));
 $tree->new_tag(PFT::Header->new(title => 'Bar'));
-$tree->attachment('foo', 'bar.txt')->touch;
-$tree->pic('baz', 'foo.png')->touch;
 
 my $map = PFT::Map->new($tree);
 diag('Follows list of nodes:');
-diag('   ', $_->id) foreach $map->nodes;
+diag($_->id, ' unres: ', join ', ', $_->unresolved) foreach $map->nodes;
 
 my @dumped = $map->dump;
 

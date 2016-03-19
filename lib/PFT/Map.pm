@@ -65,7 +65,7 @@ sub _resolve {
                 $node->add_outlink($resolved);
             }
             else {
-                print "Not yet solved: $s\n"
+                $node->unresolved($s)
             }
         }
     }

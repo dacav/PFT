@@ -151,7 +151,17 @@ sub tags { shift->_list('tags') }
 sub tagged { shift->_list('tagged') }
 sub days { shift->_list('days') }
 sub inlinks { shift->_list('ilns') }
-sub outlinks { shift->_list('olns') }
+
+sub unresolved {
+    my $self = shift;
+    unless (@_) {
+        exists $self->{unres_syms}
+            ? @{$self->{unres_syms}}
+            : ()
+    } else {
+        push @{$self->{unres_syms}}, @_
+    }
+}
 
 =back
 
