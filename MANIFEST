@@ -10,17 +10,23 @@ README.md
 lib/PFT.pm
 lib/PFT/Conf.pm
 lib/PFT/Content.pm
+lib/PFT/Content/Attachment.pm
 lib/PFT/Content/Base.pm
-lib/PFT/Content/File.pm
-lib/PFT/Content/Page.pm
 lib/PFT/Content/Blob.pm
+lib/PFT/Content/Blog.pm
+lib/PFT/Content/File.pm
+lib/PFT/Content/Month.pm
+lib/PFT/Content/Page.pm
+lib/PFT/Content/Page.pm
+lib/PFT/Content/Picture.pm
+lib/PFT/Content/Tag.pm
 lib/PFT/Date.pm
 lib/PFT/Header.pm
 lib/PFT/Map.pm
 lib/PFT/Map/Node.pm
-lib/PFT/Tree.pm
 lib/PFT/Text.pm
 lib/PFT/Text/Symbol.pm
+lib/PFT/Tree.pm
 lib/PFT/Util.pm
 
 t/00-load.t
