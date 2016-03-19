@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More; # tests => 1;
+use Test::More tests => 20;
 
 use PFT::Content;
 use PFT::Header;
