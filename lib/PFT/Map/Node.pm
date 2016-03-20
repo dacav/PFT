@@ -16,6 +16,16 @@ PFT::Map::Node - Node of a PFT site map
 
 =head1 SYNOPSIS
 
+    PFT::Map::Node->new($seqnr, $id, $content);
+    PFT::Map::Node->new($seqnr, $id, undef, $header);
+    PFT::Map::Node->new($seqnr, $id, $content, $header);
+
+Nodes are created within a PFT::Map object. The constructor should
+therefore not be called directly.
+
+Each node is identified by a unique sequence number and by a mnemonic
+identifier. This details are used within PFT::Map.
+
 =over 1
 
 =head1 DESCRIPTION
@@ -86,6 +96,13 @@ sub content { shift->{cont} }
 
 sub kind { substr(shift->{id}, 0, 1) }
 
+=item date
+
+Returns the date of the content, or undef if the content is not recording
+any date.
+
+=cut
+
 sub date {
     my $self = shift;
     $self->header
@@ -93,9 +110,24 @@ sub date {
         : undef
 }
 
-sub next { shift->{next} }
+=item seqnr
+
+Returns the sequential id of the node w.r.t. the map
+
+=cut
+
 sub seqnr { shift->{seqnr} }
+
+=item id
+
+Returns the mnemonic unique identifier.
+
+=cut
+
 sub id { shift->{id} }
+
+
+sub next { shift->{next} }
 
 sub prev {
     my $self = shift;
