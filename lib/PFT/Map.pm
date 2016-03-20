@@ -63,8 +63,10 @@ sub _resolve {
     for my $node (@{$self->{toresolve}}) {
         for my $s (PFT::Text->new($node->content)->symbols) {
             if (my $resolved = resolve($self, $node, $s)) {
-                $resolved->isa('PFT::Map::Node') or Carp::cluck
-                    'Buggy resolver: got ', ref($resolved);
+                $resolved->isa('PFT::Map::Node') or confess
+                    "Buggy resolver: searching $s",
+                    ', expected node, got ',
+                    ref($resolved) || $resolved;
                 $node->add_outlink($resolved);
             }
             else {
@@ -75,13 +77,50 @@ sub _resolve {
     delete $self->{toresolve}
 };
 
+sub _content_id {
+    # Given a PFT::Content::Base (or any subclass) object, returns a
+    # string uniquely identifying it across the site. E.g.:
+    #
+    #     my $id = $map->_content_id($content);
+    #     my $id = $map->_content_id($virtual_page, $hdr);
+    #     my $id = $map->_content_id(undef, $hdr);
+    #
+    # Form 1: for any content
+
+    my($self, $cntnt, $hdr) = @_;
+
+    unless (defined $cntnt) {
+        confess 'No content, no header?' unless defined $hdr;
+        $cntnt = $self->{tree}->entry($hdr);
+    }
+
+    ref($cntnt) =~ /PFT::Content::(Page|Blog|Picture|Attachment|Tag|Month)/
+        or confess 'Unsupported in content to id: ' . ref($cntnt);
+
+    if ($1 eq 'Page') {
+        'p:' . ($hdr || $cntnt->header)->slug
+    } elsif ($1 eq 'Tag') {
+        't:' . ($hdr || $cntnt->header)->slug
+    } elsif ($1 eq 'Blog') {
+        my $hdr = ($hdr || $cntnt->header);
+        'b:' . $hdr->date->repr('') . ':' . $hdr->slug
+    } elsif ($1 eq 'Month') {
+        my $hdr = ($hdr || $cntnt->header);
+        'm:' . $hdr->date->repr('')
+    } elsif ($1 eq 'Picture') {
+        'i:' . join '/', $cntnt->relpath # No need for portability
+    } elsif ($1 eq 'Attachment') {
+        'a:' . join '/', $cntnt->relpath # Ditto
+    } else { die };
+}
+
 sub _mknod {
     my $self = shift;
     my($cntnt, $hdr) = @_;
 
     my $node = PFT::Map::Node->new(
         $self->{next} ++,
-        (my $id = $self->content_id(@_)),
+        (my $id = $self->_content_id(@_)),
         @_,
     );
 
@@ -229,49 +268,24 @@ sub dump {
 
 =head2 Methods
 
-=item content_id
-
-Given a PFT::Content::Base object, returns a string uniquely identifying
-it across the site. E.g.:
-
-    my $id = $map->content_id($content);
-    my $id = $map->content_id($virtual_page, $hdr);
-    my $id = $map->content_id(undef, $hdr);
-
-Form 1: for any content
-
 =cut
 
-sub content_id {
-    my($self, $cntnt, $hdr) = @_;
+=item node_of
 
-    unless (defined $cntnt) {
-        confess 'No content, no header?' unless defined $hdr;
-        $cntnt = $self->{tree}->entry($hdr);
-    }
-
-    ref($cntnt) =~ /PFT::Content::(Page|Blog|Picture|Attachment|Tag|Month)/
-        or confess 'Unsupported in content to id: ' . ref($cntnt);
-
-    if ($1 eq 'Page') {
-        'p:' . ($hdr || $cntnt->header)->slug
-    } elsif ($1 eq 'Tag') {
-        't:' . ($hdr || $cntnt->header)->slug
-    } elsif ($1 eq 'Blog') {
-        my $hdr = ($hdr || $cntnt->header);
-        'b:' . $hdr->date->repr('') . ':' . $hdr->slug
-    } elsif ($1 eq 'Month') {
-        my $hdr = ($hdr || $cntnt->header);
-        'm:' . $hdr->date->repr('')
-    } elsif ($1 eq 'Picture') {
-        'i:' . join '/', $cntnt->relpath # No need for portability
-    } elsif ($1 eq 'Attachment') {
-        'a:' . join '/', $cntnt->relpath # Ditto
-    } else { die };
-}
+Given a PFT::Content::Base (or any subclass) object, returns the
+associated node. The node gets created if it does not exist.
 
 =back
 
 =cut
+
+sub node_of {
+    my $self = shift;
+    my $id = $self->_content_id(@_);
+
+    exists $self->{idx}{$id}
+        ? $self->{idx}{$id}
+        : $self->_mknod(@_)
+}
 
 1;

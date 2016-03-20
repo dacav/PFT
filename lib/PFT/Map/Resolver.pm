@@ -31,38 +31,30 @@ sub resolve {
 
     my $kwd = $symbol->keyword;
     if ($kwd =~ /^(pic|page|blog)$/n) {
-        &local_resolve;
+        &resolve_local
     } else {
-        confess "Unrecognized keyword $kwd";
+        &resolve_remote
     }
 }
 
-sub local_resolve {
+sub resolve_local {
     my($map, $node, $symbol) = @_;
 
     my $kwd = $symbol->keyword;
-    my $tree = $map->tree;
-    my $content;
     if ($kwd eq 'pic') {
-        $content = $tree->pic($symbol->args);
+        $map->node_of($map->tree->pic($symbol->args));
     } elsif ($kwd eq 'page') {
-        $content = $tree->entry(
-            PFT::Header->new(title => join(' ', $symbol->args))
-        )
+        my $hdr = PFT::Header->new(title => join(' ', $symbol->args));
+        my $page = $map->tree->entry($hdr);
+        $map->node_of($page, $page->exists ? $page->header : $hdr);
     } elsif ($kwd eq 'blog') {
-        $content = &local_resolve_blog;
+        &resolve_local_blog;
     } else {
         confess "Unrecognized keyword $kwd";
     }
-
-    unless (defined $content and $content->exists) {
-        confess 'Cannot find "', File::Spec->catfile($symbol->args),
-            "\" (kind $kwd)"
-    }
-    $content;
 }
 
-sub local_resolve_blog {
+sub resolve_local_blog {
     my($map, $node, $symbol) = @_;
 
     my @args = $symbol->args;
@@ -76,6 +68,12 @@ sub local_resolve_blog {
     } else {
         confess "Unrecognized blog lookup $method";
     }
+}
+
+sub resolve_remote {
+    my($map, $node, $symbol) = @_;
+
+    ...
 }
 
 1;
