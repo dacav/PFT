@@ -50,12 +50,13 @@ sub new {
         # provided. Only PFT::Content::Entry object have headers.
         hdr     => defined $hdr
             ? $hdr
-            : do {
-                $cont->exists or confess "No header for virtual content";
-                $cont->isa('PFT::Content::Entry')
-                    ? $cont->header
-                    : undef
-            },
+            : $cont->isa('PFT::Content::Entry')
+                ? do {
+                    $cont->exists or confess
+                        "No header for virtual content $cont";
+                    $cont->header
+                }
+                : undef
     }, $cls
 }
 
@@ -134,12 +135,11 @@ sub title {
 
 Returns 1 if the node is virtual.
 
-A virtual node C<$n> does not correspond with a content file:
-C<$n-E<gt>content> is undef, C<$n-E<gt>header> is defined.
+A virtual node C<$n> does not correspond with an existing content file.
 
 =cut
 
-sub virtual { exists shift->{cont} }
+sub virtual { !shift->{cont}->exists }
 
 sub next { shift->{next} }
 

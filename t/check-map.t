@@ -30,8 +30,11 @@ do {
     This is a picture of me:
 
     ![my ugly face](:pic:baz/foo.png)
+    ![my ugly cat](:pic:baz/bar.png)
 
-    [1]: :pic:baz/foo.png
+    Follows my horrible poetry: [click here][1]
+
+    [1]: :attach:foo/bar.txt
     EOF
     close $f;
 };

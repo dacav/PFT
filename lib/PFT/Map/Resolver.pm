@@ -30,7 +30,7 @@ sub resolve {
     my($map, $node, $symbol) = @_;
 
     my $kwd = $symbol->keyword;
-    if ($kwd =~ /^(pic|page|blog)$/n) {
+    if ($kwd =~ /^(pic|page|blog|attach)$/n) {
         &resolve_local
     } else {
         &resolve_remote
@@ -43,6 +43,8 @@ sub resolve_local {
     my $kwd = $symbol->keyword;
     if ($kwd eq 'pic') {
         $map->node_of($map->tree->pic($symbol->args));
+    } elsif ($kwd eq 'attach') {
+        $map->node_of($map->tree->attachment($symbol->args));
     } elsif ($kwd eq 'page') {
         my $hdr = PFT::Header->new(title => join(' ', $symbol->args));
         my $page = $map->tree->entry($hdr);
@@ -73,6 +75,7 @@ sub resolve_local_blog {
 sub resolve_remote {
     my($map, $node, $symbol) = @_;
 
+    Carp::cluck $symbol;
     ...
 }
 
