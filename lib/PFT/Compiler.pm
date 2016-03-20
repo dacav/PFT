@@ -32,12 +32,10 @@ use File::Spec;
 use PFT::Map;
 use PFT::Text;
 
-use feature 'say';
-
 sub node_to_path {
     my $node = shift;
     my $hdr = $node->header;
-    if ((my $k = $node->kind) eq 'b') {(
+    if ((my $k = substr($node->id, 0, 1)) eq 'b') {(
         'blog',
         sprintf('%04d-%02d', $hdr->date->y, $hdr->date->m),
         sprintf('%02d-%s.html', $hdr->date->d, $hdr->slug),
@@ -47,10 +45,16 @@ sub node_to_path {
     )} elsif ($k eq 'p') {(
         'pages',
         $hdr->slug . '.html',
-    )} elsif ($k eq 't') {
+    )} elsif ($k eq 't') {(
         'tags',
         $hdr->slug . '.html',
-    } else { die $k };
+    )} elsif ($k eq 'i') {(
+        'pics',
+        $node->content->relpath
+    )} elsif ($k eq 'a') {(
+        'attachments',
+        $node->content->relpath
+    )} else { die $k };
 }
 
 sub build {
