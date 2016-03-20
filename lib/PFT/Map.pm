@@ -186,15 +186,17 @@ This method is used mainly or solely for testing.
 sub dump {
     my $node_dump = sub {
         my $node = shift;
-        # TODO: fix this point, avoid this 'kind' madness
         my %out = (
             id => $node->seqnr,
-            tt => $node->kind =~ '[bpt]' ? $node->header->title :
-                  $node->kind eq 'm'     ? $node->content->exists ? $node->header->title : '<month>' :
-                  $node->kind eq 'a'     ? '<attachment>' :
-                  $node->kind eq 'i'     ? '<picture>' :
-                  confess "What is '", $node->kind, "'?",
-
+            tt => $node->title || do {
+                do {
+                    my $cnt = $node->content;
+                    $cnt->isa('PFT::Content::Month') ? '<month>' :
+                    $cnt->isa('PFT::Content::Attachment') ? '<attachment>' :
+                    $cnt->isa('PFT::Content::Picture')    ? '<picture>'    :
+                    confess "what is $node?";
+                }
+            },
         );
 
         if (defined(my $prev = $node->prev)) { $out{'<'} = $prev->seqnr }

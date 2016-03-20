@@ -38,24 +38,25 @@ use WeakRef;
 sub new {
     my($cls, $seqnr, $id, $cont, $hdr) = @_;
     confess 'Need content or header' unless $cont || $hdr;
+    confess "Not content: $cont" unless $cont->isa('PFT::Content::Base');
 
-    my $self = {
+    bless {
         seqnr   => $seqnr,
         id      => $id,
-    };
+        cont    => $cont,
 
-    if (defined $cont) {
-        confess "Not content: $cont"
-            unless $cont->isa('PFT::Content::Base');
-        $self->{cont} = $cont;
-    }
-    if (defined $hdr) {
-        confess "Not header $hdr"
-            unless $hdr->isa('PFT::Header');
-        $self->{hdr} = $hdr;
-    }
-
-    bless $self, $cls;
+        # Rule of the game: header might be obtained by content, but if
+        # content is virtual (i.e. !$coontent->exists) it must be
+        # provided. Only PFT::Content::Entry object have headers.
+        hdr     => defined $hdr
+            ? $hdr
+            : do {
+                $cont->exists or confess "No header for virtual content";
+                $cont->isa('PFT::Content::Entry')
+                    ? $cont->header
+                    : undef
+            },
+    }, $cls
 }
 
 =head2 Properties
@@ -71,17 +72,7 @@ do not have a tag page).
 
 =cut
 
-sub header {
-    my $self = shift;
-    exists $self->{hdr}
-        ? $self->{hdr}
-        : do {
-            my $cont = $self->{cont};
-            $self->{hdr} = $cont->isa('PFT::Content::Entry')
-                ? $cont->header
-                : undef
-        }
-}
+sub header { shift->{hdr} }
 
 =item content
 
@@ -93,8 +84,6 @@ represented anyway in a compiled PFT site.
 =cut
 
 sub content { shift->{cont} }
-
-sub kind { substr(shift->{id}, 0, 1) }
 
 =item date
 
@@ -126,6 +115,31 @@ Returns the mnemonic unique identifier.
 
 sub id { shift->{id} }
 
+=item title
+
+Returns the title of the content, if any
+
+=cut
+
+sub title {
+    my $self = shift;
+
+    if (defined(my $hdr = $self->header)) {
+        $hdr->title
+    } else {
+    }
+}
+
+=item virtual
+
+Returns 1 if the node is virtual.
+
+A virtual node C<$n> does not correspond with a content file:
+C<$n-E<gt>content> is undef, C<$n-E<gt>header> is defined.
+
+=cut
+
+sub virtual { exists shift->{cont} }
 
 sub next { shift->{next} }
 
@@ -201,7 +215,10 @@ use overload
         $swap ? -$out : $out;
     },
     '""' => sub {
-        'PFT::Map::Node[id='.shift->{id}.']'
+        my $self = shift;
+        'PFT::Map::Node[id=' . $self->id
+            . ', virtual=' . ($self->virtual ? 'yes' : 'no')
+            . ']'
     },
 ;
 
