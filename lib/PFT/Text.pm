@@ -54,7 +54,9 @@ sub new {
 sub html {
     my $self = shift;
     my $md = do {
-        my $fd = $self->{page}->read;
+        my $page = $self->{page};
+        confess "$page is virtual" unless $page->exists;
+        my $fd = $page->read;
         local $/ = undef;
         <$fd>;
     };

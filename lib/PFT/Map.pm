@@ -61,7 +61,7 @@ sub _resolve {
     my $self = shift;
 
     for my $node (@{$self->{toresolve}}) {
-        for my $s (PFT::Text->new($node->file)->symbols) {
+        for my $s (PFT::Text->new($node->content)->symbols) {
             if (my $resolved = resolve($self, $node, $s)) {
                 $resolved->isa('PFT::Map::Node') or Carp::cluck
                     'Buggy resolver: got ', ref($resolved);
@@ -77,26 +77,31 @@ sub _resolve {
 
 sub _mknod {
     my $self = shift;
+    my($cntnt, $hdr) = @_;
+
     my $node = PFT::Map::Node->new(
-        (my $from = shift),     # from: header | file
-        shift,                  # kind p|b|m|t|i|a
         $self->{next} ++,
+        (my $id = $self->content_id(@_)),
+        @_,
     );
 
-    push @{$self->{toresolve}}, $node if $from->isa('PFT::Content::Entry');
-    $self->{idx}{$node->id} = $node;
+    if ($cntnt and $cntnt->isa('PFT::Content::Entry') and $cntnt->exists) {
+        push @{$self->{toresolve}}, $node
+    }
+    die if exists $self->{idx}{$id};
+    $self->{idx}{$id} = $node;
 }
 
 sub _scan_pages {
     my $self = shift;
-    $self->_mknod($_, 'p') foreach $self->{tree}->pages_ls;
+    $self->_mknod($_) foreach $self->{tree}->pages_ls;
 }
 
 sub _scan_blog {
     my $self = shift;
     my $tree = $self->{tree};
-    my @blog = map $self->_mknod($_, 'b'),
-        grep { !$_->isa('PFT::Content::Month') } $tree->blog_ls;
+    my @blog = map $self->_mknod($_),
+        grep !$_->isa('PFT::Content::Month'), $tree->blog_ls;
 
     my($prev, $prev_month);
     foreach (sort { $a->date <=> $b->date } @blog) {
@@ -108,8 +113,8 @@ sub _scan_blog {
             if (!defined($prev_month) or $prev_month->date <=> $m_date) {
                 my $m_hdr = PFT::Header->new(date => $m_date);
                 my $m_page = $tree->entry($m_hdr);
-                my $n = $self->_mknod(
-                    $m_page->exists ? ($m_page, 'p') : ($m_hdr, 'm'),
+                my $n = $self->_mknod($m_page,
+                    $m_page->exists ? $m_page->header : $m_hdr
                 );
                 $n->prev($prev_month) if defined $prev_month;
                 $prev_month = $n;
@@ -131,8 +136,8 @@ sub _scan_tags {
             my $t_node = exists $tags{$_} ? $tags{$_} : do {
                 my $t_hdr = PFT::Header->new(title => $_);
                 my $t_page = $tree->tag($t_hdr);
-                $tags{$_} = $self->_mknod(
-                    $t_page->exists ? ($t_page, 'p') : ($t_hdr, 't'),
+                $tags{$_} = $self->_mknod($t_page,
+                    $t_page->exists ? $t_page->header : $t_hdr
                 );
             };
             $node->add_tag($t_node);
@@ -142,12 +147,12 @@ sub _scan_tags {
 
 sub _scan_attach {
     my $self = shift;
-    $self->_mknod($_, 'a') for $self->{tree}->attachments_ls;
+    $self->_mknod($_) for $self->{tree}->attachments_ls;
 }
 
 sub _scan_pics {
     my $self = shift;
-    $self->_mknod($_, 'i') for $self->{tree}->pics_ls;
+    $self->_mknod($_) for $self->{tree}->pics_ls;
 }
 
 =head2 Properties
@@ -162,7 +167,7 @@ List the nodes
 
 sub nodes { values %{shift->{idx}} }
 
-=item treee
+=item tree
 
 The associated content tree
 
@@ -181,13 +186,15 @@ This method is used mainly or solely for testing.
 sub dump {
     my $node_dump = sub {
         my $node = shift;
+        # TODO: fix this point, avoid this 'kind' madness
         my %out = (
             id => $node->seqnr,
             tt => $node->kind =~ '[bpt]' ? $node->header->title :
-                  $node->kind eq 'm'     ? '<month>' :
+                  $node->kind eq 'm'     ? $node->content->exists ? $node->header->title : '<month>' :
                   $node->kind eq 'a'     ? '<attachment>' :
                   $node->kind eq 'i'     ? '<picture>' :
                   confess "What is '", $node->kind, "'?",
+
         );
 
         if (defined(my $prev = $node->prev)) { $out{'<'} = $prev->seqnr }
@@ -214,6 +221,51 @@ sub dump {
     map{ $node_dump->($_) }
         sort{ $a <=> $b }
         values %{$self->{idx}}
+}
+
+=back
+
+=head2 Methods
+
+=item content_id
+
+Given a PFT::Content::Base object, returns a string uniquely identifying
+it across the site. E.g.:
+
+    my $id = $map->content_id($content);
+    my $id = $map->content_id($virtual_page, $hdr);
+    my $id = $map->content_id(undef, $hdr);
+
+Form 1: for any content
+
+=cut
+
+sub content_id {
+    my($self, $cntnt, $hdr) = @_;
+
+    unless (defined $cntnt) {
+        confess 'No content, no header?' unless defined $hdr;
+        $cntnt = $self->{tree}->entry($hdr);
+    }
+
+    ref($cntnt) =~ /PFT::Content::(Page|Blog|Picture|Attachment|Tag|Month)/
+        or confess 'Unsupported in content to id: ' . ref($cntnt);
+
+    if ($1 eq 'Page') {
+        'p:' . ($hdr || $cntnt->header)->slug
+    } elsif ($1 eq 'Tag') {
+        't:' . ($hdr || $cntnt->header)->slug
+    } elsif ($1 eq 'Blog') {
+        my $hdr = ($hdr || $cntnt->header);
+        'b:' . $hdr->date->repr('') . ':' . $hdr->slug
+    } elsif ($1 eq 'Month') {
+        my $hdr = ($hdr || $cntnt->header);
+        'm:' . $hdr->date->repr('')
+    } elsif ($1 eq 'Picture') {
+        'i:' . join '/', $cntnt->relpath # No need for portability
+    } elsif ($1 eq 'Attachment') {
+        'a:' . join '/', $cntnt->relpath # Ditto
+    } else { die };
 }
 
 =back

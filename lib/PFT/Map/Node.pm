@@ -16,15 +16,7 @@ PFT::Map::Node - Node of a PFT site map
 
 =head1 SYNOPSIS
 
-    my $node = PFT::Map::Node->($from, $kind, $seqid, $resolver);
-
 =over 1
-
-=item C<$from> can either be a C<PFT::Header> or a C<PFT::Content::Base>;
-
-=item Valid vaulues for C<$kind> match C</^[bmpt]$/>;
-
-=item C<$seqid> is a numeric sequence number.
 
 =head1 DESCRIPTION
 
@@ -34,38 +26,26 @@ use Carp;
 use WeakRef;
 
 sub new {
-    my($cls, $from, $kind, $seqnr) = @_;
+    my($cls, $seqnr, $id, $cont, $hdr) = @_;
+    confess 'Need content or header' unless $cont || $hdr;
 
-    my($hdr, $file);
-    if ($from->isa('PFT::Header')) {
-        $hdr = $from;
-    } else {
-        confess 'Allowed only PFT::Header or PFT::Content::Base'
-            unless $from->isa('PFT::Content::File');
-        $file = $from;
-        $hdr = $from->header if $from->isa('PFT::Content::Entry');
+    my $self = {
+        seqnr   => $seqnr,
+        id      => $id,
+    };
+
+    if (defined $cont) {
+        confess "Not content: $cont"
+            unless $cont->isa('PFT::Content::Base');
+        $self->{cont} = $cont;
     }
-    $kind =~ /^[bmptia]$/
-        or confess "Invalid kind $kind. Valid: b|m|p|t|i|a";
+    if (defined $hdr) {
+        confess "Not header $hdr"
+            unless $hdr->isa('PFT::Header');
+        $self->{hdr} = $hdr;
+    }
 
-    bless {
-        kind => $kind,
-        id => do {
-            my $id = $kind;
-            $id .= '.' . $hdr->date->repr('.') if $kind =~ '[bm]';
-
-            # [m]onths have no slug;
-            # [b]log [p]ages and [t]ags do have headers
-            # [a]ttachments and [i]mages have files
-            $kind eq 'm'     ? $id :
-            $kind =~ '[bpt]' ? $id . '.' . $hdr->slug :
-            $kind =~ '[ai]'  ? join '.', $id, $file->relpath :
-            confess "What is '$id'?";
-        },
-        seqnr => $seqnr,
-        hdr => $hdr,
-        file => $file,
-    }, $cls;
+    bless $self, $cls;
 }
 
 =head2 Properties
@@ -81,21 +61,38 @@ do not have a tag page).
 
 =cut
 
-sub header { shift->{hdr} }
+sub header {
+    my $self = shift;
+    exists $self->{hdr}
+        ? $self->{hdr}
+        : do {
+            my $cont = $self->{cont};
+            $self->{hdr} = $cont->isa('PFT::Content::Entry')
+                ? $cont->header
+                : undef
+        }
+}
 
-=item file
+=item content
 
-The file associated with this node. This property could return undefined
-for the nodes which do not correspond to any content. In this case we talk
-about I<virtual files>, in that the node should be represented anyway in a
-compiled PFT site.
+The content associated with this node. This property could return
+undefined for the nodes which do not correspond to any content. In this
+case we talk about I<virtual files>, in that the node should be
+represented anyway in a compiled PFT site.
 
 =cut
 
-sub file { shift->{file} }
+sub content { shift->{cont} }
 
-sub kind { shift->{kind} }
-sub date { shift->{hdr}->date }
+sub kind { substr(shift->{id}, 0, 1) }
+
+sub date {
+    my $self = shift;
+    $self->header
+        ? $self->{hdr}->date
+        : undef
+}
+
 sub next { shift->{next} }
 sub seqnr { shift->{seqnr} }
 sub id { shift->{id} }
