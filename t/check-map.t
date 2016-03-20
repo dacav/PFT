@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 20;
+use Test::More tests => 19;
 
 use PFT::Content;
 use PFT::Header;
@@ -72,11 +72,6 @@ diag($_->id, ' unres: ', join ', ', $_->unresolved) foreach $map->nodes;
 
 my @dumped = $map->dump;
 
-# main::expected is declared down in the file.
-is_deeply(\@main::expected, \@dumped, 'Deeply equal');
-
-# in case of modification, you should check it manually the first time and
-# update the bottom part of this file.
 #use Data::Dumper;
 #diag(Dumper \@dumped);
 
@@ -109,91 +104,3 @@ while (my($i, $node) = each @dumped) {
 }
 
 done_testing();
-
-BEGIN {
-    # Obtained by dumping, verified manually
-    @main::expected = (
-      {
-        'id' => 0,
-        'tt' => 'A page',
-      },
-      {
-        'id' => 1,
-        'tt' => 'Another page',
-        't' => [9, 10]
-      },
-      {
-        'id' => 2,
-        'd' => '2014-01-01',
-        'tt' => 'Blog post nr.1',
-        '>' => 3,
-        '^' => 7,
-      },
-      {
-        'id' => 3,
-        'd' => '2014-01-02',
-        'tt' => 'Blog post nr.11',
-        '<' => 2,
-        '>' => 4,
-        '^' => 7,
-        't' => [10],
-      },
-      {
-        'id' => 4,
-        'd' => '2014-01-03',
-        'tt' => 'Blog post nr.3',
-        '^' => 7,
-        't' => [9],
-        '>' => 5,
-        '<' => 3,
-      },
-      {
-        'id' => 5,
-        'd' => '2014-02-04',
-        'tt' => 'Blog post nr.2',
-        '^' => 8,
-        '>' => 6,
-        '<' => 4,
-      },
-      {
-        'id' => 6,
-        'd' => '2014-02-05',
-        'tt' => 'Blog post nr.12',
-        '<' => 5,
-        't' => [10],
-        '^' => 8,
-      },
-      {
-        'id' => 7,
-        'd' => '2014-01-*',
-        'tt' => '<month>',
-        'v' => [2, 3, 4],
-        '>' => 8,
-      },
-      {
-        'id' => 8,
-        'd' => '2014-02-*',
-        'tt' => 'Month nr.2',
-        '<' => 7,
-        'v' => [5, 6],
-      },
-      {
-        'id' => 9,
-        'tt' => 'Bar',
-        '.' => [1, 4],
-      },
-      {
-        'id' => 10,
-        'tt' => 'foo',
-        '.' => [1, 3, 6],
-      },
-      {
-        'id' => 11,
-        'tt' => '<attachment>',
-      },
-      {
-        'id' => 12,
-        'tt' => '<picture>',
-      }
-    )
-}
