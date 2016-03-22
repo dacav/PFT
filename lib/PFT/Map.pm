@@ -142,11 +142,11 @@ sub _scan_blog {
     my @blog = map $self->_mknod($_),
         grep !$_->isa('PFT::Content::Month'), $tree->blog_ls;
 
-    my($prev, $prev_month);
+    my($prev, $prev_month, $last_month);
     foreach (sort { $a->date <=> $b->date } @blog) {
         $_->prev($prev) if defined $prev;
 
-        $_->month(do {
+        $_->parent(do {
             my $m_date = $_->date->derive(d => undef);
 
             if (!defined($prev_month) or $prev_month->date <=> $m_date) {
@@ -156,13 +156,15 @@ sub _scan_blog {
                     $m_page->exists ? $m_page->header : $m_hdr
                 );
                 $n->prev($prev_month) if defined $prev_month;
-                $prev_month = $n;
+                $last_month = $prev_month = $n;
             }
             $prev_month
         });
 
         $prev = $_;
     }
+
+    @{$self}{'last', 'last_month'} = ($prev, $last_month);
 }
 
 sub _scan_tags {
@@ -213,6 +215,35 @@ The associated content tree
 =cut
 
 sub tree { shift->{tree} }
+
+=item pages
+
+List page nodes
+
+=cut
+
+sub _grep_content {
+    my($self, $type) = @_;
+    grep{ $_->content_type eq $type } $self->nodes
+}
+
+sub pages { shift->_grep_content('PFT::Content::Page') }
+
+=item months
+
+List month nodes
+
+=cut
+
+sub months { shift->_grep_content('PFT::Content::Month') }
+
+=item tags
+
+List tag nodes
+
+=cut
+
+sub tags { shift->_grep_content('PFT::Content::Tag') }
 
 =item dump
 
@@ -275,8 +306,6 @@ sub dump {
 Given a PFT::Content::Base (or any subclass) object, returns the
 associated node. The node gets created if it does not exist.
 
-=back
-
 =cut
 
 sub node_of {
@@ -287,5 +316,47 @@ sub node_of {
         ? $self->{idx}{$id}
         : $self->_mknod(@_)
 }
+
+=item recent_blog
+
+The I<N> most recent blog nodes.
+
+The number I<N> is given as parameter, and defaults to 1. The method
+returns up to I<N> nodes, ordered by date, from most to least recent.
+
+=cut
+
+sub _recent {
+    my($self, $key, $n) = @_;
+
+    $n = 1 unless defined $n;
+    confess "Requires N > 0, got $n" if $n < 1;
+
+    my @out;
+    my $cursor = $self->{$key};
+    while ($n -- && defined $cursor) {
+        push @out, $cursor;
+        $cursor = $cursor->prev;
+    }
+
+    @out;
+}
+
+sub recent_blog { shift->_recent('last', shift) }
+
+=item recent_months
+
+The I<N> most recent months node.
+
+The number I<N> is given as parameter, and defaults to 1. The method
+returns up to I<N> nodes, ordered by date, from most to least recent.
+
+=cut
+
+sub recent_months { shift->_recent('last_month', shift) }
+
+=back
+
+=cut
 
 1;
