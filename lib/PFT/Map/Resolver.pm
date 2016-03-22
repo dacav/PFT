@@ -64,8 +64,9 @@ sub resolve_local_blog {
     my @args = $symbol->args;
     my $method = shift @args;
     if ($method eq 'back') {
-        my $steps = @args ? shift(@args) : 0;
-        while ($node && $steps > 0) {
+        my $steps = @args ? shift(@args) : 1;
+        $steps > 0 or confess "Going back $steps <= 0 from $node";
+        while ($node && $steps-- > 0) {
             $node = $node->prev;
         }
         $node;
