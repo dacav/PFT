@@ -122,10 +122,13 @@ Returns the title of the content, if any
 
 sub title {
     my $self = shift;
-
-    if (defined(my $hdr = $self->header)) {
-        $hdr->title
+    my $hdr = $self->header;
+    unless (defined $hdr) { return undef }
+    my $title = $hdr->title;
+    if (!defined($title) && $self->content->isa('PFT::Content::Month')) {
+        sprintf("%04d / %02d", @{$hdr->date}[0, 1])
     } else {
+        $title;
     }
 }
 
