@@ -146,7 +146,7 @@ sub _scan_blog {
     foreach (sort { $a->date <=> $b->date } @blog) {
         $_->prev($prev) if defined $prev;
 
-        $_->parent(do {
+        $_->month(do {
             my $m_date = $_->date->derive(d => undef);
 
             if (!defined($prev_month) or $prev_month->date <=> $m_date) {
