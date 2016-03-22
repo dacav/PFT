@@ -202,6 +202,12 @@ sub tagged { shift->_list('tagged') }
 sub days { shift->_list('days') }
 sub inlinks { shift->_list('ilns') }
 
+sub children {
+    my $self = shift;
+    $self->_list('tagged'),
+    $self->_list('days'),
+}
+
 sub unresolved {
     my $self = shift;
     unless (@_) {
