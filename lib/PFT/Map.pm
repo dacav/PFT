@@ -304,7 +304,7 @@ sub dump {
 =item node_of
 
 Given a PFT::Content::Base (or any subclass) object, returns the
-associated node. The node gets created if it does not exist.
+associated node, or undef if such node does not exist.
 
 =cut
 
@@ -312,9 +312,7 @@ sub node_of {
     my $self = shift;
     my $id = $self->_content_id(@_);
 
-    exists $self->{idx}{$id}
-        ? $self->{idx}{$id}
-        : $self->_mknod(@_)
+    exists $self->{idx}{$id} ? $self->{idx}{$id} : undef
 }
 
 =item recent_blog

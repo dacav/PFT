@@ -47,14 +47,12 @@ sub resolve_local {
         $map->node_of($map->tree->attachment($symbol->args));
     } elsif ($kwd eq 'page') {
         my $hdr = PFT::Header->new(title => join(' ', $symbol->args));
-        my $page = $map->tree->entry($hdr);
-        $map->node_of($page, $page->exists ? $page->header : $hdr);
+        $map->node_of($map->tree->entry($hdr), $hdr);
     } elsif ($kwd eq 'blog') {
         &resolve_local_blog;
     } elsif ($kwd eq 'tag') {
         my $hdr = PFT::Header->new(title => join(' ', $symbol->args));
-        my $page = $map->tree->tag($hdr);
-        $map->node_of($page, $page->exists ? $page->header : $hdr);
+        $map->node_of($map->tree->tag($hdr), $hdr);
     } else {
         confess "Unrecognized keyword $kwd";
     }
