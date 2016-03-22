@@ -94,10 +94,8 @@ any date.
 =cut
 
 sub date {
-    my $self = shift;
-    $self->header
-        ? $self->{hdr}->date
-        : undef
+    my $hdr = shift->header;
+    $hdr ? $hdr->date : undef
 }
 
 =item seqnr
