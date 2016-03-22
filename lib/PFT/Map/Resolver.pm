@@ -30,7 +30,7 @@ sub resolve {
     my($map, $node, $symbol) = @_;
 
     my $kwd = $symbol->keyword;
-    if ($kwd =~ /^(pic|page|blog|attach)$/n) {
+    if ($kwd =~ /^(pic|page|blog|attach|tag)$/n) {
         &resolve_local
     } else {
         &resolve_remote
@@ -51,6 +51,10 @@ sub resolve_local {
         $map->node_of($page, $page->exists ? $page->header : $hdr);
     } elsif ($kwd eq 'blog') {
         &resolve_local_blog;
+    } elsif ($kwd eq 'tag') {
+        my $hdr = PFT::Header->new(title => join(' ', $symbol->args));
+        my $page = $map->tree->tag($hdr);
+        $map->node_of($page, $page->exists ? $page->header : $hdr);
     } else {
         confess "Unrecognized keyword $kwd";
     }
