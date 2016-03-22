@@ -142,6 +142,14 @@ A virtual node C<$n> does not correspond with an existing content file.
 
 sub virtual { !shift->{cont}->exists }
 
+=item content_type
+
+Returns the type of the content. Short for C<ref($node-E<gt>content)>
+
+=cut
+
+sub content_type { ref(shift->content) }
+
 sub next { shift->{next} }
 
 sub prev {
