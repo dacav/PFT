@@ -42,6 +42,7 @@ use Cwd;
 
 use PFT::Content;
 use PFT::Conf;
+use PFT::Map;
 
 sub new {
     my $cls = shift;
@@ -92,15 +93,24 @@ sub dir_build { File::Spec->catdir(shift->{root}, 'build') }
 
 =item content
 
-Returns a PFT::Content object.
+Returns a C<PFT::Content> object, abstracting the access to the I<content>
+directory.
 
 =cut
 
 sub content { PFT::Content->new(shift->dir_content, {@_}) }
 
+=item map
+
+Returns a C<PFT::Map> object, abstracting the the content graph.
+
+=cut
+
+sub content_map { PFT::Map->new(shift->content) }
+
 =item conf
 
-Returns a PFT::Conf object
+Returns a C<PFT::Conf> object, abstracting the configuration file.
 
 =cut
 
