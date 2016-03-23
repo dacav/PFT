@@ -68,7 +68,7 @@ $tree->new_tag(PFT::Header->new(title => 'Bar'));
 
 my $map = PFT::Map->new($tree);
 diag('Follows list of nodes:');
-diag($_->id, ' unres: ', join ', ', $_->unresolved) foreach $map->nodes;
+diag($_->id, ' unres: ', join ', ', $_->symbols_unres) foreach $map->nodes;
 
 my @dumped = $map->dump;
 

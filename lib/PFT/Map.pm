@@ -70,7 +70,7 @@ sub _resolve {
                 $node->add_outlink($resolved);
             }
             else {
-                $node->unresolved($s)
+                $node->symbols_unres($s)
             }
         }
     }
