@@ -222,7 +222,7 @@ sub _text {
 
 sub symbols { shift->_text->symbols }
 
-sub unresolved {
+sub symbols_unres {
     my $self = shift;
     unless (@_) {
         exists $self->{unres_syms}
