@@ -201,6 +201,7 @@ sub tags { shift->_list('tags') }
 sub tagged { shift->_list('tagged') }
 sub days { shift->_list('days') }
 sub inlinks { shift->_list('ilns') }
+sub outlinks { shift->_list('olns') }
 
 sub children {
     my $self = shift;
@@ -217,6 +218,31 @@ sub unresolved {
     } else {
         push @{$self->{unres_syms}}, @_
     }
+}
+
+=item html
+
+Expand HTML of the content, translating outbound links into
+hyper-references (hrefs).
+
+Requires as parameter a callback mapping a PFT::Map::Node object into
+a string representing path within the site. The callback is applied to all
+symbols, and the resulting string will replace the symbol placeholder in
+the HTML.
+
+Returns a string with encoded HTML, or an empty string if the node is
+virtual.
+
+=cut
+
+sub html {
+    my $self = shift;
+    return undef if $self->virtual;
+
+    my $mkhref = shift;
+    PFT::Text->new($self->content)->html_resolved(
+        map $mkhref->($_), $self->outlinks
+    );
 }
 
 =back
