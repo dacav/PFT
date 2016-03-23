@@ -61,7 +61,7 @@ sub _resolve {
     my $self = shift;
 
     for my $node (@{$self->{toresolve}}) {
-        for my $s (PFT::Text->new($node->content)->symbols) {
+        for my $s ($node->symbols) {
             if (my $resolved = resolve($self, $node, $s)) {
                 $resolved->isa('PFT::Map::Node') or confess
                     "Buggy resolver: searching $s",

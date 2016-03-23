@@ -32,6 +32,8 @@ identifier. This details are used within PFT::Map.
 
 =cut
 
+use PFT::Text;
+
 use Carp;
 use WeakRef;
 
@@ -209,6 +211,17 @@ sub children {
     $self->_list('days'),
 }
 
+sub _text {
+    my $self = shift;
+    if (exists $self->{text}) {
+        $self->{text}
+    } else {
+        $self->{text} = PFT::Text->new($self->content)
+    }
+}
+
+sub symbols { shift->_text->symbols }
+
 sub unresolved {
     my $self = shift;
     unless (@_) {
@@ -240,7 +253,7 @@ sub html {
     return undef if $self->virtual;
 
     my $mkhref = shift;
-    PFT::Text->new($self->content)->html_resolved(
+    $self->_text->html_resolved(
         map $mkhref->($_), $self->outlinks
     );
 }
