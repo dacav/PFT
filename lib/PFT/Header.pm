@@ -17,28 +17,59 @@ PFT::Header - Header for PFT content textfiles
     use PFT::Header;
 
     my $hdr = PFT::Header->new(
-        title => $title,        # mandatory, decoded
+        title => $title,        # mandatory (with conditions), decoded
+        encoding => $encoding,  # mandatory
+        date => $date,          # optional (conditions apply) PFT::Date
         author => $author,      # optional, decoded
-        template => $template,
-        encoding => $encoding,  # defaults 'utf-8'
-        tags => $tags,          # defaults []
-        opts => $opts,          # defaults {}
+        tags => $tags,          # list of decoded strins, defaults to []
+        opts => $opts,          # ignored by internals, defaults to {}
     );
 
-    my $hdr = PFT::Header->load(STDIN);
+    my $hdr = PFT::Header->load(\*STDIN);
 
     my $hdr = PFT::Header->load('/path/to/file');
 
 =head1 DESCRIPTION
 
-A header starts with a valid YAML document (including the leading '---'
-line and ends with another '---' line.
+A header is a chunk of meta-information describing content properties.
 
-The I<title> parameter is mandatory;
+It is used in a PFT::Tree::Content structure as index for retrieving the
+content on the filesystem. Every textual content (i.e.
+PFT::Content::Entry) stores a textual representation of an header in the
+beginning of the file.
 
-The I<title> and I<author> parameters are expected to be byte strings
-encoded according to the I<encoding> parameter. The I<tag> parameter is
-expected to be a list of encoded strings.
+=head2 Structure
+
+Each content has a I<title>, an optional I<author>, a mandatory
+I<encoding> property, an optional list of I<tags> in form of strings, an
+optional hash I<opts> containing other options.
+
+Note that the I<opts> map is ignored by the header, and just stored as it
+is on the content file. It is however encoded in the dumping process.
+Please be aware of this if you plan to use non-ascii options.
+
+=head2 Textual representation
+
+The textual representation of a header starts with a valid YAML document
+(including the leading '---' line and ends with another '---' line).
+
+The textual representation is stored in encoded form, with the encoding
+being consistent with the declared one.
+
+=head2 Construction
+
+The header can be constructed in three ways, corresponding to the three
+forms in the B<SYNOPSIS>.
+
+The first form is constructed in code. The I<title> field is mandatory
+unless there is a I<date> field, and the date represents a month (i.e.
+lacks the I<day> field). This property is enforced by the constructor.
+All the fields are expected in decoded form.
+
+The second and third forms are equivalent, and they differ in the source
+from which a header is loaded (a stream or a file path, respectively).
+In this form the content is loaded as textual representation, and decoded
+according to the declared encoding.
 
 =cut
 
@@ -47,8 +78,6 @@ use Carp;
 use YAML::Tiny;
 
 use PFT::Date;
-
-our $DEFAULT_ENC = 'utf-8';
 
 my $params_check = sub {
     my $params = shift;
@@ -64,23 +93,22 @@ my $params_check = sub {
             croak 'Year and month are mandatory for headers with date';
         }
     } else {
-        exists $params->{title}
+        defined $params->{title}
             or croak 'Title is mandatory for headers not having dates';
     }
+    defined $params->{encoding} or confess "Encoding is mandatory";
 };
 
 sub new {
     my $cls = shift;
     my %opts = @_;
 
-    my $enc = $opts{encoding} || $DEFAULT_ENC;
     $params_check->(\%opts);
-
     bless {
         title => $opts{title},
         author => $opts{author},
         template => $opts{template},
-        encoding => $enc,
+        encoding => $opts{encoding},
         date => $opts{date},
         tags => $opts{tags} || [],
         opts => $opts{opts} || {},
@@ -112,30 +140,28 @@ sub load {
     my $hdr = eval { YAML::Tiny::Load($text) };
     $hdr or confess 'Loading header: ' . $@ =~ s/ at .*$//rs;
 
-    my $enc = $hdr->{Encoding} || $DEFAULT_ENC;
-
-    my $decode = sub { decode($enc, shift) };
+    my $enc = $hdr->{Encoding} || confess "Missing encoding";
 
     my $date;
     $hdr->{Date} and $date = eval {
-        PFT::Date->from_string($decode->($hdr->{Date}))
+        PFT::Date->from_string(decode($enc, $hdr->{Date}))
     };
     croak $@ =~ s/ at .*$//rs if $@;
 
     my $self = {
-        title => $decode->($hdr->{Title}),
-        author => $decode->($hdr->{Author}),
-        template => $decode->($hdr->{Template}),
+        title => decode($enc, $hdr->{Title}),
+        author => decode($enc, $hdr->{Author}),
+        template => decode($enc, $hdr->{Template}),
         tags => [ do {
             my $tags = $hdr->{Tags};
-            ref $tags eq 'ARRAY' ? map($decode->($_), @$tags)
-                : defined $tags ? $decode->($tags)
+            ref $tags eq 'ARRAY' ? map(decode($enc, $_), @$tags)
+                : defined $tags ? decode($enc, $tags)
                 : ()
         }],
         encoding => $enc,
         date => $date,
         opts => !exists $hdr->{Options} ? undef : {
-            map { $decode->($_) } %{$hdr->{Options}}
+            map decode($enc, $_), %{$hdr->{Options}}
         },
     };
     $params_check->($self);
@@ -145,6 +171,8 @@ sub load {
 
 =head2 Properties
 
+=over 1
+
     $hdr->title
     $hdr->author
     $hdr->template
@@ -153,16 +181,65 @@ sub load {
     $hdr->date
     $hdr->opts
     $hdr->slug
-    $hdr->slug_tags
+    $hdr->tags_slug
+
+=cut
+
+=item title
+
+Returns the title of the content.
+
+Outputs a in decoded string.
 
 =cut
 
 sub title { shift->{title} }
+
+=item author
+
+Returns the author of the content, or undef if there is no author.
+
+Outputs a in decoded string.
+
+=cut
+
 sub author { shift->{author} }
+
 sub template { shift->{template} }
+
+=item encoding
+
+The encoding declared by the header for the content
+
+=cut
+
 sub encoding { shift->{encoding} }
+
+=item tags
+
+A list of tags declared by the header.
+
+The tags are in a normal (i.e. not slugified) form. For a slugified
+version use the C<tags_slug> method.
+
+=cut
+
 sub tags { wantarray ? @{shift->{tags}} : shift->{tags} }
+
+=item date
+
+The date declared by the heade, as PFT::Date object.
+
+=cut
+
 sub date { shift->{date} }
+
+=item opts
+
+A list of options for this content.
+
+=cut
+
 sub opts { shift->{opts} }
 
 my $slugify = sub {
@@ -175,13 +252,38 @@ my $slugify = sub {
     lc $out
 };
 
+=item slug
+
+A slug of the title in decoded form.
+
+=cut
+
 sub slug {
     $slugify->(shift->{title})
 }
 
-sub slug_tags {
+=item slug_enc
+
+A shortcut for C<$header-E<gt>enc($header-E<gt>slug)>.
+
+=cut
+
+sub slug_enc {
+    my $self = shift;
+    $self->enc($self->slug)
+}
+
+=item tags_slug
+
+A list of tags as for the C<tags> method, but in slugified form.
+
+=cut
+
+sub tags_slug {
     map{ $slugify->($_) } @{shift->tags || []}
 }
+
+=over
 
 =head2 Methods
 

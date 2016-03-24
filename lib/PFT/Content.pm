@@ -166,7 +166,7 @@ sub hdr_to_path {
         my $ym = sprintf('%04d-%02d', $d->y, $d->m);
         if (defined $d->d) {
             $basedir = File::Spec->catdir($self->dir_blog, $ym);
-            $fname = sprintf('%02d-%s', $d->d, $hdr->slug);
+            $fname = sprintf('%02d-%s', $d->d, $hdr->slug_enc);
         } else {
             $basedir = $self->dir_blog;
             $fname = $ym . '.month';
@@ -174,7 +174,7 @@ sub hdr_to_path {
 
         File::Spec->catfile($basedir, $fname)
     } else {
-        File::Spec->catfile($self->dir_pages, $hdr->slug)
+        File::Spec->catfile($self->dir_pages, $hdr->slug_enc)
     }
 }
 
@@ -206,7 +206,7 @@ sub tag {
     my $hdr = shift;
     PFT::Content::Tag->new({
         tree => $self,
-        path => File::Spec->catfile($self->dir_tags, $hdr->slug),
+        path => File::Spec->catfile($self->dir_tags, $hdr->slug_enc),
         name => $hdr->title,
     })
 }
@@ -258,15 +258,6 @@ sub pages_ls {
         $self->_text_ls(File::Spec->catfile($self->dir_pages, '*'))
 }
 
-=item pic
-
-Accepts a list of strings which will be joined into the path of a
-picture file.  Returns a C<PFT::Content::Blob> instance, which could
-correspond to a non-existing file. The caller might create it (e.g. by
-copying a picture on the corresponding path).
-
-=cut
-
 sub _blob {
     my $self = shift;
     my $pfxlen = length(my $pfx = shift) + length(path_sep);
@@ -292,6 +283,18 @@ sub _blob_ls {
     PFT::Util::list_files($pfx)
 }
 
+=item pic
+
+Accepts a list of strings which will be joined into the path of a
+picture file.  Returns a C<PFT::Content::Blob> instance, which could
+correspond to a non-existing file. The caller might create it (e.g. by
+copying a picture on the corresponding path).
+
+Note that the input path should be made by strings in encoded form, in
+order to match the filesystem path.
+
+=cut
+
 sub pic {
     my $self = shift;
     PFT::Content::Picture->new($self->_blob($self->dir_pics, @_))
@@ -314,6 +317,9 @@ Accepts a list of strings which will be joined into the path of an
 attachment file.  Returns a C<PFT::Content::Blob> instance, which could
 correspond to a non-existing file. The caller might create it (e.g. by
 copying a file on the corresponding path).
+
+Note that the input path should be made by strings in encoded form, in
+order to match the filesystem path.
 
 =cut
 

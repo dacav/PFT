@@ -19,10 +19,11 @@ my $tree = PFT::Content->new("$root");
 
 # Populating
 
+my @enc = (encoding => 'utf-8');
 $tree->pic('baz', 'foo.png')->touch;
 $tree->attachment('foo', 'bar.txt')->touch;
 do {
-    my $page = $tree->new_entry(PFT::Header->new(title => 'A page'));
+    my $page = $tree->new_entry(PFT::Header->new(title => 'A page', @enc));
     my $f = $page->open('a+');
     print $f <<'    EOF' =~ s/^    //rgms;
     Hello.
@@ -41,30 +42,36 @@ do {
 $tree->new_entry(PFT::Header->new(
     title => 'Another page',
     tags => ['foo', 'bar'],
+    @enc
 ));
 $tree->new_entry(PFT::Header->new(
     title => 'Blog post nr.3',
     date => PFT::Date->new(2014, 1, 3),
     tags => ['bar'],
+    @enc
 ));
 for (1 .. 2) {
     $tree->new_entry(PFT::Header->new(
         title => 'Blog post nr.'.$_,
         date => PFT::Date->new(2014, $_, $_ * $_),
+        @enc
     ));
     $tree->new_entry(PFT::Header->new(title => 'Blog post nr.'.($_ + 10),
         date => PFT::Date->new(2014, $_, $_ * $_ + 1),
         tags => ['foo'],
+        @enc
     ));
 }
 $tree->new_entry(PFT::Header->new(title => 'Month nr.2',
     date => PFT::Date->new(2014, 2),
+    @enc
 ));
 $tree->new_entry(PFT::Header->new(title => 'Month nr.3',
     date => PFT::Date->new(2014, 3),
     tags => ['bar'],
+    @enc
 ));
-$tree->new_tag(PFT::Header->new(title => 'Bar'));
+$tree->new_tag(PFT::Header->new(title => 'Bar', @enc));
 
 my $map = PFT::Map->new($tree);
 diag('Follows list of nodes:');
