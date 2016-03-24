@@ -44,6 +44,10 @@ Each content has a I<title>, an optional I<author>, a mandatory
 I<encoding> property, an optional list of I<tags> in form of strings, an
 optional hash I<opts> containing other options.
 
+Note that the I<opts> map is ignored by the header, and just stored as it
+is on the content file. It is however encoded in the dumping process.
+Please be aware of this if you plan to use non-ascii options.
+
 =head2 Textual representation
 
 The textual representation of a header starts with a valid YAML document
@@ -167,6 +171,8 @@ sub load {
 
 =head2 Properties
 
+=over 1
+
     $hdr->title
     $hdr->author
     $hdr->template
@@ -179,12 +185,61 @@ sub load {
 
 =cut
 
+=item title
+
+Returns the title of the content.
+
+Outputs a in decoded string.
+
+=cut
+
 sub title { shift->{title} }
+
+=item author
+
+Returns the author of the content, or undef if there is no author.
+
+Outputs a in decoded string.
+
+=cut
+
 sub author { shift->{author} }
+
 sub template { shift->{template} }
+
+=item encoding
+
+The encoding declared by the header for the content
+
+=cut
+
 sub encoding { shift->{encoding} }
+
+=item tags
+
+A list of tags declared by the header.
+
+The tags are in a normal (i.e. not slugified) form. For a slugified
+version use the C<tags_slug> method.
+
+=cut
+
 sub tags { wantarray ? @{shift->{tags}} : shift->{tags} }
+
+=item date
+
+The date declared by the heade, as PFT::Date object.
+
+=cut
+
 sub date { shift->{date} }
+
+=item opts
+
+A list of options for this content.
+
+=cut
+
 sub opts { shift->{opts} }
 
 my $slugify = sub {
@@ -197,13 +252,27 @@ my $slugify = sub {
     lc $out
 };
 
+=item slug
+
+A slug of the title.
+
+=cut
+
 sub slug {
     $slugify->(shift->{title})
 }
 
+=item slug_tags
+
+A list of tags as for the C<tags> method, but in slugified form.
+
+=cut
+
 sub slug_tags {
     map{ $slugify->($_) } @{shift->tags || []}
 }
+
+=over
 
 =head2 Methods
 
