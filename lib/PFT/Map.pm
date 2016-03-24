@@ -176,7 +176,7 @@ sub _scan_tags {
     my %tags;
 
     for my $node (sort { $a <=> $b } values %{$self->{idx}}) {
-        foreach (sort $node->header->slug_tags) {
+        foreach (sort $node->header->tags_slug) {
             my $t_node = exists $tags{$_} ? $tags{$_} : do {
                 my $t_hdr = PFT::Header->new(
                     title => $_,

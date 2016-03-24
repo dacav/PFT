@@ -181,7 +181,7 @@ sub load {
     $hdr->date
     $hdr->opts
     $hdr->slug
-    $hdr->slug_tags
+    $hdr->tags_slug
 
 =cut
 
@@ -273,13 +273,13 @@ sub slug_enc {
     $self->enc($self->slug)
 }
 
-=item slug_tags
+=item tags_slug
 
 A list of tags as for the C<tags> method, but in slugified form.
 
 =cut
 
-sub slug_tags {
+sub tags_slug {
     map{ $slugify->($_) } @{shift->tags || []}
 }
 

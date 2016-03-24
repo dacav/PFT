@@ -76,7 +76,7 @@ do {
     my $ts = ['One tag', 'Two ~ tags'];
     my $h = PFT::Header->new(title => 'x', tags => $ts, encoding => 'utf-8');
     is_deeply(scalar($h->tags), $ts, 'Full tags');
-    is_deeply([$h->slug_tags], ['one-tag', 'two-tags'], 'Slug tags');
+    is_deeply([$h->tags_slug], ['one-tag', 'two-tags'], 'Slug tags');
 };
 
 done_testing()
