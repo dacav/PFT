@@ -166,7 +166,7 @@ sub hdr_to_path {
         my $ym = sprintf('%04d-%02d', $d->y, $d->m);
         if (defined $d->d) {
             $basedir = File::Spec->catdir($self->dir_blog, $ym);
-            $fname = sprintf('%02d-%s', $d->d, $hdr->slug);
+            $fname = sprintf('%02d-%s', $d->d, $hdr->slug_enc);
         } else {
             $basedir = $self->dir_blog;
             $fname = $ym . '.month';
@@ -174,7 +174,7 @@ sub hdr_to_path {
 
         File::Spec->catfile($basedir, $fname)
     } else {
-        File::Spec->catfile($self->dir_pages, $hdr->slug)
+        File::Spec->catfile($self->dir_pages, $hdr->slug_enc)
     }
 }
 
@@ -206,7 +206,7 @@ sub tag {
     my $hdr = shift;
     PFT::Content::Tag->new({
         tree => $self,
-        path => File::Spec->catfile($self->dir_tags, $hdr->slug),
+        path => File::Spec->catfile($self->dir_tags, $hdr->slug_enc),
         name => $hdr->title,
     })
 }

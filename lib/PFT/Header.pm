@@ -254,12 +254,23 @@ my $slugify = sub {
 
 =item slug
 
-A slug of the title.
+A slug of the title in decoded form.
 
 =cut
 
 sub slug {
     $slugify->(shift->{title})
+}
+
+=item slug_enc
+
+A shortcut for C<$header-E<gt>enc($header-E<gt>slug)>.
+
+=cut
+
+sub slug_enc {
+    my $self = shift;
+    $self->enc($self->slug)
 }
 
 =item slug_tags
