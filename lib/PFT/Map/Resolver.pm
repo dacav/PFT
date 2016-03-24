@@ -51,7 +51,10 @@ sub resolve_local {
     } elsif ($kwd eq 'blog') {
         &resolve_local_blog;
     } elsif ($kwd eq 'tag') {
-        my $hdr = PFT::Header->new(title => join(' ', $symbol->args));
+        my $hdr = PFT::Header->new(
+            title => join(' ', $symbol->args),
+            encoding => $node->header->encoding,
+        );
         $map->node_of($map->tree->tag($hdr), $hdr);
     } else {
         confess "Unrecognized keyword $kwd";
