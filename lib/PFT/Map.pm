@@ -150,7 +150,10 @@ sub _scan_blog {
             my $m_date = $_->date->derive(d => undef);
 
             if (!defined($prev_month) or $prev_month->date <=> $m_date) {
-                my $m_hdr = PFT::Header->new(date => $m_date);
+                my $m_hdr = PFT::Header->new(
+                    date => $m_date,
+                    encoding => $_->header->encoding,
+                );
                 my $m_page = $tree->entry($m_hdr);
                 my $n = $self->_mknod($m_page,
                     $m_page->exists ? $m_page->header : $m_hdr
@@ -175,7 +178,10 @@ sub _scan_tags {
     for my $node (sort { $a <=> $b } values %{$self->{idx}}) {
         foreach (sort $node->header->slug_tags) {
             my $t_node = exists $tags{$_} ? $tags{$_} : do {
-                my $t_hdr = PFT::Header->new(title => $_);
+                my $t_hdr = PFT::Header->new(
+                    title => $_,
+                    encoding => $node->header->encoding,
+                );
                 my $t_page = $tree->tag($t_hdr);
                 $tags{$_} = $self->_mknod($t_page,
                     $t_page->exists ? $t_page->header : $t_hdr

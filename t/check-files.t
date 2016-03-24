@@ -48,7 +48,7 @@ eval {
 isnt($@, undef, 'Error also if reading');
 
 # Header placement (on unlinked file)
-my $header = PFT::Header->new(title => 'foo');
+my $header = PFT::Header->new(title => 'foo', encoding => 'utf-8');
 
 do {
     $page->unlink;
@@ -69,7 +69,7 @@ do {
     close $fh;
 };
 do {
-    my $h_alt = PFT::Header->new(title => 'bar');
+    my $h_alt = PFT::Header->new(title => 'bar', encoding => 'utf-8');
     $page->set_header($h_alt);
 
     my($h_got, $fh) = $page->read();

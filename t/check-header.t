@@ -36,22 +36,25 @@ for my $date (undef, PFT::Date->from_string('2014-12-16')) {
     is_deeply($hl, $h, 'dump and reload, ' . ($date ? $date : 'no date'));
 }
 
-is(eval { PFT::Header->new( title => 'X', date => 0)}, undef, 'broken because...');
+is(eval { PFT::Header->new(title => 'X', date => 0, encoding => 'utf-8')},
+    undef, 'broken because...'
+);
 isnt(undef, $@, 'date must be PFT::Date');
 diag($@);
 
-is(eval { PFT::Header->new(date => PFT::Date->new(1,2,3))}, undef,
-    'broken because...'
+is(eval { PFT::Header->new(date => PFT::Date->new(1,2,3), encodeing => 'utf-8')},
+    undef, 'broken because...'
 );
 isnt(undef, $@, 'full date but no title');
 diag($@);
 
-isnt(PFT::Header->new(date => PFT::Date->new(1, 2)), undef,
-    'not broken because day is missing'
+isnt(
+    PFT::Header->new(date => PFT::Date->new(1, 2), encoding => 'utf-8',),
+    undef, 'not broken because day is missing'
 );
 
-is(eval { PFT::Header->new(date => PFT::Date->new(1)) }, undef,
-    'broken because...'
+is(eval { PFT::Header->new(date => PFT::Date->new(1), encoding => 'utf-8') },
+    undef, 'broken because...'
 );
 isnt(undef, $@, 'date missing year or month');
 diag($@);
@@ -71,7 +74,7 @@ do {
 
 do {
     my $ts = ['One tag', 'Two ~ tags'];
-    my $h = PFT::Header->new(title => 'x', tags => $ts);
+    my $h = PFT::Header->new(title => 'x', tags => $ts, encoding => 'utf-8');
     is_deeply(scalar($h->tags), $ts, 'Full tags');
     is_deeply([$h->slug_tags], ['one-tag', 'two-tags'], 'Slug tags');
 };
