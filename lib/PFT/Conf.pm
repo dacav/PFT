@@ -60,7 +60,7 @@ sub new_default {
             editor => undef,
         },
         input_enc => 'utf-8',
-        output_enc => 'utf-8',
+        output_enc => 'utf-8',  # FIXME: Probably some local env?
 
         _root => undef,
     }, shift;
