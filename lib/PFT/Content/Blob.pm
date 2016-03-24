@@ -21,7 +21,7 @@ PFT::Content::Blob - Binary file
     my $p = PFT::Content::Blob->new({
         tree    => $tree,
         path    => $path,
-        relpath => ['animals', 'cats', 'meow.png'],
+        relpath => ['animals', 'cats', 'meow.png'], # decoded strings
     })
 
 =head1 DESCRIPTION
