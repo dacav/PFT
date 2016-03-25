@@ -94,9 +94,11 @@ sub html_resolved {
     my $self = shift;
 
     my $html = $self->html;
+    my $offset = 0;
     for my $sym ($self->symbols) {
         if (my $repl = shift) {
-            substr($html, $sym->start, $sym->len) = $repl
+            substr($html, $offset + $sym->start, $sym->len) = $repl;
+            $offset += length($repl) - $sym->len
         }
     }
     $html;
