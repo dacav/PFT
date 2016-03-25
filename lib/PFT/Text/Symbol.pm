@@ -49,8 +49,6 @@ It will generate a symbol C<$s1> such that:
 Since a block of HTML can possibly yield multiple symbols, there's no
 public construction. Use the C<scan_html> multi-constructor instead.
 
-Unicode notice: input HTML is assumed to be in decoded form.
-
 =cut
 
 sub keyword { shift->[0] }
