@@ -130,6 +130,7 @@ doesn't exist already.
 sub entry {
     my $self = shift;
     my $hdr = shift;
+    confess "Not a header: $hdr" unless $hdr->isa('PFT::Header');
 
     my $params = {
         tree => $self,
@@ -204,6 +205,7 @@ exist already.
 sub tag {
     my $self = shift;
     my $hdr = shift;
+    confess "Not a header: $hdr" unless $hdr->isa('PFT::Header');
     PFT::Content::Tag->new({
         tree => $self,
         path => File::Spec->catfile($self->dir_tags, $hdr->slug_enc),
