@@ -73,9 +73,8 @@ sub _resolve {
                 }
             }
             else {
-                warn $@ =~ s/\v.*//rs if $@;
                 $node->add_outlink(undef);
-                $node->symbols_unres($s)
+                $node->add_symbol_unres($s => $@ ? $@ =~ s/\v.*//rs : undef);
             }
         }
     }

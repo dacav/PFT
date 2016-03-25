@@ -237,15 +237,15 @@ sub _text {
 
 sub symbols { shift->_text->symbols }
 
+sub add_symbol_unres {
+    push @{shift->{unres_syms}}, [@_]
+}
+
 sub symbols_unres {
     my $self = shift;
-    unless (@_) {
-        exists $self->{unres_syms}
-            ? @{$self->{unres_syms}}
-            : ()
-    } else {
-        push @{$self->{unres_syms}}, @_
-    }
+    exists $self->{unres_syms}
+        ? @{$self->{unres_syms}}
+        : ()
 }
 
 =item html
