@@ -47,6 +47,17 @@ use PFT::Date;
 use File::Spec;
 use Carp;
 
+=item open
+
+Open the file, return a file handler.
+
+Note: The PFT::Content::Entry class is using directly the
+PFT::Content::File C<open> method. You should set the I<binmode> if you
+use this C<open> method. If reading the content, consider using C<read>
+instead.
+
+=cut
+
 sub header {
     my $self = shift;
     return undef unless $self->exists;
@@ -101,7 +112,6 @@ sub set_header {
     }
 
     my $fh = $self->open('w');
-    $hdr->binmode($fh);
     $hdr->dump($fh);
     print $fh $_ foreach @lines;
 }

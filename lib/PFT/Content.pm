@@ -33,7 +33,11 @@ The structure is the following:
 use File::Spec;
 use File::Path qw/make_path/;
 use File::Basename qw/dirname basename/;
+
 use Carp;
+
+use Encode::Locale;
+use Encode;
 
 use PFT::Content::Page;
 use PFT::Content::Blog;
@@ -62,7 +66,7 @@ sub new {
 
 sub _create {
     my $self = shift;
-    make_path map({ $self->$_ } qw/
+    make_path(map $self->$_ => qw/
         dir_blog
         dir_pages
         dir_tags
@@ -167,7 +171,7 @@ sub hdr_to_path {
         my $ym = sprintf('%04d-%02d', $d->y, $d->m);
         if (defined $d->d) {
             $basedir = File::Spec->catdir($self->dir_blog, $ym);
-            $fname = sprintf('%02d-%s', $d->d, $hdr->slug_enc);
+            $fname = sprintf('%02d-%s', $d->d, $hdr->slug);
         } else {
             $basedir = $self->dir_blog;
             $fname = $ym . '.month';
@@ -175,7 +179,7 @@ sub hdr_to_path {
 
         File::Spec->catfile($basedir, $fname)
     } else {
-        File::Spec->catfile($self->dir_pages, $hdr->slug_enc)
+        File::Spec->catfile($self->dir_pages, $hdr->slug)
     }
 }
 
@@ -205,10 +209,11 @@ exist already.
 sub tag {
     my $self = shift;
     my $hdr = shift;
+
     confess "Not a header: $hdr" unless $hdr->isa('PFT::Header');
     PFT::Content::Tag->new({
         tree => $self,
-        path => File::Spec->catfile($self->dir_tags, $hdr->slug_enc),
+        path => File::Spec->catfile($self->dir_tags, $hdr->slug),
         name => $hdr->title,
     })
 }
@@ -217,7 +222,7 @@ sub _text_ls {
     my $self = shift;
 
     my @out;
-    for my $path (map glob, @_) {
+    for my $path (PFT::Util::glob @_) {
         my $hdr = eval { PFT::Header->load($path) }
             or croak "Loading $path: " . $@ =~ s/ at .*$//rs;
 
@@ -292,9 +297,6 @@ picture file.  Returns a C<PFT::Content::Blob> instance, which could
 correspond to a non-existing file. The caller might create it (e.g. by
 copying a picture on the corresponding path).
 
-Note that the input path should be made by strings in encoded form, in
-order to match the filesystem path.
-
 =cut
 
 sub pic {
@@ -357,8 +359,9 @@ sub blog_back {
 
     confess 'Negative back?' if $back < 0;
 
-    my $glob = File::Spec->catfile($self->dir_blog, '*', '*');
-    my @globs = glob $glob;
+    my @globs = PFT::Utils::glob(
+        File::Spec->catfile($self->dir_blog, '*', '*')
+    );
 
     return undef if $back > scalar(@globs) - 1;
 

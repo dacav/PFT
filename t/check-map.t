@@ -6,41 +6,48 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 19;
+use Test::More tests => 21;
 
 use PFT::Content;
 use PFT::Header;
 use PFT::Map;
 
+use File::Spec;
 use File::Temp;
 
+use Encode::Locale;
+use Encode;
+
 my $root = File::Temp->newdir();
-my $tree = PFT::Content->new("$root");
+my $unicode_dir = File::Spec->catdir($root, '☺');
+mkdir encode(locale => $unicode_dir);
+my $tree = PFT::Content->new($unicode_dir);
 
 # Populating
 
 my @enc = (encoding => 'utf-8');
-$tree->pic('baz', 'foo.png')->touch;
-$tree->attachment('foo', 'bar.txt')->touch;
+$tree->pic('baz', 'foo←bar.png')->touch;
+$tree->attachment('foo', 'bar♥.txt')->touch;
 do {
-    my $page = $tree->new_entry(PFT::Header->new(title => 'A page', @enc));
+    my $page = $tree->new_entry(PFT::Header->new(title => 'A page¹', @enc));
     my $f = $page->open('a+');
+    binmode $f, 'utf8';
     print $f <<'    EOF' =~ s/^    //rgms;
     Hello.
 
     This is a picture of me:
 
-    ![my ugly face](:pic:baz/foo.png)
-    ![my ugly cat](:pic:baz/bar.png)
+    ![my ugly face](:pic:baz/foo←bar.png)
+    ![my ugly cat](:pic:baz/bar→foo.png)
 
     Follows my horrible poetry: [click here][1]
 
-    [1]: :attach:foo/bar.txt
+    [1]: :attach:foo/bar♥.txt
     EOF
     close $f;
 };
 $tree->new_entry(PFT::Header->new(
-    title => 'Another page',
+    title => 'Another page²',
     tags => ['foo', 'bar'],
     @enc
 ));
@@ -74,8 +81,38 @@ $tree->new_entry(PFT::Header->new(title => 'Month nr.3',
 $tree->new_tag(PFT::Header->new(title => 'Bar', @enc));
 
 my $map = PFT::Map->new($tree);
-diag('Follows list of nodes:');
-diag($_->id, ' unres: ', join ', ', $_->symbols_unres) foreach $map->nodes;
+my @all_unres;
+my @ids;
+foreach ($map->nodes) {
+    push @ids, $_->id;
+    push @all_unres, $_->symbols_unres
+}
+
+is_deeply([sort @ids], [qw<
+    a:foo/bar♥.txt
+    b:2014-01-01:blog-post-nr-1
+    b:2014-01-02:blog-post-nr-11
+    b:2014-01-03:blog-post-nr-3
+    b:2014-02-04:blog-post-nr-2
+    b:2014-02-05:blog-post-nr-12
+    i:baz/foo←bar.png
+    m:2014-01-*
+    m:2014-02-*
+    p:a-page
+    p:another-page
+    t:bar
+    t:foo
+    >],
+    "All content is present"
+);
+
+is_deeply([
+        map {
+            my $s = $_->[0];
+            join '|', $s->keyword, $s->args
+        } @all_unres
+    ], ["pic|baz|bar→foo.png"], "Missing symbols"
+);
 
 my @dumped = $map->dump;
 

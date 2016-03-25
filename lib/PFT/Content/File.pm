@@ -31,7 +31,8 @@ use File::Basename qw/basename dirname/;
 use File::Spec;
 
 use IO::File;
-
+use Encode::Locale;
+use Encode;
 use Carp;
 
 use parent 'PFT::Content::Base';
@@ -54,6 +55,7 @@ sub new {
     my $self = $cls->SUPER::new($params);
 
     $self->{path} = File::Spec->rel2abs($path);
+    $self->{encpath} = encode(locale_fs => $path);
     $self
 }
 
@@ -68,8 +70,6 @@ PFT::Content::Base.
 
 =over
 
-=cut
-
 =item path
 
 Absolute path of the file on the filesystem.
@@ -77,6 +77,14 @@ Absolute path of the file on the filesystem.
 =cut 
 
 sub path { shift->{path} }
+
+=item encpath
+
+Absolute path, encoded with locale
+
+=cut
+
+sub encpath { shift->{encpath} }
 
 =item filename
 
@@ -93,7 +101,7 @@ Last modification time according to the filesystem.
 =cut
 
 sub mtime {
-    (stat shift->path)[9];
+    (stat shift->{encpath})[9];
 }
 
 =item open
@@ -108,13 +116,13 @@ This method does automatic error checking (confessing on error).
 =cut
 
 sub open {
-    my $self = shift;
+    my($self, $mode) = @_;
 
     # Regular behavior
-    my $path = $self->path;
-    my $mode = shift;
-    make_path dirname $path if $mode =~ /w|a/;
-    IO::File->new($path, $mode) or confess "Cannot open $path: $!"
+    my $encpath = $self->{encpath};
+    make_path dirname $encpath if $mode =~ /w|a/;
+    IO::File->new($encpath, $mode)
+        or confess 'Cannot open "', $self->path, "\": $!"
 }
 
 =item touch
@@ -125,7 +133,7 @@ Change modification time on the filesytem to current timestamp.
 
 sub touch {
     shift->open('a')
-};
+}
 
 =item exists
 
@@ -133,9 +141,7 @@ Verify if the file exists
 
 =cut
 
-sub exists {
-    -e shift->path
-}
+sub exists { -e shift->encpath }
 
 =item empty
 
@@ -143,9 +149,7 @@ Check if the file is empty
 
 =cut
 
-sub empty {
-    -z shift->path
-}
+sub empty { -z shift->encpath }
 
 =item unlink
 
@@ -153,7 +157,8 @@ sub empty {
 
 sub unlink {
     my $self = shift;
-    unlink $self->path or confess 'Cannot unlink ' . $self->path
+    unlink $self->encpath
+        or confess 'Cannot unlink "' . $self->path . "\": $!"
 }
 
 =item rename_as
@@ -162,16 +167,18 @@ Move the file in the filesystem, update internal data.
 
 =cut
 
+# use the path property as setter instead?
 sub rename_as {
-    my $self = shift;
-    my $new_path = shift;
+    my($self, $new_path) = @_;
+    my $enc_new_path = encode(locale_fs => $new_path);
 
-    make_path dirname $new_path;
-    rename $self->{path}, $new_path
-        or confess "Cannot rename '$self->{path}' -> '$new_path': $!";
+    make_path dirname $enc_new_path;
+    rename $self->{encpath}, $enc_new_path
+        or confess "Cannot rename '$self->{path}' → '$new_path': $!";
 
     $self->tree->was_renamed($self->{path}, $new_path);
     $self->{path} = $new_path;
+    $self->{encpath} = $enc_new_path;
 }
 
 =back

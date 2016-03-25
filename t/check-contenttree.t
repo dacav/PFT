@@ -10,18 +10,23 @@ use PFT::Content;
 use PFT::Header;
 use PFT::Date;
 
-use Test::More;
 use File::Temp qw/tempdir/;
 use File::Spec;
 
-my $dir = tempdir(CLEANUP => 1);
+use Encode;
+use Encode::Locale;
 
-my $tree = PFT::Content->new("$dir");
+use Test::More;
+
+my $dir = tempdir(CLEANUP => 1);
+my $inner_unicode = File::Spec->catfile($dir, 'öéåñ');
+mkdir encode(locale => $inner_unicode);
+my $tree = PFT::Content->new($inner_unicode);
 
 do {
     my $date = PFT::Date->new(0, 12, 25);
     my $p = $tree->new_entry(PFT::Header->new(
-        title => 'foo-bar-baz',
+        title => 'foo-♥-baz',
         date => $date,
         encoding => 'utf-8',
     ));
@@ -29,7 +34,7 @@ do {
 };
 do {
     my $p = $tree->new_entry(PFT::Header->new(
-        title => 'foo-bar-baz',
+        title => 'foo-bar-☺az',
         encoding => 'utf-8',
     ));
     is($tree->path_to_date($p->path), undef, 'Path-to-date, no date')
@@ -37,14 +42,14 @@ do {
 
 do {
     my $p = $tree->new_entry(PFT::Header->new(
-        title => 'foo-bar-baz',
+        title => 'foo-öar-baz',
         encoding => 'utf-8',
     ));
-    is($tree->path_to_slug($p->path), 'foo-bar-baz', 'Path-to-slug 1')
+    is($tree->path_to_slug($p->path), 'foo-öar-baz', 'Path-to-slug 1')
 };
 do {
     my $p = $tree->new_entry(PFT::Header->new(
-        title => 'foo-bar-baz',
+        title => 'foo²bar☺baz',
         date => PFT::Date->new(0, 12, 25),
         encoding => 'utf-8',
     ));

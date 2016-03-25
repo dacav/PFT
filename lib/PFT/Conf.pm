@@ -32,11 +32,14 @@ PFT::Conf - Configuration parser for PFT
 =cut
 
 use Carp;
-
 use Cwd;
+use Encode;
+use Encode::Locale;
+
 use File::Spec::Functions qw/updir catfile catdir rootdir/;
 use File::Path qw/make_path/;
 use File::Basename qw/dirname/;
+
 use YAML::Tiny qw/DumpFile LoadFile/;
 
 my $CONF_NAME = 'pft.yaml';
@@ -97,10 +100,10 @@ sub new_load {
     my $cls = shift;
 
     my $root = shift;
-    my $conf_file = isroot($root)
-        or croak "$root is not a PFT site: $CONF_NAME is missing";
-
-    my $cfg = LoadFile($conf_file);
+    my $cfg = LoadFile(
+        isroot($root)
+            or croak "$root is not a PFT site: $CONF_NAME is missing"
+    );
     my $self;
 
     (
@@ -146,7 +149,7 @@ sub new_load {
 }
 
 sub isroot {
-    my $f = catfile(shift, $CONF_NAME);
+    my $f = encode(locale_fs => catfile(shift, $CONF_NAME));
     -e $f ? $f : undef
 }
 
@@ -154,7 +157,7 @@ sub locate {
     my $cur = shift || Cwd::getcwd;
     my $root;
 
-    croak "Not a directory: $cur" unless -d $cur;
+    croak "Not a directory: $cur" unless -d encode(locale_fs => $cur);
     until ($cur eq rootdir or defined($root)) {
         if (isroot($cur)) {
             $root = $cur

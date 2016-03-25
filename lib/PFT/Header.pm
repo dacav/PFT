@@ -17,10 +17,10 @@ PFT::Header - Header for PFT content textfiles
     use PFT::Header;
 
     my $hdr = PFT::Header->new(
-        title => $title,        # mandatory (with conditions), decoded
+        title => $title,        # mandatory (conditions apply)
         encoding => $encoding,  # mandatory
         date => $date,          # optional (conditions apply) PFT::Date
-        author => $author,      # optional, decoded
+        author => $author,      # optional
         tags => $tags,          # list of decoded strins, defaults to []
         opts => $opts,          # ignored by internals, defaults to {}
     );
@@ -45,16 +45,12 @@ I<encoding> property, an optional list of I<tags> in form of strings, an
 optional hash I<opts> containing other options.
 
 Note that the I<opts> map is ignored by the header, and just stored as it
-is on the content file. It is however encoded in the dumping process.
-Please be aware of this if you plan to use non-ascii options.
+is on the content file.
 
 =head2 Textual representation
 
 The textual representation of a header starts with a valid YAML document
 (including the leading '---' line and ends with another '---' line).
-
-The textual representation is stored in encoded form, with the encoding
-being consistent with the declared one.
 
 =head2 Construction
 
@@ -64,16 +60,15 @@ forms in the B<SYNOPSIS>.
 The first form is constructed in code. The I<title> field is mandatory
 unless there is a I<date> field, and the date represents a month (i.e.
 lacks the I<day> field). This property is enforced by the constructor.
-All the fields are expected in decoded form.
 
 The second and third forms are equivalent, and they differ in the source
 from which a header is loaded (a stream or a file path, respectively).
-In this form the content is loaded as textual representation, and decoded
-according to the declared encoding.
 
 =cut
 
-use Encode qw/encode decode/;
+use Encode;
+use Encode::Locale;
+
 use Carp;
 use YAML::Tiny;
 
@@ -124,8 +119,8 @@ sub load {
             confess "Only supporting GLOB and IO::File. Got $type";
         }
     } else {
-        my $fh = IO::File->new($from) or confess "Cannot open $from";
-        $from = $fh;
+        $from = IO::File->new(encode locale_fs => $from)
+            or confess "Cannot open $from";
     }
 
     # Header starts with a valid YAML document (including the leading
@@ -263,7 +258,7 @@ sub opts { shift->{opts} }
 
 =item slug
 
-A slug of the title in decoded form.
+A slug of the title.
 
 =cut
 
@@ -289,7 +284,7 @@ A list of tags as for the C<tags> method, but in slugified form.
 =cut
 
 sub tags_slug {
-    map{ slugify($_) } @{shift->tags || []}
+    map slugify($_) => @{shift->tags || []}
 }
 
 =over
@@ -351,6 +346,8 @@ sub set_date {
 =item dump
 
 Dump the header on a file. A GLOB or IO::File is expected as argument.
+The encoding is handled automatically for the output file: no need to
+binmode.
 
 =cut
 

@@ -23,6 +23,9 @@ This module contains general utility functions.
 use File::Spec;
 use Exporter;
 
+use Encode;
+use Encode::Locale;
+
 our @EXPORT_OK = qw/
     list_files
 /;
@@ -39,6 +42,8 @@ This is definitely off-scope, but some perl modules are really bad.
 C<File::Find> is a utter crap! And I don't really want to add more
 external deps for such a stupid thing.
 
+Also, this handles encoding according to locale.
+
 =cut
 
 sub list_files {
@@ -47,8 +52,9 @@ sub list_files {
 
     while (@todo) {
         my $dn = pop @todo;
-        opendir my $d, $dn or die "Opening $dn: $!";
-        foreach (File::Spec->no_upwards(readdir $d)) {
+        opendir my $d, encode(locale_fs => $dn) or die "Opening $dn: $!";
+        my @content = map decode(locale_fs => $_) => readdir $d;
+        foreach (File::Spec->no_upwards(@content)) {
             if (-d (my $dir = File::Spec->catdir($dn, $_))) {
                 push @todo, $dir
             } else {
@@ -59,6 +65,24 @@ sub list_files {
     }
 
     @out
+}
+
+=item glob
+
+A unicode-safe C<glob>.
+
+Uses the encoding specified in locale.
+
+This is different from C<CORE::glob> in that it accepts a list of glob
+patterns
+
+=cut
+
+sub glob {
+    map decode(locale_fs => $_),
+    map CORE::glob,
+    map encode(locale_fs => $_),
+    @_
 }
 
 =back
