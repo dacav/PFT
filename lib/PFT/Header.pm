@@ -169,6 +169,25 @@ sub load {
     bless $self, $cls;
 }
 
+=head2 Functions
+
+The following functions are not associated with an instance. Call them as
+C<PFT::Header::function(...)>
+
+=over 1 slugify
+
+=cut
+
+sub slugify {
+    my $out = shift;
+    confess 'Slugify of nothing?' unless $out;
+
+    $out =~ s/[\W_]/-/g;
+    $out =~ s/--+/-/g;
+    $out =~ s/-$//;
+    lc $out
+};
+
 =head2 Properties
 
 =over 1
@@ -242,16 +261,6 @@ A list of options for this content.
 
 sub opts { shift->{opts} }
 
-my $slugify = sub {
-    my $out = shift;
-    confess 'Slugify of nothing?' unless $out;
-
-    $out =~ s/[\W_]/-/g;
-    $out =~ s/--+/-/g;
-    $out =~ s/-$//;
-    lc $out
-};
-
 =item slug
 
 A slug of the title in decoded form.
@@ -259,7 +268,7 @@ A slug of the title in decoded form.
 =cut
 
 sub slug {
-    $slugify->(shift->{title})
+    slugify(shift->{title})
 }
 
 =item slug_enc
@@ -280,7 +289,7 @@ A list of tags as for the C<tags> method, but in slugified form.
 =cut
 
 sub tags_slug {
-    map{ $slugify->($_) } @{shift->tags || []}
+    map{ slugify($_) } @{shift->tags || []}
 }
 
 =over
