@@ -34,6 +34,8 @@ use PFT::Map::Resolver qw/resolve/;
 use PFT::Text;
 use PFT::Header;
 
+use Encode::Locale qw/$ENCODING_LOCALE/;
+
 sub new {
     my $cls = shift;
     my $tree = shift;
@@ -156,7 +158,7 @@ sub _scan_blog {
             if (!defined($prev_month) or $prev_month->date <=> $m_date) {
                 my $m_hdr = PFT::Header->new(
                     date => $m_date,
-                    encoding => $_->header->encoding,
+                    encoding => $ENCODING_LOCALE,
                 );
                 my $m_page = $tree->entry($m_hdr);
                 my $n = $self->_mknod($m_page,
@@ -184,7 +186,7 @@ sub _scan_tags {
             my $t_node = exists $tags{$_} ? $tags{$_} : do {
                 my $t_hdr = PFT::Header->new(
                     title => $_,
-                    encoding => $node->header->encoding,
+                    encoding => $ENCODING_LOCALE,
                 );
                 my $t_page = $tree->tag($t_hdr);
                 $tags{$_} = $self->_mknod($t_page,
