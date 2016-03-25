@@ -62,14 +62,19 @@ sub _resolve {
 
     for my $node (@{$self->{toresolve}}) {
         for my $s ($node->symbols) {
-            if (my $resolved = resolve($self, $node, $s)) {
-                $resolved->isa('PFT::Map::Node') or confess
-                    "Buggy resolver: searching $s",
-                    ', expected node, got ',
-                    ref($resolved) || $resolved;
-                $node->add_outlink($resolved);
+            my $resolved = eval { resolve($self, $node, $s) };
+            if (defined $resolved) {
+                if (!ref($resolved) || $resolved->isa('PFT::Map::Node')) {
+                    # scalar or other node
+                    $node->add_outlink($resolved);
+                } else {
+                    confess "Buggy resolver: searching $s",
+                        ', expected node, got ', $resolved
+                }
             }
             else {
+                warn $@ =~ s/\v.*//rs if $@;
+                $node->add_outlink(undef);
                 $node->symbols_unres($s)
             }
         }

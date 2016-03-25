@@ -189,7 +189,22 @@ sub _add {
     weaken($linked->{$kb}[-1]);
 }
 
-sub add_outlink { shift->_add(shift, 'olns', 'inls') }
+sub add_outlink {
+    my($self, $node) = @_;
+
+    # An out-link can be either another node or a string to be placed on
+    # the page as it is. It can be also undef, meaning that we were not
+    # able to resolve that symbol.
+    if ($node && $node->isa('PFT::Map::Node')) {
+        # Building back-link if a node.
+        $self->_add($node, 'olns', 'inls')
+    } else {
+        confess "Invalid outlink: $node" if ref($node);
+        # Directly adding if a string or undef.
+        push @{$self->{'olns'}}, $node
+    }
+}
+
 sub add_tag { shift->_add(shift, 'tags', 'tagged') }
 
 sub _list {
@@ -254,7 +269,15 @@ sub html {
 
     my $mkhref = shift;
     $self->_text->html_resolved(
-        map $mkhref->($_), $self->outlinks
+        map {
+            defined($_)
+                ? $_->isa('PFT::Map::Node')
+                    ? $mkhref->($_) # Create reference of node
+                    : ref($_)
+                        ? confess "Not PFT::Map::Node: $_"
+                        : $_        # Keep string as it is
+                : undef             # Symbol could not be resolved.
+        } $self->outlinks
     );
 }
 
