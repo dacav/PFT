@@ -119,8 +119,7 @@ sub load {
             confess "Only supporting GLOB and IO::File. Got $type";
         }
     } else {
-        $from = IO::File->new(encode locale_fs => $from)
-            or confess "Cannot open $from";
+        $from = IO::File->new($from) or confess "Cannot open $from";
     }
 
     # Header starts with a valid YAML document (including the leading
