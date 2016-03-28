@@ -253,7 +253,7 @@ A list of options for this content.
 
 =cut
 
-sub opts { shift->{opts} }
+sub opts { shift->{opts} || {} }
 
 =item slug
 
