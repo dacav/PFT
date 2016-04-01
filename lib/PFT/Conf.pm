@@ -120,9 +120,9 @@ sub _check_assign {
         my $c = $self;
         while (@keys > 1) {
             push @path, (my $k = shift @keys);
-            confess "Missing @path" unless $c->{$k};
+            confess "Missing section \"@path\"" unless $c->{$k};
             $c = $c->{$k};
-            confess "Path @path cannot continue with @keys"
+            confess "Seeking \"@keys\" in \"@path\""
                 unless ref $c eq 'HASH';
         }
         push @path, shift @keys;
