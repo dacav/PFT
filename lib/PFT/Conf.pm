@@ -39,9 +39,9 @@ use File::Spec::Functions qw/updir catfile catdir rootdir/;
 use File::Path qw/make_path/;
 use File::Basename qw/dirname/;
 
-use YAML::Tiny qw/DumpFile LoadFile/;
+use YAML::Tiny;
 
-my $CONF_NAME = 'pft.yaml';
+our $CONF_NAME = 'pft.yaml';
 my($IDX_MANDATORY, $IDX_GETOPT_SUFFIX, $IDX_DEFAULT) = 0 .. 2;
 
 my $user = $ENV{USER} || 'anon';
@@ -131,16 +131,22 @@ sub _check_assign {
 }
 
 sub new_load {
-    my $cls = shift;
+    my($cls, $root) = @_;
 
-    my $root = shift;
-    my $self = LoadFile(
-        isroot($root)
-            or croak "$root is not a PFT site: $CONF_NAME is missing"
-    );
+    my $self = do {
+        my $enc_fname = isroot($root)
+            or croak "$root is not a PFT site: $CONF_NAME is missing";
+        open(my $f, '<:encoding(locale)', $enc_fname)
+            or croak "Cannot open $CONF_NAME in $root $!";
+        $/ = undef;
+        my $yaml = <$f>;
+        close $f;
+
+        YAML::Tiny::Load($yaml);
+    };
     _check_assign($self);
-    $self->{_root} = $root;
 
+    $self->{_root} = $root;
     bless $self, $cls;
 }
 
@@ -185,36 +191,31 @@ reference, so the intsance will point to the saved file.
 =cut
 
 sub save_to {
-    my $self = shift;
-    my $root = shift;
+    my($self, $root) = @_;
 
-    make_path(dirname $root);
+    my $orig_root = delete $self->{_root};
 
-    DumpFile(catfile($root, $CONF_NAME), {
-        Author => $self->{author},
-        Template => $self->{template},
-        SiteTitle => $self->{site_title},
-        SiteURL => $self->{site_url},
-        HomePage => $self->{home_page},
-        Remote => { do {
-                my $d = $self->{remote};
+    # YAML::Tiny does not like blessed items. I could unbless with
+    # Data::Structure::Util, or easily do a shallow copy
+    my $yaml = YAML::Tiny::Dump {%$self};
 
-                Method => $d->{method},
-                Host => $d->{host},
-                User => $d->{user},
-                Port => $d->{port},
-                Path => $d->{path},
-        }},
-        System => { do {
-                my $d = $self->{system};
+    eval {
+        my $enc_root = encode(locale_fs => $root);
+        -e $enc_root or make_path $enc_root
+            or die "Cannot mkdir $root: $!";
+        open(my $out,
+            '>:encoding(locale)',
+            encode(locale_fs => catfile($root, $CONF_NAME)),
+        ) or die "Cannot open $CONF_NAME in $root: $!";
+        print $out $yaml;
+        close $out;
 
-                Editor => $d->{editor},
-                Browser => $d->{browser},
-        }},
-        InputEnc => $self->{input_enc},
-        OutputEnc => $self->{output_enc},
-    });
-    $self->{_root} = $root;
+        $self->{_root} = $root;
+    };
+    $@ and do {
+        $self->{_root} = $orig_root;
+        croak $@ =~ s/ at.*$//sr;
+    }
 }
 
 =back
