@@ -138,7 +138,7 @@ sub new_load {
             or croak "$root is not a PFT site: $CONF_NAME is missing";
         open(my $f, '<:encoding(locale)', $enc_fname)
             or croak "Cannot open $CONF_NAME in $root $!";
-        $/ = undef;
+        local $/ = undef;
         my $yaml = <$f>;
         close $f;
 
