@@ -222,7 +222,7 @@ sub _text_ls {
     my $self = shift;
 
     my @out;
-    for my $path (PFT::Util::glob @_) {
+    for my $path (PFT::Util::locale_glob @_) {
         my $hdr = eval { PFT::Header->load($path) }
             or confess "Loading header of $path: " . $@ =~ s/ at .*$//rs;
 
@@ -359,7 +359,7 @@ sub blog_back {
 
     confess 'Negative back?' if $back < 0;
 
-    my @globs = PFT::Utils::glob(
+    my @globs = PFT::Util::locale_glob(
         File::Spec->catfile($self->dir_blog, '*', '*')
     );
 
