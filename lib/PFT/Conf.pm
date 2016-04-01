@@ -49,7 +49,7 @@ my %CONF_RECIPE = (
     'site-author'     => [1, '=s', $ENV{USER} || 'Anonymous'],
     'site-template'   => [1, '=s', 'default'],
     'site-title'      => [1, '=s', 'My PFT website'],
-    'site-url'        => [1, '=s', 'http://example.org'],
+    'site-url'        => [0, '=s', 'http://example.org'],
     'site-home'       => [1, '=s', 'Welcome'],
     'site-encoding'   => [1, '=s', $Encode::Locale::ENCODING_LOCALE],
     'remote-method'   => [1, '=s', 'rsync+ssh'],
