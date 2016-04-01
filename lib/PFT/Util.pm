@@ -67,7 +67,7 @@ sub list_files {
     @out
 }
 
-=item glob
+=item locale_glob
 
 A unicode-safe C<glob>.
 
@@ -78,7 +78,7 @@ patterns
 
 =cut
 
-sub glob {
+sub locale_glob {
     map decode(locale_fs => $_),
     map CORE::glob,
     map encode(locale_fs => $_),
