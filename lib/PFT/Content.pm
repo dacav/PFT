@@ -224,7 +224,7 @@ sub _text_ls {
     my @out;
     for my $path (PFT::Util::glob @_) {
         my $hdr = eval { PFT::Header->load($path) }
-            or croak "Loading $path: " . $@ =~ s/ at .*$//rs;
+            or confess "Loading header of $path: " . $@ =~ s/ at .*$//rs;
 
         push @out, {
             tree => $self,
