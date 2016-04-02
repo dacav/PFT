@@ -1,9 +1,5 @@
 package PFT::Header v0.0.1;
 
-use strict;
-use warnings;
-use utf8;
-
 =pod
 
 =encoding utf8
@@ -18,7 +14,6 @@ PFT::Header - Header for PFT content textfiles
 
     my $hdr = PFT::Header->new(
         title => $title,        # mandatory (conditions apply)
-        encoding => $encoding,  # mandatory
         date => $date,          # optional (conditions apply) PFT::Date
         author => $author,      # optional
         tags => $tags,          # list of decoded strins, defaults to []
@@ -40,12 +35,9 @@ beginning of the file.
 
 =head2 Structure
 
-Each content has a I<title>, an optional I<author>, a mandatory
-I<encoding> property, an optional list of I<tags> in form of strings, an
-optional hash I<opts> containing other options.
-
-Note that the I<opts> map is ignored by the header, and just stored as it
-is on the content file.
+Each content has a I<title>, an optional I<author>, an optional list of
+I<tags> in form of strings, an optional hash I<opts> containing other
+options.
 
 =head2 Textual representation
 
@@ -65,6 +57,11 @@ The second and third forms are equivalent, and they differ in the source
 from which a header is loaded (a stream or a file path, respectively).
 
 =cut
+
+use strict;
+use warnings;
+use utf8;
+use v5.16;
 
 use Encode;
 use Encode::Locale;
@@ -91,7 +88,6 @@ my $params_check = sub {
         defined $params->{title}
             or croak 'Title is mandatory for headers not having dates';
     }
-    defined $params->{encoding} or confess "Encoding is mandatory";
 };
 
 sub new {
@@ -103,7 +99,6 @@ sub new {
         title => $opts{title},
         author => $opts{author},
         template => $opts{template},
-        encoding => $opts{encoding},
         date => $opts{date},
         tags => $opts{tags} || [],
         opts => $opts{opts} || {},
@@ -111,8 +106,7 @@ sub new {
 }
 
 sub load {
-    my $cls = shift;
-    my $from = shift;
+    my($cls, $from) = @_;
 
     if (my $type = ref $from) {
         unless ($type eq 'GLOB' || $type eq 'IO::File') {
@@ -121,6 +115,7 @@ sub load {
     } else {
         $from = IO::File->new($from) or confess "Cannot open $from";
     }
+    binmode $from, ':encoding(locale)' or confess "Binmode: $!";
 
     # Header starts with a valid YAML document (including the leading
     # /^---$/ string) and ends with another /^---$/ string.
@@ -134,29 +129,24 @@ sub load {
     my $hdr = eval { YAML::Tiny::Load($text) };
     $hdr or confess 'Loading header: ' . $@ =~ s/ at .*$//rs;
 
-    my $enc = $hdr->{Encoding} || confess "Missing encoding";
-
     my $date;
     $hdr->{Date} and $date = eval {
-        PFT::Date->from_string(decode($enc, $hdr->{Date}))
+        PFT::Date->from_string($hdr->{Date})
     };
     croak $@ =~ s/ at .*$//rs if $@;
 
     my $self = {
-        title => decode($enc, $hdr->{Title}),
-        author => decode($enc, $hdr->{Author}),
-        template => decode($enc, $hdr->{Template}),
+        title => $hdr->{Title},
+        author => $hdr->{Author},
+        template => $hdr->{Template},
         tags => [ do {
             my $tags = $hdr->{Tags};
-            ref $tags eq 'ARRAY' ? map(decode($enc, $_), @$tags)
-                : defined $tags ? decode($enc, $tags)
+            ref $tags eq 'ARRAY' ? @$tags
+                : defined $tags ? $tags
                 : ()
         }],
-        encoding => $enc,
         date => $date,
-        opts => !exists $hdr->{Options} ? undef : {
-            map decode($enc, $_), %{$hdr->{Options}}
-        },
+        opts => $hdr->{Options},
     };
     $params_check->($self);
 
@@ -189,7 +179,6 @@ sub slugify {
     $hdr->title
     $hdr->author
     $hdr->template
-    $hdr->encoding
     $hdr->tags
     $hdr->date
     $hdr->opts
@@ -219,14 +208,6 @@ Outputs a in decoded string.
 sub author { shift->{author} }
 
 sub template { shift->{template} }
-
-=item encoding
-
-The encoding declared by the header for the content
-
-=cut
-
-sub encoding { shift->{encoding} }
 
 =item tags
 
@@ -265,17 +246,6 @@ sub slug {
     slugify(shift->{title})
 }
 
-=item slug_enc
-
-A shortcut for C<$header-E<gt>enc($header-E<gt>slug)>.
-
-=cut
-
-sub slug_enc {
-    my $self = shift;
-    $self->enc($self->slug)
-}
-
 =item tags_slug
 
 A list of tags as for the C<tags> method, but in slugified form.
@@ -292,44 +262,6 @@ sub tags_slug {
 
 =over
 
-=item enc
-
-Encode a string with the encoding defined by the header
-
-=cut
-
-sub enc {
-    my $enc = shift->{encoding};
-    wantarray
-        ? map { encode($enc, $_) } @_
-        : encode($enc, shift)
-}
-
-=item dec
-
-Decode a byte string with the encoding defined by the header
-
-=cut
-
-sub dec {
-    my $enc = shift->{encoding};
-    wantarray
-        ? map { decode($enc, $_) } @_
-        : decode($enc, shift)
-}
-
-=item binmode
-
-Call binmode on the given file descriptor with the encoding defined by the
-header.
-
-=cut
-
-sub binmode {
-    my $enc = shift->{encoding};
-    binmode shift, ":encoding($enc)";
-}
-
 =item set_date
 
 =cut
@@ -345,8 +277,6 @@ sub set_date {
 =item dump
 
 Dump the header on a file. A GLOB or IO::File is expected as argument.
-The encoding is handled automatically for the output file: no need to
-binmode.
 
 =cut
 
@@ -360,11 +290,10 @@ sub dump {
                 $type ? $type : 'Scalar'
     }
     my $tags = $self->tags;
-    $self->binmode($to);
+    binmode $to, ':encoding(locale)' or confess "Cannot binmode: $!";
     print $to YAML::Tiny::Dump({
         Title => $self->title,
         Author => $self->author,
-        Encoding => $self->encoding,
         Template => $self->template,
         Tags => @$tags ? $tags : undef,
         Date => $self->date ? $self->date->repr('-') : undef,

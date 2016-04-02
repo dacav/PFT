@@ -1,11 +1,5 @@
 package PFT::Map v0.0.1;
 
-use v5.10;
-
-use strict;
-use warnings;
-use utf8;
-
 =pod
 
 =encoding utf8
@@ -24,6 +18,11 @@ PFT::Map - Map of a PFT site
 Map of a PFT site
 
 =cut
+
+use strict;
+use warnings;
+use utf8;
+use v5.16;
 
 use Carp;
 use WeakRef;
@@ -156,10 +155,7 @@ sub _scan_blog {
             my $m_date = $_->date->derive(d => undef);
 
             if (!defined($prev_month) or $prev_month->date <=> $m_date) {
-                my $m_hdr = PFT::Header->new(
-                    date => $m_date,
-                    encoding => $ENCODING_LOCALE,
-                );
+                my $m_hdr = PFT::Header->new(date => $m_date);
                 my $m_page = $tree->entry($m_hdr);
                 my $n = $self->_mknod($m_page,
                     $m_page->exists ? $m_page->header : $m_hdr
@@ -184,10 +180,7 @@ sub _scan_tags {
     for my $node (sort { $a <=> $b } values %{$self->{idx}}) {
         foreach (sort $node->header->tags_slug) {
             my $t_node = exists $tags{$_} ? $tags{$_} : do {
-                my $t_hdr = PFT::Header->new(
-                    title => $_,
-                    encoding => $ENCODING_LOCALE,
-                );
+                my $t_hdr = PFT::Header->new(title => $_);
                 my $t_page = $tree->tag($t_hdr);
                 $tags{$_} = $self->_mknod($t_page,
                     $t_page->exists ? $t_page->header : $t_hdr

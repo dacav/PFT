@@ -44,27 +44,40 @@ use parent 'PFT::Content::File';
 use PFT::Header;
 use PFT::Date;
 
+use Encode;
+use Encode::Locale;
+
 use File::Spec;
 use Carp;
 
 =item open
 
-Open the file, return a file handler.
+Open the file, return a file handler. Sets the binmode according to the
+locale.
 
-Note: The PFT::Content::Entry class is using directly the
-PFT::Content::File C<open> method. You should set the I<binmode> if you
-use this C<open> method. If reading the content, consider using C<read>
-instead.
+=cut
+
+sub open {
+    my $self = shift;
+    my $out = $self->SUPER::open(@_);
+    binmode $out, 'encoding(locale)';
+    $out;
+}
+
+=item header
+
+Reads the header from the page.
+
+Returns undef if the entry is not backed by a file. Croaks if the file
+does not contain a healty header.
 
 =cut
 
 sub header {
     my $self = shift;
     return undef unless $self->exists;
-    my $fh = $self->open('r');
-    my $h = eval { PFT::Header->load($fh) };
-    $h or croak $@ =~ s/ at .*$//rs;
-    $h;
+    eval { PFT::Header->load($self->open('r')) }
+        or croak $@ =~ s/ at .*$//rs;
 }
 
 =item read
@@ -86,7 +99,6 @@ sub read {
     my $fh = $self->open('r');
     my $h = eval { PFT::Header->load($fh) }
         or croak $@ =~ s/ at .*$//rs;
-    $h->binmode($fh);
 
     wantarray ? ($h, $fh) : $fh;
 }
