@@ -71,7 +71,9 @@ use YAML::Tiny;
 
 use PFT::Date;
 
-my $params_check = sub {
+# Restrictions on header fields are handled by the following function,
+# as they are not just booleans.
+sub _params_check {
     my $params = shift;
 
     if (exists $params->{date} and defined(my $d = $params->{date})) {
@@ -90,18 +92,33 @@ my $params_check = sub {
     }
 };
 
+
+# Map of supported options (`opts` field).  Keys are valid options, values
+# are default, value=undef means do not set by default.
+my %OPTS_RECIPE = (
+    hide        => 0,
+    template    => undef
+);
+
+sub _opts_default {
+    my %out;
+    while (my($k, $v) = each %OPTS_RECIPE) {
+        $out{$k} = $v if defined $v;
+    }
+    \%out
+}
+
 sub new {
     my $cls = shift;
-    my %opts = @_;
+    my %params = @_;
 
-    $params_check->(\%opts);
+    _params_check(\%params);
     bless {
-        title => $opts{title},
-        author => $opts{author},
-        template => $opts{template},
-        date => $opts{date},
-        tags => $opts{tags} || [],
-        opts => $opts{opts} || {},
+        title => $params{title},
+        author => $params{author},
+        date => $params{date},
+        tags => $params{tags} || [],
+        opts => $params{opts} || _opts_default(),
     }, $cls;
 }
 
@@ -134,21 +151,29 @@ sub load {
         PFT::Date->from_string($hdr->{Date})
     };
     croak $@ =~ s/ at .*$//rs if $@;
+    delete $hdr->{Date};
 
     my $self = {
-        title => $hdr->{Title},
-        author => $hdr->{Author},
-        template => $hdr->{Template},
+        title => delete $hdr->{Title},
+        author => delete $hdr->{Author},
         tags => [ do {
-            my $tags = $hdr->{Tags};
+            my $tags = delete $hdr->{Tags};
             ref $tags eq 'ARRAY' ? @$tags
                 : defined $tags ? $tags
                 : ()
         }],
         date => $date,
-        opts => $hdr->{Options},
+        opts => delete $hdr->{Options},
     };
-    $params_check->($self);
+    _params_check($self);
+
+    foreach (keys %$hdr) {
+        warn 'Unexpected key in header: ', $_;
+    }
+    foreach (keys %{$self->{opts}}) {
+        warn 'Unexpected key in header: opts.', $_
+            unless exists $OPTS_RECIPE{$_}
+    }
 
     bless $self, $cls;
 }
@@ -206,8 +231,6 @@ Outputs a in decoded string.
 =cut
 
 sub author { shift->{author} }
-
-sub template { shift->{template} }
 
 =item tags
 
@@ -294,7 +317,6 @@ sub dump {
     print $to YAML::Tiny::Dump({
         Title => $self->title,
         Author => $self->author,
-        Template => $self->template,
         Tags => @$tags ? $tags : undef,
         Date => $self->date ? $self->date->repr('-') : undef,
         Options => $self->opts,
