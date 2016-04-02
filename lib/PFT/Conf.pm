@@ -42,25 +42,27 @@ use File::Basename qw/dirname/;
 use YAML::Tiny;
 
 our $CONF_NAME = 'pft.yaml';
-my($IDX_MANDATORY, $IDX_GETOPT_SUFFIX, $IDX_DEFAULT) = 0 .. 2;
 
-my $user = $ENV{USER} || 'anon';
-my %CONF_RECIPE = (
-    'site-author'     => [1, '=s', $ENV{USER} || 'Anonymous'],
-    'site-template'   => [1, '=s', 'default'],
-    'site-title'      => [1, '=s', 'My PFT website'],
-    'site-url'        => [0, '=s', 'http://example.org'],
-    'site-home'       => [1, '=s', 'Welcome'],
-    'site-encoding'   => [1, '=s', $Encode::Locale::ENCODING_LOCALE],
-    'remote-method'   => [1, '=s', 'rsync+ssh'],
-    'remote-host'     => [0, '=s', 'example.org'],
-    'remote-user'     => [0, '=s', $user],
-    'remote-port'     => [0, '=i', 22],
-    'remote-path'     => [0, '=s', $user],
-    'system-editor'   => [0, '=s', $ENV{EDITOR} || 'vim'],
-    'system-browser'  => [0, '=s', $ENV{BROWSER} || 'firefox'],
-    'system-encoding' => [0, '=s', $Encode::Locale::ENCODING_LOCALE],
-);
+my($IDX_MANDATORY, $IDX_GETOPT_SUFFIX, $IDX_DEFAULT) = 0 .. 2;
+my %CONF_RECIPE = do {
+    my $user = $ENV{USER} || 'anon';
+    (
+        'site-author'     => [1, '=s', $ENV{USER} || 'Anonymous'],
+        'site-template'   => [1, '=s', 'default'],
+        'site-title'      => [1, '=s', 'My PFT website'],
+        'site-url'        => [0, '=s', 'http://example.org'],
+        'site-home'       => [1, '=s', 'Welcome'],
+        'site-encoding'   => [1, '=s', $Encode::Locale::ENCODING_LOCALE],
+        'remote-method'   => [1, '=s', 'rsync+ssh'],
+        'remote-host'     => [0, '=s', 'example.org'],
+        'remote-user'     => [0, '=s', $user],
+        'remote-port'     => [0, '=i', 22],
+        'remote-path'     => [0, '=s', $user],
+        'system-editor'   => [0, '=s', $ENV{EDITOR} || 'vim'],
+        'system-browser'  => [0, '=s', $ENV{BROWSER} || 'firefox'],
+        'system-encoding' => [0, '=s', $Encode::Locale::ENCODING_LOCALE],
+    )
+};
 
 # Transforms a flat mapping as $CONF_RECIPE into 'deep' hash table
 sub _hashify {
