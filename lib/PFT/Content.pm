@@ -265,6 +265,18 @@ sub pages_ls {
         $self->_text_ls(File::Spec->catfile($self->dir_pages, '*'))
 }
 
+=item tags_ls
+
+List all tag pages
+
+=cut
+
+sub tags_ls {
+    my $self = shift;
+    map PFT::Content::Tag->new($_),
+        $self->_text_ls(File::Spec->catfile($self->dir_tags, '*'))
+}
+
 sub _blob {
     my $self = shift;
     my $pfxlen = length(my $pfx = shift) + length(path_sep);
