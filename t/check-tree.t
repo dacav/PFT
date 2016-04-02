@@ -18,6 +18,7 @@ isnt($@, undef, 'Value set for $@ (follows)');
 diag($@);
 
 my $tree = eval { PFT::Tree->new($dir, {create => 1}) };
+diag('Empty string should follow: ', $@ || '');
 isnt($tree, undef, 'Ok with create');
 
 done_testing()

@@ -72,7 +72,7 @@ sub _create {
     };
 
     unless (PFT::Conf::isroot(my $root = $self->{root})) {
-        PFT::Conf->new_default_env->save_to($root);
+        PFT::Conf->new_default->save_to($root);
     }
 
     $self->content(create => 1);
