@@ -1,6 +1,6 @@
 package PFT::Util v0.0.1;
 
-use v5.10;
+use v5.16;
 
 use strict;
 use warnings;
