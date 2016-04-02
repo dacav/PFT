@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use v5.10;
+use v5.16;
 
 use strict;
 use warnings;
@@ -25,11 +25,10 @@ my $tree = PFT::Content->new($unicode_dir);
 
 # Populating
 
-my @enc = (encoding => 'utf-8');
 $tree->pic('baz', 'foo←bar.png')->touch;
 $tree->attachment('foo', 'bar♥.txt')->touch;
 do {
-    my $page = $tree->new_entry(PFT::Header->new(title => 'A page¹', @enc));
+    my $page = $tree->new_entry(PFT::Header->new(title => 'A page¹'));
     my $f = $page->open('a+');
     binmode $f, 'utf8';
     print $f <<'    EOF' =~ s/^    //rgms;
@@ -49,36 +48,30 @@ do {
 $tree->new_entry(PFT::Header->new(
     title => 'Another page²',
     tags => ['foo', 'bar'],
-    @enc
 ));
 $tree->new_entry(PFT::Header->new(
     title => 'Blog post nr.3',
     date => PFT::Date->new(2014, 1, 3),
     tags => ['bar'],
-    @enc
 ));
 for (1 .. 2) {
     $tree->new_entry(PFT::Header->new(
         title => 'Blog post nr.'.$_,
         date => PFT::Date->new(2014, $_, $_ * $_),
-        @enc
     ));
     $tree->new_entry(PFT::Header->new(title => 'Blog post nr.'.($_ + 10),
         date => PFT::Date->new(2014, $_, $_ * $_ + 1),
         tags => ['foo'],
-        @enc
     ));
 }
 $tree->new_entry(PFT::Header->new(title => 'Month nr.2',
     date => PFT::Date->new(2014, 2),
-    @enc
 ));
 $tree->new_entry(PFT::Header->new(title => 'Month nr.3',
     date => PFT::Date->new(2014, 3),
     tags => ['bar'],
-    @enc
 ));
-$tree->new_tag(PFT::Header->new(title => 'Bar', @enc));
+$tree->new_tag(PFT::Header->new(title => 'Bar'));
 
 my $map = PFT::Map->new($tree);
 my @all_unres;

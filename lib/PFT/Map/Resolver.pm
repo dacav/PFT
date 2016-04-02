@@ -1,11 +1,5 @@
 package PFT::Map::Resolver v0.0.1;
 
-use v5.10;
-
-use strict;
-use warnings;
-use utf8;
-
 =pod
 
 =encoding utf8
@@ -19,6 +13,11 @@ PFT::Map::Resolver - Configuration parser for PFT
 =head1 DESCRIPTION
 
 =cut
+
+use v5.16;
+use strict;
+use warnings;
+use utf8;
 
 use Exporter qw/import/;
 our @EXPORT_OK = qw/resolve/;
@@ -48,7 +47,6 @@ sub resolve_local {
     } elsif ($kwd eq 'page') {
         my $hdr = PFT::Header->new(
             title => join(' ', $symbol->args),
-            encoding => $node->header->encoding,
         );
         $map->node_of($map->tree->entry($hdr), $hdr);
     } elsif ($kwd eq 'blog') {
@@ -56,7 +54,6 @@ sub resolve_local {
     } elsif ($kwd eq 'tag') {
         my $hdr = PFT::Header->new(
             title => join(' ', $symbol->args),
-            encoding => $node->header->encoding,
         );
         $map->node_of($map->tree->tag($hdr), $hdr);
     } else {

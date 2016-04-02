@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use v5.10;
+use v5.16;
 
 use strict;
 use warnings;
@@ -48,7 +48,7 @@ eval {
 isnt($@, undef, 'Error also if reading');
 
 # Header placement (on unlinked file)
-my $header = PFT::Header->new(title => 'foo', encoding => 'utf-8');
+my $header = PFT::Header->new(title => 'foo');
 
 do {
     $page->unlink;
@@ -69,7 +69,7 @@ do {
     close $fh;
 };
 do {
-    my $h_alt = PFT::Header->new(title => 'bar', encoding => 'utf-8');
+    my $h_alt = PFT::Header->new(title => 'bar');
     $page->set_header($h_alt);
 
     my($h_got, $fh) = $page->read();

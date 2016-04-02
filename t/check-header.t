@@ -3,7 +3,7 @@
 use warnings;
 use strict;
 
-use v5.10;
+use v5.16;
 
 use feature qw/say/;
 use Test::More;
@@ -19,7 +19,6 @@ my $dir = tempdir(CLEANUP => 1);
 for my $date (undef, PFT::Date->from_string('2014-12-16')) {
     my $h = PFT::Header->new(
         title => 'Rådmansgatan',
-        encoding => 'iso8859-15',
         date => $date,
     );
 
@@ -36,7 +35,7 @@ for my $date (undef, PFT::Date->from_string('2014-12-16')) {
     is_deeply($hl, $h, 'dump and reload, ' . ($date ? $date : 'no date'));
 }
 
-is(eval { PFT::Header->new(title => 'X', date => 0, encoding => 'utf-8')},
+is(eval { PFT::Header->new(title => 'X', date => 0) },
     undef, 'broken because...'
 );
 isnt(undef, $@, 'date must be PFT::Date');
@@ -49,11 +48,11 @@ isnt(undef, $@, 'full date but no title');
 diag($@);
 
 isnt(
-    PFT::Header->new(date => PFT::Date->new(1, 2), encoding => 'utf-8',),
+    PFT::Header->new(date => PFT::Date->new(1, 2)),
     undef, 'not broken because day is missing'
 );
 
-is(eval { PFT::Header->new(date => PFT::Date->new(1), encoding => 'utf-8') },
+is(eval { PFT::Header->new(date => PFT::Date->new(1)) },
     undef, 'broken because...'
 );
 isnt(undef, $@, 'date missing year or month');
@@ -62,7 +61,6 @@ diag($@);
 do {
     my $h = PFT::Header->new(
         title => 'Rådmansgatan',
-        encoding => 'iso8859-15',
     );
 
     my($fh, $filename) = tempfile(DIR => $dir);
@@ -74,7 +72,7 @@ do {
 
 do {
     my $ts = ['One tag', 'Two ~ tags'];
-    my $h = PFT::Header->new(title => 'x', tags => $ts, encoding => 'utf-8');
+    my $h = PFT::Header->new(title => 'x', tags => $ts);
     is_deeply(scalar($h->tags), $ts, 'Full tags');
     is_deeply([$h->tags_slug], ['one-tag', 'two-tags'], 'Slug tags');
 };

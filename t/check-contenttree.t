@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use v5.10;
+use v5.16;
 
 use strict;
 use warnings;
@@ -28,14 +28,12 @@ do {
     my $p = $tree->new_entry(PFT::Header->new(
         title => 'foo-♥-baz',
         date => $date,
-        encoding => 'utf-8',
     ));
     is_deeply($tree->path_to_date($p->path), $date, 'Path-to-date')
 };
 do {
     my $p = $tree->new_entry(PFT::Header->new(
         title => 'foo-bar-☺az',
-        encoding => 'utf-8',
     ));
     is($tree->path_to_date($p->path), undef, 'Path-to-date, no date')
 };
@@ -43,7 +41,6 @@ do {
 do {
     my $p = $tree->new_entry(PFT::Header->new(
         title => 'foo-öar-baz',
-        encoding => 'utf-8',
     ));
     is($tree->path_to_slug($p->path), 'foo-öar-baz', 'Path-to-slug 1')
 };
@@ -51,7 +48,6 @@ do {
     my $p = $tree->new_entry(PFT::Header->new(
         title => 'foo²bar☺baz',
         date => PFT::Date->new(0, 12, 25),
-        encoding => 'utf-8',
     ));
     is($tree->path_to_slug($p->path), 'foo-bar-baz', 'Path-to-slug 2')
 };
@@ -61,14 +57,12 @@ do {
     my $hdr = PFT::Header->new(
         title => 'one',
         date => PFT::Date->new(10, 11, 12),
-        encoding => 'utf-8',
     );
 
     my $e = $tree->new_entry($hdr);
     $e->set_header(PFT::Header->new(
         title => 'two',
         date => PFT::Date->new(10, 12, 14),
-        encoding => 'utf-8',
     ));
 
     ok($e->path =~ /0010-11.*12-one/, 'Original path');
