@@ -277,6 +277,19 @@ sub tags_ls {
         $self->_text_ls(File::Spec->catfile($self->dir_tags, '*'))
 }
 
+=item entry_ls
+
+List all entries (pages, blog, tags)
+
+=cut
+
+sub entry_ls {
+    my $self = shift;
+    $self->pages_ls,
+    $self->blog_ls,
+    $self->tags_ls,
+}
+
 sub _blob {
     my $self = shift;
     my $pfxlen = length(my $pfx = shift) + length(path_sep);
