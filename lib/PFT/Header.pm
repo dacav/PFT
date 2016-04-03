@@ -214,8 +214,9 @@ sub slugify {
     confess 'Slugify of nothing?' unless $out;
 
     $out =~ s/[\W_]/-/g;
+    $out =~ s/-+$//;
+    $out =~ s/^-+//;
     $out =~ s/--+/-/g;
-    $out =~ s/-$//;
     lc $out
 };
 
