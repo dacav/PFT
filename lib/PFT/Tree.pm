@@ -45,16 +45,19 @@ use PFT::Conf;
 use PFT::Map;
 
 sub new {
-    my $cls = shift;
-    my $given = shift;
-    my $opts = shift;
+    my($cls, $given, $opts) = @_;
 
-    if (defined(my $root = PFT::Conf::locate($given))) {
-        bless { root => $root }, $cls;
-    } elsif ($opts->{create}) {
+    if ($opts->{create}) {
+        defined $given or confess "Base dir is mandatory if creating";
+        my $root = PFT::Conf::locate($given);
+        if (defined $root and $root ne $given) {
+            confess "Cannot nest. Found a root in $root";
+        }
         my $self = bless { root => $given }, $cls;
         $self->_create();
-        $self;
+        $self
+    } elsif (defined(my $root = PFT::Conf::locate($given))) {
+        bless { root => $root }, $cls;
     } else {
         croak "Cannot find tree in $given"
     }
