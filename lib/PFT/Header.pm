@@ -14,6 +14,7 @@ PFT::Header - Header for PFT content textfiles
 
     my $hdr = PFT::Header->new(
         title => $title,        # mandatory (conditions apply)
+        slug => $slug,          # optional short identifier
         date => $date,          # optional (conditions apply) PFT::Date
         author => $author,      # optional
         tags => $tags,          # list of decoded strins, defaults to []
@@ -131,6 +132,10 @@ sub new {
         date => $params{date},
         tags => $params{tags} || [],
         opts => $params{opts} || _opts_default(),
+        slug => do {
+            my $given = $params{slug} || $params{title};
+            defined $given ? slugify($given) : undef
+        },
     }, $cls;
 }
 
@@ -165,8 +170,13 @@ sub load {
     croak $@ =~ s/ at .*$//rs if $@;
     delete $hdr->{Date};
 
+    my $title = delete $hdr->{Title};
     my $self = {
-        title => delete $hdr->{Title},
+        title => $title,
+        slug => do {
+            my $given = delete $hdr->{Slug} || $title;
+            defined $given ? slugify($given) : undef
+        },
         author => delete $hdr->{Author},
         tags => [ do {
             my $tags = delete $hdr->{Tags};
@@ -278,7 +288,8 @@ A slug of the title.
 =cut
 
 sub slug {
-    slugify(shift->{title})
+    my $self = shift;
+    $self->{slug} || slugify($self->{title})
 }
 
 =item tags_slug
@@ -328,6 +339,7 @@ sub dump {
     binmode $to, ':encoding(locale)' or confess "Cannot binmode: $!";
     print $to YAML::Tiny::Dump({
         Title => $self->title,
+        Slug => $self->slug,
         Author => $self->author,
         Tags => @$tags ? $tags : undef,
         Date => $self->date ? $self->date->repr('-') : undef,
