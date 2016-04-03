@@ -26,6 +26,14 @@ PFT::Conf - Configuration parser for PFT
 
     PFT::Conf::isroot($path)        # Check if location exists under path.
 
+    use Getopt::Long;
+    Getopt::Long::Configure 'bundling';
+    GetOptions(
+        PFT::Conf::wire_getopt(\my %opts),
+        'more-opt' => \$more,
+    );
+    PFT::Conf::new_getopt(\%opts);  # Create with command line options
+
 =head1 DESCRIPTION
 
 =cut
@@ -70,7 +78,9 @@ sub _hashify {
 
     @_ % 2 and die "Odd number of args";
     for (my $i = 0; $i < @_; $i += 2) {
+        defined(my $val = $_[$i + 1]) or next;
         my @keys = split /-/, $_[$i];
+
         die "Key is empty? \"$_[$i]\"" unless @keys;
         my $dst = \%out;
         while (@keys > 1) {
@@ -81,8 +91,9 @@ sub _hashify {
             ref $dst ne 'HASH' and croak "Not pointing to hash: $_[$i]";
         }
         my $k = shift @keys;
-        exists $dst->{$k} and croak "Overwriting $_[$i]";
-        $dst->{$k} = $_[$i + 1];
+        exists $dst->{$k} && ref $dst->{$k} eq 'HASH'
+            and croak "Overwriting $_[$i]";
+        $dst->{$k} = $val;
     }
 
     \%out;
@@ -179,6 +190,29 @@ sub new_load_locate {
         unless defined $root;
 
     $cls->new_load($root);
+}
+
+sub wire_getopt {
+    my $hash = shift;
+    confess 'Needs hash' unless ref $hash eq 'HASH';
+
+    my @out;
+    my @recipe = _read_recipe($IDX_GETOPT_SUFFIX);
+    for (my $i = 0; $i < @recipe; $i += 2) {
+        push @out, $recipe[$i] . $recipe[$i + 1] => \$hash->{$recipe[$i]}
+    }
+    @out;
+}
+
+sub new_getopt {
+    my($cls, $wired_hash) = @_;
+
+    my $self = _hashify(
+        _read_recipe($IDX_DEFAULT), # defaults
+        %$wired_hash,               # override via wire_getopt
+    );
+    $self->{_root} = undef;
+    bless $self, $cls;
 }
 
 =head2 Methods
