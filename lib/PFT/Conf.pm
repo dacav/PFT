@@ -55,7 +55,7 @@ my($IDX_MANDATORY, $IDX_GETOPT_SUFFIX, $IDX_DEFAULT) = 0 .. 2;
 my %CONF_RECIPE = do {
     my $user = $ENV{USER} || 'anon';
     (
-        'site-author'     => [1, '=s', $ENV{USER} || 'Anonymous'],
+        'site-author'     => [1, '=s', $user || 'Anonymous'],
         'site-template'   => [1, '=s', 'default'],
         'site-title'      => [1, '=s', 'My PFT website'],
         'site-url'        => [0, '=s', 'http://example.org'],
@@ -65,7 +65,7 @@ my %CONF_RECIPE = do {
         'remote-host'     => [0, '=s', 'example.org'],
         'remote-user'     => [0, '=s', $user],
         'remote-port'     => [0, '=i', 22],
-        'remote-path'     => [0, '=s', $user],
+        'remote-path'     => [0, '=s', "/home/$user/public_html"],
         'system-editor'   => [0, '=s', $ENV{EDITOR} || 'vim'],
         'system-browser'  => [0, '=s', $ENV{BROWSER} || 'firefox'],
         'system-encoding' => [0, '=s', $Encode::Locale::ENCODING_LOCALE],
