@@ -92,20 +92,32 @@ sub _params_check {
     }
 };
 
-
-# Map of supported options (`opts` field).  Keys are valid options, values
-# are default, value=undef means do not set by default.
+# Keys are recognized options. Values are arrays:
+# - The default option, or undef if the option should not be set by
+#   default;
+# - The normalization callback, or undef if the normalization is the
+#   identity function.
 my %OPTS_RECIPE = (
-    hide        => 0,
-    template    => undef
+    hide        => [0,      sub { 0 + shift }],
+    template    => [undef,  undef            ],
 );
 
 sub _opts_default {
     my %out;
-    while (my($k, $v) = each %OPTS_RECIPE) {
-        $out{$k} = $v if defined $v;
+    while (my($k, $vs) = each %OPTS_RECIPE) {
+        $out{$k} = $vs->[0] if defined $vs->[0];
     }
     \%out
+}
+
+sub _opts_normalize {
+    my $opts = shift;
+    foreach (keys %$opts) {
+        if (defined(my $cb = $OPTS_RECIPE{$_}->[1])) {
+            $opts->{$_} = $cb->($opts->{$_})
+        }
+    }
+    $opts
 }
 
 sub new {
@@ -163,7 +175,7 @@ sub load {
                 : ()
         }],
         date => $date,
-        opts => delete $hdr->{Options},
+        opts => _opts_normalize(delete $hdr->{Options}),
     };
     _params_check($self);
 
@@ -319,7 +331,7 @@ sub dump {
         Author => $self->author,
         Tags => @$tags ? $tags : undef,
         Date => $self->date ? $self->date->repr('-') : undef,
-        Options => $self->opts,
+        Options => _opts_normalize($self->opts),
     }), "---\n";
 }
 
