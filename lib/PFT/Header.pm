@@ -290,7 +290,7 @@ A slug of the title.
 
 sub slug {
     my $self = shift;
-    $self->{slug} || slugify($self->{title})
+    $self->{slug} || $self->{title} && slugify($self->{title}) || undef
 }
 
 =item tags_slug
