@@ -59,7 +59,7 @@ sub new {
     } elsif (defined(my $root = PFT::Conf::locate($given))) {
         bless { root => $root }, $cls;
     } else {
-        croak "Cannot find tree in $given"
+        croak 'Cannot find tree in ', $given || Cwd::cwd;
     }
 }
 

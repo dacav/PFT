@@ -82,13 +82,13 @@ sub _params_check {
             or confess 'date parameter must be PFT::Date';
 
         if ($d->complete) {
-            exists $params->{title}
+            $params->{title}
                 or croak 'Title is mandatory headers having complete date';
         } elsif (!defined $d->y or !defined $d->m) {
             croak 'Year and month are mandatory for headers with date';
         }
     } else {
-        defined $params->{title}
+        $params->{title}
             or croak 'Title is mandatory for headers not having dates';
     }
 };
