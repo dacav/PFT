@@ -54,6 +54,8 @@ our $CONF_NAME = 'pft.yaml';
 my($IDX_MANDATORY, $IDX_GETOPT_SUFFIX, $IDX_DEFAULT) = 0 .. 2;
 my %CONF_RECIPE = do {
     my $user = $ENV{USER} || 'anon';
+    my $editor = $ENV{EDITOR} || 'vim';
+    my $browser = $ENV{BROWSER} || 'firefox';
     (
         'site-author'     => [1, '=s', $user || 'Anonymous'],
         'site-template'   => [1, '=s', 'default'],
@@ -66,8 +68,8 @@ my %CONF_RECIPE = do {
         'remote-user'     => [0, '=s', $user],
         'remote-port'     => [0, '=i', 22],
         'remote-path'     => [0, '=s', "/home/$user/public_html"],
-        'system-editor'   => [0, '=s', $ENV{EDITOR} || 'vim'],
-        'system-browser'  => [0, '=s', $ENV{BROWSER} || 'firefox'],
+        'system-editor'   => [0, '=s', "$editor %s"],
+        'system-browser'  => [0, '=s', "$browser %s"],
         'system-encoding' => [0, '=s', $Encode::Locale::ENCODING_LOCALE],
     )
 };
