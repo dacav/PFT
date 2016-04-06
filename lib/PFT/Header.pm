@@ -94,8 +94,7 @@ sub _params_check {
 };
 
 # Keys are recognized options. Values are arrays:
-# - The default option, or undef if the option should not be set by
-#   default;
+# - The default option;
 # - The normalization callback, or undef if the normalization is the
 #   identity function.
 my %OPTS_RECIPE = (
@@ -106,7 +105,7 @@ my %OPTS_RECIPE = (
 sub _opts_default {
     my %out;
     while (my($k, $vs) = each %OPTS_RECIPE) {
-        $out{$k} = $vs->[0] if defined $vs->[0];
+        $out{$k} = $vs->[0]
     }
     \%out
 }
