@@ -1,4 +1,3 @@
-lib/PFT/Map/Resolver.pm
 lib/PFT/Map/Node.pm
 lib/PFT/Date.pm
 lib/PFT/Text.pm
