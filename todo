@@ -1,4 +1,3 @@
-lib/PFT/Text.pm
 lib/PFT/Header.pm
 lib/PFT/Util.pm
 lib/PFT/Content/Blog.pm

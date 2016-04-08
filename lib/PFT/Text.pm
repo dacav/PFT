@@ -1,12 +1,4 @@
-package PFT::Text v0.0.1;
-
-use v5.16;
-
-use strict;
-use warnings;
-use utf8;
-
-=pod
+package PFT::Text v0.5.0;
 
 =encoding utf8
 
@@ -20,12 +12,19 @@ PFT::Text - Wrapper around content text
 
 =head1 DESCRIPTION
 
-Semantic wrapper around content text. Knows how the text should be parsed,
-abstracts away inner data retrieval.
+Semantic wrapper around content text.
+
+It knows how the text should be parsed, abstracts away inner data
+retrieval.
 
 The constructor expects a C<Content::Page> object as parameter.
 
 =cut
+
+use utf8;
+use v5.16
+use strict;
+use warnings;
 
 use PFT::Text::Symbol;
 use Text::Markdown qw/markdown/;
