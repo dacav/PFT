@@ -1,13 +1,7 @@
-lib/PFT/Content/Blog.pm
-lib/PFT/Content/Page.pm
 lib/PFT/Content/Entry.pm
-lib/PFT/Content/Month.pm
-lib/PFT/Content/Attachment.pm
 lib/PFT/Content/Blob.pm
-lib/PFT/Content/Picture.pm
 lib/PFT/Content/Base.pm
 lib/PFT/Content/File.pm
-lib/PFT/Content/Tag.pm
 lib/PFT/Conf.pm
 lib/PFT/Text/Symbol.pm
 lib/PFT/Map.pm
