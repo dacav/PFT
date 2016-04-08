@@ -31,10 +31,10 @@ Perl directives
 
  3. Take advantage of the powerful Unicode support in Perl:
 
-        use strict;
-        use warnings;
         use utf8;
         use v5.16
+        use strict;
+        use warnings;
 
  4. Import modules, define constants
 
@@ -47,7 +47,8 @@ Perl directives
         use constant { ... };
         my $internal_cb = sub { ... };
 
- 5. Constructor 
+ 5. Constructor. The constructor is typically already documented in the
+    _SYNOPSIS_ section.
 
         sub new { ... bless }
 
