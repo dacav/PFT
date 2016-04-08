@@ -1,4 +1,3 @@
-lib/PFT/Date.pm
 lib/PFT/Text.pm
 lib/PFT/Header.pm
 lib/PFT/Util.pm

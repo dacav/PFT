@@ -1,10 +1,4 @@
-package PFT::Date v0.0.1;
-
-use v5.16;
-
-use strict;
-use warnings;
-use utf8;
+package PFT::Date v0.5.0;
 
 =pod
 
@@ -28,10 +22,15 @@ PFT::Date - Representation of date
 
 =head1 DESCRIPTION
 
-PFT::Date is defined as a blessed array reference. The first element is
+C<PFT::Date> is defined as a blessed array reference. The first element is
 the year, the second is the month, the third is the day.
 
 =cut
+
+use utf8;
+use v5.16
+use strict;
+use warnings;
 
 use Carp;
 
@@ -210,8 +209,6 @@ Check if the date is complete of year, month and day.
 sub complete {
     3 == scalar grep defined, @{shift()}
 }
-
-=pod
 
 =back
 
