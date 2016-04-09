@@ -1,7 +1,10 @@
-lib/PFT/Content/Entry.pm
 lib/PFT/Content/Blob.pm
 lib/PFT/Content/Base.pm
 lib/PFT/Content/File.pm
 lib/PFT/Text/Symbol.pm
 lib/PFT/Map.pm
 lib/PFT/Tree.pm
+
+Document content hierarchy
+
+Lookup for TODO in code
