@@ -1,4 +1,3 @@
-lib/PFT/Map.pm
 lib/PFT/Tree.pm
 
 Seek for bad versions
@@ -6,3 +5,5 @@ Seek for bad versions
 Document content hierarchy
 
 Lookup for TODO in code
+
+Conf → our
