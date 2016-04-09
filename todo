@@ -1,8 +1,9 @@
-lib/PFT/Content/Base.pm
 lib/PFT/Content/File.pm
 lib/PFT/Text/Symbol.pm
 lib/PFT/Map.pm
 lib/PFT/Tree.pm
+
+Seek for bad versions
 
 Document content hierarchy
 
