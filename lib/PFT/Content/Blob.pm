@@ -1,4 +1,4 @@
-package PFT::Content::Blob v0.0.1;
+package PFT::Content::Blob v0.5.0;
 
 use v5.16;
 
