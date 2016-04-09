@@ -32,7 +32,7 @@ Perl directives
  3. Take advantage of the powerful Unicode support in Perl:
 
         use utf8;
-        use v5.16
+        use v5.16;
         use strict;
         use warnings;
 

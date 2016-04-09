@@ -22,7 +22,7 @@ The constructor expects a C<Content::Page> object as parameter.
 =cut
 
 use utf8;
-use v5.16
+use v5.16;
 use strict;
 use warnings;
 

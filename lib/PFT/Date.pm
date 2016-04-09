@@ -28,7 +28,7 @@ the year, the second is the month, the third is the day.
 =cut
 
 use utf8;
-use v5.16
+use v5.16;
 use strict;
 use warnings;
 
