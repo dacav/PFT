@@ -1,10 +1,4 @@
-package PFT::Text::Symbol v0.0.1;
-
-use v5.16;
-
-use strict;
-use warnings;
-use utf8;
+package PFT::Text::Symbol v0.5.0;
 
 =pod
 
@@ -23,9 +17,10 @@ PFT::Text::Symbol - Symbol from text scan
 
 =head1 DESCRIPTION
 
-Each instance represents a symbol from a PFT::Text instance. Symbols are
-declared within the text. They are detected as links in HTML
-matching C<E<lt>aE<gt>> and C<E<lt>imgE<gt>> tags.
+Each instance of C<PFT::Text::Symbol> represents a symbol obtained by
+parsing the text of an entry C<PFT::Content::Entry>: they are detected as
+C<E<lt>aE<gt>> and C<E<lt>imgE<gt>> tags in HTML.  Symbols are collected
+into a a C<PFT::Text> object.
 
 An example will make this easy to understand. Let's consider the following
 tag:
@@ -49,15 +44,13 @@ It will generate a symbol C<$s1> such that:
 Since a block of HTML can possibly yield multiple symbols, there's no
 public construction. Use the C<scan_html> multi-constructor instead.
 
+=head2 Construction
+
+There's no single object constructor. Construction goes through
+C<PFT::Text::Symbol-E<gt>scan_html>, which expects an HTML string as
+parameter and returns a list of blessed symbols.
+
 =cut
-
-sub keyword { shift->[0] }
-
-sub args { @{shift->[1]} }
-
-sub start { shift->[2] }
-
-sub len { shift->[3] }
 
 sub scan_html {
     my $cls = shift;
@@ -84,6 +77,43 @@ sub scan_html {
 
     sort { $a->start <=> $b->start } @out;
 }
+
+use utf8;
+use v5.16;
+use strict;
+use warnings;
+
+=head2 Properties
+
+=over
+
+=item keyword
+
+=cut
+
+sub keyword { shift->[0] }
+
+=item args
+
+=cut
+
+sub args { @{shift->[1]} }
+
+=item start
+
+=cut
+
+sub start { shift->[2] }
+
+=item len
+
+=cut
+
+sub len { shift->[3] }
+
+=back
+
+=cut
 
 use overload
     '""' => sub {
