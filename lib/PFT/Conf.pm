@@ -1,12 +1,4 @@
-package PFT::Conf v0.0.1;
-
-use v5.16;
-
-use strict;
-use warnings;
-use utf8;
-
-=pod
+package PFT::Conf v0.5.0;
 
 =encoding utf8
 
@@ -32,21 +24,75 @@ PFT::Conf - Configuration parser for PFT
         PFT::Conf::wire_getopt(\my %opts),
         'more-opt' => \$more,
     );
-    PFT::Conf::new_getopt(\%opts);  # Create with command line options
+    PFT::Conf->new_getopt(\%opts);  # Create with command line options
 
 =head1 DESCRIPTION
 
+Automatic loader and handler for the configuration file of a I<PFT> site.
+
+The configuration is a simple I<YAML> file with a conventional name.  Some
+keys are mandatory, while other are optional. This module allows a
+headache free check for mandatory ones.
+
+=head2
+
+Many constructors are available, here described:
+
+=over
+
+=item new_default
+
+Creates a new configuration based on environment variables and common
+sense.
+
+The configuration can later be stored on a file with the C<save_to>
+method.
+
+=item new_load
+
+Loads a configuration file which must already exist. Accepts as optional
+argument the name of a directory (not encoded), which defaults on
+the current directory.
+
+This constructor fails with C<croak> if the directory does not contain a
+configuration file.
+
+=item new_load_locate
+
+Works as C<new_load>, but before failing makes an attempt to locate the
+configuration file in the parent directories up to the root level.
+
+This is handy for launching commands from the command line without
+worrying on the current directory: it works as long as your I<cwd> is
+below a I<PFT> root directory.
+
+=item wire_getopt and new_getopt
+
+This is a two-steps constructor meant for command line initializers.
+
+An example of usage can be found in the B<SYNOPSIS> section. In short, the
+auxiliary function C<PFT::Conf::wire_getopt> provides a list of
+ready-to-use options for the C<GetOpt::Long> Perl module. It expects a
+hash reference as argument, which will be used as storage for selected
+options. The C<new_getopt> constructor expects as argument the same hash
+reference.
+
+=back
+
 =cut
+
+use utf8;
+use v5.16;
+use strict;
+use warnings;
 
 use Carp;
 use Cwd;
-use Encode;
 use Encode::Locale;
-
-use File::Spec::Functions qw/updir catfile catdir rootdir/;
-use File::Path qw/make_path/;
+use Encode;
 use File::Basename qw/dirname/;
-
+use File::Path qw/make_path/;
+use File::Spec::Functions qw/updir catfile catdir rootdir/;
 use YAML::Tiny;
 
 our $CONF_NAME = 'pft.yaml';
@@ -165,10 +211,70 @@ sub new_load {
     bless $self, $cls;
 }
 
+sub new_load_locate {
+    my $cls = shift;
+    my $root = locate(my $start = shift);
+    croak "Not a PFT site (or any parent up to $start)"
+        unless defined $root;
+
+    $cls->new_load($root);
+}
+
+sub new_getopt {
+    my($cls, $wired_hash) = @_;
+
+    my $self = _hashify(
+        _read_recipe($IDX_DEFAULT), # defaults
+        %$wired_hash,               # override via wire_getopt
+    );
+    $self->{_root} = undef;
+    bless $self, $cls;
+}
+
+=head2 Utility functions
+
+=over
+
+=item isroot
+
+The C<PFT::Conf::isroot> function searches for the configuration file in
+the given directory path (not encoded).
+
+Returns C<undef> if the file was not found, and the encoded file name
+(according to locale) if it was found.
+
+=cut
+
 sub isroot {
     my $f = encode(locale_fs => catfile(shift, $CONF_NAME));
     -e $f ? $f : undef
 }
+
+=item locate
+
+The C<PFT::Conf::locate> function locates a I<PFT> configuration file.
+
+It accepts as optional parameter a directory path (not encoded),
+defaulting on the current working directory.
+
+Possible return values:
+
+=over
+
+=item The input directory itself if the configuration file was
+found in it;
+
+=item The first encountered parent directory containing the configuration
+file;
+
+=item C<undef> if no configuration file was found, up to the root of all
+directories.
+
+=back
+
+=back
+
+=cut
 
 sub locate {
     my $cur = shift || Cwd::getcwd;
@@ -185,15 +291,6 @@ sub locate {
     $root;
 }
 
-sub new_load_locate {
-    my $cls = shift;
-    my $root = locate(my $start = shift);
-    croak "Not a PFT site (or any parent up to $start)"
-        unless defined $root;
-
-    $cls->new_load($root);
-}
-
 sub wire_getopt {
     my $hash = shift;
     confess 'Needs hash' unless ref $hash eq 'HASH';
@@ -204,17 +301,6 @@ sub wire_getopt {
         push @out, $recipe[$i] . $recipe[$i + 1] => \$hash->{$recipe[$i]}
     }
     @out;
-}
-
-sub new_getopt {
-    my($cls, $wired_hash) = @_;
-
-    my $self = _hashify(
-        _read_recipe($IDX_DEFAULT), # defaults
-        %$wired_hash,               # override via wire_getopt
-    );
-    $self->{_root} = undef;
-    bless $self, $cls;
 }
 
 =head2 Methods
