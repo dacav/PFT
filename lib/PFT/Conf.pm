@@ -95,6 +95,13 @@ use File::Path qw/make_path/;
 use File::Spec::Functions qw/updir catfile catdir rootdir/;
 use YAML::Tiny;
 
+=head2 Shared variables
+
+C<$PFT::Conf::CONF_NAME> is a string. Defines the name of the
+configuration file.
+
+=cut
+
 our $CONF_NAME = 'pft.yaml';
 
 my($IDX_MANDATORY, $IDX_GETOPT_SUFFIX, $IDX_DEFAULT) = 0 .. 2;
