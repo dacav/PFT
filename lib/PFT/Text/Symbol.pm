@@ -1,4 +1,4 @@
-package PFT::Text::Symbol v0.5.1;
+package PFT::Text::Symbol v0.5.2;
 
 =pod
 

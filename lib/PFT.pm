@@ -1,3 +1,3 @@
-package PFT v0.5.1;
+package PFT v0.5.2;
 
 1;

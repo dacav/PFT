@@ -1,4 +1,4 @@
-package PFT::Tree v0.5.1;
+package PFT::Tree v0.5.2;
 
 =encoding utf8
 
