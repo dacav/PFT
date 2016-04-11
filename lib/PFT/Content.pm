@@ -402,14 +402,18 @@ sub blog_back {
     })
 }
 
-=item path_to_date
+=item detect_date
 
-Given a path (of a page) determine the corresponding date. Returns a
-C<PFT::Date> object or undef if the page does not have date.
+Given a C<PFT::Content::File> object (or any subclass) determines the
+corresponding date by analyzing the path. Returns a C<PFT::Date> object or
+undef if the page does not have date.
+
+This function is helpful for checking inconsistency between the date
+declared in headers and the date used on the file system.
 
 =cut
 
-sub path_to_date {
+sub detect_date {
     my($self, $content) = @_;
 
     unless ($content->isa('PFT::Content::File')) {
@@ -436,13 +440,18 @@ sub path_to_date {
     )
 }
 
-=item path_to_slug
+=item detect_slug
 
-Given a path (of a page) determine the corresponding slug string.
+Given a C<PFT::Content::File> object (or any subclass) determines the
+corresponding slug by analyzing the path. Returns the slug or undef if the
+content does not have a slug (e.g. months).
+
+This function is helpful for checking inconsistency between the slug
+declared in headers and the slug used on the file system.
 
 =cut
 
-sub path_to_slug {
+sub detect_slug {
     my($self, $content) = @_;
 
     unless ($content->isa('PFT::Content::File')) {
