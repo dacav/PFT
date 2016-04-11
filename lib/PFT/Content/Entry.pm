@@ -153,7 +153,7 @@ sub make_consistent {
         }
     } # else not in blog.
 
-    if ($hdr->slug ne $self->tree->path_to_slug($self->path)) {
+    if ($hdr->slug ne $self->tree->path_to_slug($self)) {
         $rename ++;
     }
 

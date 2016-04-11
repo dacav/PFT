@@ -42,14 +42,14 @@ do {
     my $p = $tree->new_entry(PFT::Header->new(
         title => 'foo-öar-baz',
     ));
-    is($tree->path_to_slug($p->path), 'foo-öar-baz', 'Path-to-slug 1')
+    is($tree->path_to_slug($p), 'foo-öar-baz', 'Path-to-slug 1')
 };
 do {
     my $p = $tree->new_entry(PFT::Header->new(
         title => 'foo²bar☺baz',
         date => PFT::Date->new(0, 12, 25),
     ));
-    is($tree->path_to_slug($p->path), 'foo-bar-baz', 'Path-to-slug 2')
+    is($tree->path_to_slug($p), 'foo-bar-baz', 'Path-to-slug 2')
 };
 
 # Testing make_consistent function

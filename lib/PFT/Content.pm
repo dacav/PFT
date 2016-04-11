@@ -443,14 +443,12 @@ Given a path (of a page) determine the corresponding slug string.
 =cut
 
 sub path_to_slug {
-    my $self = shift;
-    my $path = shift;
+    my($self, $content) = @_;
 
-    my $fname = basename $path;
+    return undef if $content->isa('PFT::Content::Month');
 
-    my $rel = File::Spec->abs2rel($path, $self->dir_blog);
-    $fname =~ s/^\d{2}-// if index($rel, File::Spec->updir) < 0;
-
+    my $fname = basename($content->path);
+    $fname =~ s/^\d{2}-// if $content->isa('PFT::Content::Blog');
     $fname
 }
 
