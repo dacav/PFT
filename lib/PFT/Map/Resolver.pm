@@ -1,16 +1,37 @@
-package PFT::Map::Resolver v0.0.1;
-
-=pod
+package PFT::Map::Resolver v0.5.1;
 
 =encoding utf8
 
 =head1 NAME
 
-PFT::Map::Resolver - Configuration parser for PFT
+PFT::Map::Resolver - Resolve symbols in PFT Entries
 
 =head1 SYNOPSIS
 
+    use PFT::Map::Resolver 'resolve';
+
+    die unless $map->isa('PFT::Map');
+    die unless $node->isa('PFT::Map::Node');
+    die unless $sym->isa('PFT::Text::Symbol');
+
+    my $result = resolve($map, $node, $sym);
+
 =head1 DESCRIPTION
+
+This module only exports one function, named C<resolve>.
+
+The function resolves a symbol retrieved from the text of a
+C<PFT::Map::Node>. The returned value will be one of the following:
+
+=over
+
+=item A node (i.e. a C<PFT::Map::Node> instance);
+
+=item A string (e.g. C<http://manpages.org>);
+
+=item The C<undef> value (meaning: failed resolution).
+
+=back
 
 =cut
 

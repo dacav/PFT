@@ -1,12 +1,4 @@
-package PFT::Content::Entry v0.0.1;
-
-use v5.16;
-
-use strict;
-use warnings;
-use utf8;
-
-=pod
+package PFT::Content::Entry v0.5.1;
 
 =encoding utf8
 
@@ -26,18 +18,23 @@ PFT::Content::Entry - Content edited by user.
 
 =head1 DESCRIPTION
 
+C<PFT::Content::Entry> is the basetype for all text-based content files.
+It inherits from C<PFT::Content::File> and has two specific subtypes:
+C<PFT::Content::Blog> (representing an entry with date) and 
+C<PFT::Content::Page> (representing an entry withouth date).
+
+=back
 
 =head2 Methods
 
 =over
 
-=item header
-
-Returns a PFT::Header object representing the header of the file.
-If the file is empty returns undef. Croaks if the file is not empty, but
-the header is broken.
-
 =cut
+
+use utf8;
+use v5.16;
+use strict;
+use warnings;
 
 use parent 'PFT::Content::File';
 
@@ -105,7 +102,9 @@ sub read {
 
 =item set_header
 
-Sets a new header, passed by parameter. This will rewrite the file.
+Sets a new header, passed by parameter.
+
+This will rewrite the file. Content will be maintained.
 
 =cut
 
@@ -134,7 +133,9 @@ Make page consistent with the filesystem tree.
 
 =cut
 
+# TODO:
 sub make_consistent {
+
     my $self = shift;
 
     my $hdr = $self->header;

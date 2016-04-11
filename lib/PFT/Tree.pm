@@ -1,12 +1,4 @@
-package PFT::Tree v0.0.1;
-
-use v5.16;
-
-use strict;
-use warnings;
-use utf8;
-
-=pod
+package PFT::Tree v0.5.1;
 
 =encoding utf8
 
@@ -31,9 +23,24 @@ The structure is the following:
     ├── pft.yaml
     └── templates
 
-Where the C<content> directory is handled with a PFT::Content instance.
+Where:
+
+=over
+
+=item C<content> is a directory is handled with a C<PFT::Content>
+instance.
+
+=item C<pft.yaml> is a configuration file handled with C<PFT::Conf>
+
+=item The remaining directories are just created, but the content is not
+handled by the C<PFT::Tree> structure.
 
 =cut
+
+use utf8;
+use v5.16;
+use strict;
+use warnings;
 
 use File::Spec;
 use File::Path qw/make_path/;

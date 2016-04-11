@@ -1,12 +1,4 @@
-package PFT::Util v0.0.1;
-
-use v5.16;
-
-use strict;
-use warnings;
-use utf8;
-
-=pod
+package PFT::Util v0.5.1;
 
 =encoding utf8
 
@@ -19,6 +11,11 @@ PFT::Util - Utilities
 This module contains general utility functions.
 
 =cut
+
+use utf8;
+use v5.16;
+use strict;
+use warnings;
 
 use File::Spec;
 use Exporter;

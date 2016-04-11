@@ -1,6 +1,4 @@
-package PFT::Header v0.0.1;
-
-=pod
+package PFT::Header v0.5.1;
 
 =encoding utf8
 
@@ -59,15 +57,14 @@ from which a header is loaded (a stream or a file path, respectively).
 
 =cut
 
-use strict;
-use warnings;
 use utf8;
 use v5.16;
-
-use Encode;
-use Encode::Locale;
+use strict;
+use warnings;
 
 use Carp;
+use Encode::Locale;
+use Encode;
 use YAML::Tiny;
 
 use PFT::Date;

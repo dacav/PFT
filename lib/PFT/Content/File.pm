@@ -1,12 +1,4 @@
-package PFT::Content::File v0.0.1;
-
-use v5.16;
-
-use strict;
-use warnings;
-use utf8;
-
-=pod
+package PFT::Content::File v0.5.1;
 
 =encoding utf8
 
@@ -25,6 +17,11 @@ PFT::Content::File - On disk content file.
     });
 
 =cut
+
+use utf8;
+use v5.16;
+use strict;
+use warnings;
 
 use File::Path qw/make_path/;
 use File::Basename qw/basename dirname/;
@@ -61,12 +58,12 @@ sub new {
 
 =head1 DESCRIPTION
 
-This class describes a file on disk.
+This class describes a content file on disk.
 
 =head2 Properties
 
 Besides the properties following in this section, more are inherited from
-PFT::Content::Base.
+C<PFT::Content::Base>.
 
 =over
 
@@ -167,7 +164,7 @@ Move the file in the filesystem, update internal data.
 
 =cut
 
-# use the path property as setter instead?
+# TODO use the path property as setter instead?
 sub rename_as {
     my($self, $new_path) = @_;
     my $enc_new_path = encode(locale_fs => $new_path);

@@ -1,12 +1,4 @@
-package PFT::Map::Node v0.0.1;
-
-use v5.16;
-
-use strict;
-use warnings;
-use utf8;
-
-=pod
+package PFT::Map::Node v0.5.1;
 
 =encoding utf8
 
@@ -20,17 +12,34 @@ PFT::Map::Node - Node of a PFT site map
     PFT::Map::Node->new($seqnr, $id, undef, $header);
     PFT::Map::Node->new($seqnr, $id, $content, $header);
 
-Nodes are created within a PFT::Map object. The constructor should
-therefore not be called directly.
-
-Each node is identified by a unique sequence number and by a mnemonic
-identifier. This details are used within PFT::Map.
-
-=over 1
-
 =head1 DESCRIPTION
 
+Objects of type C<PFT::Map::Node> are nodes of the site map. They are
+created within a C<PFT::Map> object.  Each node is identified by a unique
+sequence number and by a mnemonic identifier.
+
+The first form of constructor in the B<SYNOPSIS> creates a
+C<PFT::Map::Node> without providing a header. This is possible because a
+content item (C<PFT::Map::Content::Base> instance) is provided. The
+constructor will make an attempt to read the header.
+
+The second and third forms shall be used when the header is already
+available (as optimization to avoid the system to fetch it again), or in
+those situation in which the header cannot be retrieved.
+
+The header cannot be retrieved from entries which do not correspond to a
+real file (I<virtual contents>). Nodes referring to I<virtual contents>
+are called I<virtual nodes>. They represent an auto-generated pages within
+a PFT site (typical case: I<tag pages> and I<month pages>.
+
+See the C<PFT::Map::Node> implementation for further details.
+
 =cut
+
+use utf8;
+use v5.16;
+use strict;
+use warnings;
 
 use PFT::Text;
 
@@ -68,10 +77,11 @@ sub new {
 
 =item header
 
-Header associated with this node. This property could return undefined for
-the nodes which are associated with a non-textual content (like images or
-attachments). A header will exist for non-existent pages (like tags which
-do not have a tag page).
+Header associated with this node.
+
+This property could return C<undef> if the node is associated with a
+non-textual content (something which C<PFT::Content::Base> but not a
+C<PFT::Content::Entry>).
 
 =cut
 
@@ -79,10 +89,10 @@ sub header { shift->{hdr} }
 
 =item content
 
-The content associated with this node. This property could return
-undefined for the nodes which do not correspond to any content. In this
-case we talk about I<virtual files>, in that the node should be
-represented anyway in a compiled PFT site.
+The content associated with this node.
+
+This property could return undefined for the nodes which do not correspond
+to any content. 
 
 =cut
 
@@ -102,7 +112,9 @@ sub date {
 
 =item seqnr
 
-Returns the sequential id of the node w.r.t. the map
+Returns the sequential id of the node.
+
+Reported verbatim as by constructor parameter.
 
 =cut
 
@@ -110,7 +122,9 @@ sub seqnr { shift->{seqnr} }
 
 =item id
 
-Returns the mnemonic unique identifier.
+Returns the mnemonic identifier, uniue for te whole site.
+
+Reported verbatim as by constructor parameter.
 
 =cut
 
@@ -118,7 +132,11 @@ sub id { shift->{id} }
 
 =item title
 
-Returns the title of the content, if any
+Returns the title of the content.
+
+The title is retrieved by the header. Content items like pictures do not
+have a header, so they don't have a title: C<undef> is returned if this is
+the case.
 
 =cut
 
@@ -136,9 +154,7 @@ sub title {
 
 =item virtual
 
-Returns 1 if the node is virtual.
-
-A virtual node C<$n> does not correspond with an existing content file.
+Returns 1 if the node is I<virtual>.
 
 =cut
 
@@ -151,6 +167,45 @@ Returns the type of the content. Short for C<ref($node-E<gt>content)>
 =cut
 
 sub content_type { ref(shift->content) }
+
+=back
+
+=head2 Routing properties
+
+Routing properties allow to access other nodes. For instance, the C<prev>
+property of a node will correspond to the previous node in chronological
+sense. They can be C<undef> (e.g. if the node does not have a
+predecessor).
+
+The properties are:
+
+=over
+
+=item C<prev>: previous node;
+
+=item C<next>: next node;
+
+=item C<tags>: list of tag nodes, possibly virtual;
+
+=item C<tagged>: non-empty only for tag nodes, list of tagged nodes;
+
+=item C<days>: non-empty only for month nodes, list of days in the month;
+
+=item C<inlinks>: list of nodes whose text is pointing to this node;
+
+=item C<outlinks>: links of node pointed by the text of this node;
+
+=item C<children>: union of C<tagged> and C<days>
+
+=item C<symbols>: list of symbols referenced in the text, sorted by
+occourence
+
+Other methods are defined as setters for the mentioned properties. They
+are currently not documented, but used in C<PFT::Map>.
+
+=back
+
+=cut
 
 sub next { shift->{next} }
 
@@ -248,18 +303,21 @@ sub symbols_unres {
         : ()
 }
 
+=head2 More complex methods
+
+=over 1
+
 =item html
 
 Expand HTML of the content, translating outbound links into
 hyper-references (hrefs).
 
-Requires as parameter a callback mapping a PFT::Map::Node object into
-a string representing path within the site. The callback is applied to all
+Requires as parameter a callback mapping a C<PFT::Map::Node> object into a
+string representing path within the site. The callback is applied to all
 symbols, and the resulting string will replace the symbol placeholder in
 the HTML.
 
-Returns a string with encoded HTML, or an empty string if the node is
-virtual.
+Returns a string HTML, or an empty string if the node is virtual.
 
 =cut
 
@@ -281,10 +339,6 @@ sub html {
     );
 }
 
-=back
-
-=cut
-
 use overload
     '<=>' => sub {
         my($self, $oth, $swap) = @_;
@@ -298,5 +352,9 @@ use overload
             . ']'
     },
 ;
+
+=back
+
+=cut
 
 1;

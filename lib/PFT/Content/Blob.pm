@@ -1,4 +1,4 @@
-package PFT::Content::Blob v0.0.1;
+package PFT::Content::Blob v0.5.1;
 
 use v5.16;
 
@@ -26,9 +26,14 @@ PFT::Content::Blob - Binary file
 
 =head1 DESCRIPTION
 
+C<PFT::Content::Blob> is the basetype for all binary-based content files.
+It inherits from C<PFT::Content::File> and has two specific subtypes:
+C<PFT::Content::Picture> and C<PFT::Content::Attachment>.
+
 =cut
 
 use parent 'PFT::Content::File';
+
 use Carp;
 
 sub new {

@@ -1,12 +1,4 @@
-package PFT::Content::Base v0.0.1;
-
-use v5.16;
-
-use strict;
-use warnings;
-use utf8;
-
-=pod
+package PFT::Content::Base v0.5.1;
 
 =encoding utf8
 
@@ -30,13 +22,16 @@ PFT::Content::Base - Base class for content
 
 =head1 DESCRIPTION
 
-This class is meant for extension for all C<PFT::Content::*> classes.
+This class is a common base for for all C<PFT::Content::*> classes.
 
 =cut
 
-use Carp;
+use utf8;
+use v5.16;
+use strict;
+use warnings;
 
-use Data::Dumper;
+use Carp;
 
 sub new {
     my $cls = shift;
