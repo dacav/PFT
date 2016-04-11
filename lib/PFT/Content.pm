@@ -445,6 +445,11 @@ Given a path (of a page) determine the corresponding slug string.
 sub path_to_slug {
     my($self, $content) = @_;
 
+    unless ($content->isa('PFT::Content::File')) {
+        confess 'Cannot determine path: ',
+            ref $content || $content, ' is not not PFT::Content::File'
+    }
+
     return undef if $content->isa('PFT::Content::Month');
 
     my $fname = basename($content->path);
