@@ -29,13 +29,13 @@ do {
         title => 'foo-♥-baz',
         date => $date,
     ));
-    is_deeply($tree->path_to_date($p->path), $date, 'Path-to-date')
+    is_deeply($tree->path_to_date($p), $date, 'Path-to-date')
 };
 do {
     my $p = $tree->new_entry(PFT::Header->new(
         title => 'foo-bar-☺az',
     ));
-    is($tree->path_to_date($p->path), undef, 'Path-to-date, no date')
+    is($tree->path_to_date($p), undef, 'Path-to-date, no date')
 };
 
 do {
