@@ -1,6 +1,4 @@
-package PFT::Map v0.0.1;
-
-=pod
+package PFT::Map v0.5.0;
 
 =encoding utf8
 
@@ -15,7 +13,10 @@ PFT::Map - Map of a PFT site
 
 =head1 DESCRIPTION
 
-Map of a PFT site
+The map of a I<PFT> site allows to navigate the site content.
+
+This can be useful for compiling the site or determining properties of the
+site (e.g. dangling links, important pages…).
 
 =cut
 
@@ -27,13 +28,12 @@ use v5.16;
 use Carp;
 use WeakRef;
 use File::Spec;
+use Encode::Locale qw/$ENCODING_LOCALE/;
 
 use PFT::Map::Node;
 use PFT::Map::Resolver qw/resolve/;
 use PFT::Text;
 use PFT::Header;
-
-use Encode::Locale qw/$ENCODING_LOCALE/;
 
 sub new {
     my $cls = shift;
@@ -75,7 +75,9 @@ sub _resolve {
             }
             else {
                 $node->add_outlink(undef);
-                $node->add_symbol_unres($s => $@ ? $@ =~ s/\v.*//rs : undef);
+                $node->add_symbol_unres(
+                    $s => ($@ ? $@ =~ s/\v.*//rs : undef)
+                );
             }
         }
     }
@@ -207,7 +209,7 @@ sub _scan_pics {
 
 =item nodes
 
-List the nodes
+List of the nodes
 
 =cut
 
@@ -223,7 +225,7 @@ sub tree { shift->{tree} }
 
 =item pages
 
-List page nodes
+List of page nodes
 
 =cut
 
@@ -236,7 +238,7 @@ sub pages { shift->_grep_content('PFT::Content::Page') }
 
 =item months
 
-List month nodes
+List of month nodes
 
 =cut
 
@@ -244,7 +246,7 @@ sub months { shift->_grep_content('PFT::Content::Month') }
 
 =item tags
 
-List tag nodes
+List of tag nodes
 
 =cut
 
@@ -252,7 +254,8 @@ sub tags { shift->_grep_content('PFT::Content::Tag') }
 
 =item dump
 
-Dump of the nodes in a easy-to-display form, that is a list of dictionaries.
+Dump of the nodes in a easy-to-display form, that is a list of
+dictionaries.
 
 This method is used mainly or solely for testing.
 
@@ -303,6 +306,8 @@ sub dump {
 =back
 
 =head2 Methods
+
+=over
 
 =cut
 

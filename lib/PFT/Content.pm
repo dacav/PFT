@@ -1,10 +1,4 @@
-package PFT::Content v0.0.1;
-
-use strict;
-use warnings;
-use utf8;
-
-=pod
+package PFT::Content v0.5.0;
 
 =encoding utf8
 
@@ -30,22 +24,25 @@ The structure is the following:
 
 =cut
 
-use File::Spec;
-use File::Path qw/make_path/;
-use File::Basename qw/dirname basename/;
+use strict;
+use warnings;
+use utf8;
+use v5.16;
 
 use Carp;
-
 use Encode::Locale;
 use Encode;
 
-use PFT::Content::Page;
-use PFT::Content::Blog;
-use PFT::Content::Picture;
-use PFT::Content::Attachment;
-use PFT::Content::Tag;
-use PFT::Content::Month;
+use File::Basename qw/dirname basename/;
+use File::Path qw/make_path/;
+use File::Spec;
 
+use PFT::Content::Attachment;
+use PFT::Content::Blog;
+use PFT::Content::Month;
+use PFT::Content::Page;
+use PFT::Content::Picture;
+use PFT::Content::Tag;
 use PFT::Date;
 use PFT::Header;
 use PFT::Util;
@@ -78,8 +75,6 @@ sub _create {
     }
 }
 
-=pod
-
 =head2 Properties
 
 Quick accessors for directories
@@ -91,7 +86,8 @@ Quick accessors for directories
     $tree->dir_pics
     $tree->dir_attachments
 
-Non-existing directories are created by the constructor.
+Non-existing directories are created by the constructor if the
+C<{create =E<gt> 1}> option is passed as last constructor argument.
 
 =cut
 
@@ -108,10 +104,12 @@ sub dir_attachments { File::Spec->catdir(shift->{base}, 'attachments') }
 
 =item new_entry
 
-Create and return a page. A header is required as argument. If the page
-does not exist it gets created according to the header. If the header
-contains a date, the page is considered to be a blog entry (and positioned
-as such).
+Create and return a page. A header is required as argument.
+
+If the page does not exist it gets created according to the header. If the
+header contains a date, the page is considered to be a I<blog entry> (and
+positioned as such). If the data is missing the I<day> information, the
+entry is a I<month entry>.
 
 =cut
 
@@ -126,7 +124,7 @@ sub new_entry {
 
 =item entry
 
-Similar to C<new_entry>, but does not create the content file if it
+Similar to C<new_entry>, but does not create a content file if it
 doesn't exist already.
 
 =cut
@@ -154,6 +152,10 @@ sub entry {
 
 Given a PFT::Header object, returns the path of a page or blog page within
 the tree.
+
+Note: this function does not work properly if you are seeking for a
+I<tag>. I<Tags> are a different beast, since they have the same header as
+a page, but they belong to a different place.
 
 =cut
 
@@ -185,7 +187,7 @@ sub hdr_to_path {
 
 =item new_tag
 
-Create and return a tag page. A header is required as argument. If the
+Create and return a I<tag page>. A header is required as argument. If the
 tag page does not exist it gets created according to the header.
 
 =cut
@@ -237,7 +239,7 @@ sub _text_ls {
 
 =item blog_ls
 
-List all blog entries
+List all blog entries (days and months).
 
 =cut
 
@@ -255,7 +257,7 @@ sub blog_ls {
 
 =item pages_ls
 
-List all pages
+List all pages (not tags pages)
 
 =cut
 
@@ -267,7 +269,7 @@ sub pages_ls {
 
 =item tags_ls
 
-List all tag pages
+List all tag pages (not regular pages)
 
 =cut
 
@@ -279,7 +281,7 @@ sub tags_ls {
 
 =item entry_ls
 
-List all entries (pages, blog, tags)
+List all entries (pages + blog + tags)
 
 =cut
 
@@ -317,6 +319,8 @@ sub _blob_ls {
 
 =item pic
 
+Get a picture.
+
 Accepts a list of strings which will be joined into the path of a
 picture file.  Returns a C<PFT::Content::Blob> instance, which could
 correspond to a non-existing file. The caller might create it (e.g. by
@@ -331,7 +335,7 @@ sub pic {
 
 =item pics_ls
 
-List all pictures
+List all pictures.
 
 =cut
 
@@ -341,6 +345,8 @@ sub pics_ls {
 }
 
 =item attachment
+
+Get an attachment.
 
 Accepts a list of strings which will be joined into the path of an
 attachment file.  Returns a C<PFT::Content::Blob> instance, which could
@@ -359,7 +365,7 @@ sub attachment {
 
 =item attachments_ls
 
-List all attachments
+List all attachments.
 
 =cut
 
@@ -371,10 +377,14 @@ sub attachments_ls {
 
 =item blog_back
 
-Go back in blog history. Expects one optional argument as the number of
-steps backward in history. If such argument is not provided, it defaults
-to 0, returning the most recent entry. Returns a PFT::Content::Blog
-object.
+Go back in blog history, return the corresponding entry.
+
+Expects one optional argument as the number of steps backward in history.
+If such argument is not provided, it defaults to 0, returning the most
+recent entry.
+
+Returns a PFT::Content::Blog object, or C<undef> if the blog does not have
+that many entries.
 
 =cut
 
@@ -477,6 +487,7 @@ sub was_renamed {
     my $self = shift;
     my $d = dirname shift;
 
+    # Actually, we internally ignore the original name. Who cares.
     # $ignored = shift
 
     opendir(my $dh, $d) or return;
