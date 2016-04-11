@@ -26,7 +26,6 @@ WriteMakefile(
         'File::Spec'            => 0,
         'File::Spec::Functions' => 0,
         'IO::File'              => 0,
-        'Template::Alloy'       => 0,
         'Text::Markdown'        => 0,
         'WeakRef'               => 0,
         'YAML::Tiny'            => 0,
