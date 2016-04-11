@@ -1,4 +1,4 @@
-package PFT::Content::Base v0.5.0;
+package PFT::Content::Base v0.5.1;
 
 =encoding utf8
 

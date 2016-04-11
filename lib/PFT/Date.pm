@@ -1,4 +1,4 @@
-package PFT::Date v0.5.0;
+package PFT::Date v0.5.1;
 
 =pod
 
