@@ -288,7 +288,10 @@ sub locate {
     my $root;
 
     croak "Not a directory: $cur" unless -d encode(locale_fs => $cur);
-    until ($cur eq rootdir or defined($root)) {
+    my $cur1 = '';
+    #no single root directory on Windows
+    until ($cur eq rootdir or $cur eq $cur1 or defined($root)) {
+        $cur1 = $cur;
         if (isroot($cur)) {
             $root = $cur
         } else {
