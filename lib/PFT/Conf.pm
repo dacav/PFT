@@ -305,7 +305,14 @@ sub locate {
     my $root;
 
     croak "Not a directory: $cur" unless -d encode(locale_fs => $cur);
-    until ($cur eq rootdir or defined($root)) {
+
+    # No single root directory on Windows. File::Spec->rootdir does not
+    # work as intended. Workaround: $prev is like $cur on the previous
+    # step: we stay on the same directory even going up, we reached the
+    # root. Thanks to Alexandr Ciornii for checking this.
+    my $prev = '';
+    until ($cur eq rootdir or $cur eq $prev or defined($root)) {
+        $prev = $cur;
         if (isroot($cur)) {
             $root = $cur
         } else {
