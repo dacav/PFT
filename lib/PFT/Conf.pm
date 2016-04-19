@@ -119,28 +119,60 @@ configuration file.
 
 =cut
 
+use Exporter 'import';
+our @EXPORT_OK = qw/pod_autogen/;
 our $CONF_NAME = 'pft.yaml';
 
-my($IDX_MANDATORY, $IDX_GETOPT_SUFFIX, $IDX_DEFAULT) = 0 .. 2;
+my($IDX_MANDATORY, $IDX_GETOPT_SUFFIX, $IDX_DEFAULT, $IDX_HELP) = 0 .. 3;
 my %CONF_RECIPE = do {
     my $user = $ENV{USER} || 'anon';
     my $editor = $ENV{EDITOR} || 'vim';
     my $browser = $ENV{BROWSER} || 'firefox';
     (
-        'site-author'     => [1, '=s', $user || 'Anonymous'],
-        'site-template'   => [1, '=s', 'default'],
-        'site-title'      => [1, '=s', 'My PFT website'],
-        'site-url'        => [0, '=s', 'http://example.org'],
-        'site-home'       => [1, '=s', 'Welcome'],
-        'site-encoding'   => [1, '=s', $Encode::Locale::ENCODING_LOCALE],
-        'remote-method'   => [1, '=s', 'rsync+ssh'],
-        'remote-host'     => [0, '=s', 'example.org'],
-        'remote-user'     => [0, '=s', $user],
-        'remote-port'     => [0, '=i', 22],
-        'remote-path'     => [0, '=s', "/home/$user/public_html"],
-        'system-editor'   => [0, '=s', "$editor %s"],
-        'system-browser'  => [0, '=s', "$browser %s"],
-        'system-encoding' => [0, '=s', $Encode::Locale::ENCODING_LOCALE],
+        'site-author'     => [1, '=s', $user || 'Anonymous',
+            'Default author of entries'
+        ],
+        'site-template'   => [1, '=s', 'default',
+            'Default template for compilation, can be overriden by single '.
+            'entries'
+        ],
+        'site-title'      => [1, '=s', 'My PFT website',
+            'Title of the website',
+        ],
+        'site-url'        => [0, '=s', 'http://example.org',
+            'Base url for the website',
+        ],
+        'site-home'       => [1, '=s', 'Welcome',
+            'First page, where index.html redirects the browsers',
+        ],
+        'site-encoding'   => [1, '=s', $Encode::Locale::ENCODING_LOCALE,
+            'Charset of the generated web pages'
+        ],
+        'remote-method'   => [1, '=s', 'rsync+ssh',
+            'Method used for publishing'
+        ],
+        'remote-host'     => [0, '=s', 'example.org',
+            'Remote host where to publish'
+        ],
+        'remote-user'     => [0, '=s', $user,
+            'User login on publishing host'
+        ],
+        'remote-port'     => [0, '=i', 22,
+            'Port for connection on publishing host'
+        ],
+        'remote-path'     => [0, '=s', "/home/$user/public_html",
+            'Directory on publishing host'
+        ],
+        'system-editor'   => [0, '=s', "$editor %s",
+            'Editor to be invoked by C<pft edit>. You may specify an '.
+            'executable, or a shell command where "%s" gets replaced '.
+            'with the file name'
+        ],
+        'system-browser'  => [0, '=s', "$browser %s",
+            'Browser to be invoked by C<pft show>. You may specify an '.
+            'executable, or a shell command where "%s" gets replaced '.
+            'with the file name'
+        ],
     )
 };
 
@@ -185,6 +217,20 @@ sub _read_recipe {
         }
     }
     @out;
+}
+
+sub pod_autogen {
+    my @out = ('=over', '');
+
+    for my $key (sort keys %CONF_RECIPE) {
+        my $info = $CONF_RECIPE{$key};
+        push @out,
+            "=item --$key", '',
+            $info->[$IDX_HELP], '',
+            "Defaults to C<$info->[$IDX_DEFAULT]>", ''
+    }
+
+    return join "\n", @out, '=back';# '', '=cut';
 }
 
 sub new_default {
