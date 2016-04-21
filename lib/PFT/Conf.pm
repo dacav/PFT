@@ -128,7 +128,7 @@ my %CONF_RECIPE = do {
     my $browser = $ENV{BROWSER} || 'firefox';
     (
         'site-author'     => [1, '=s', $user || 'Anonymous'],
-        'site-template'   => [1, '=s', 'default'],
+        'site-template'   => [1, '=s', 'default.html'],
         'site-title'      => [1, '=s', 'My PFT website'],
         'site-url'        => [0, '=s', 'http://example.org'],
         'site-home'       => [1, '=s', 'Welcome'],
