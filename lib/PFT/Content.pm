@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Content v0.5.3;
+package PFT::Content v0.5.4;
 
 =encoding utf8
 
@@ -429,21 +429,33 @@ sub blog_back {
     })
 }
 
-=item path_to_date
+=item detect_date
 
-Given a path (of a page) determine the corresponding date. Returns a
-PFT::Date object or undef if the page does not have date.
+Given a C<PFT::Content::File> object (or any subclass) determines the
+corresponding date by analyzing the path. Returns a C<PFT::Date> object or
+undef if the page does not have date.
+
+This function is helpful for checking inconsistency between the date
+declared in headers and the date used on the file system.
 
 =cut
 
-sub path_to_date {
-    my $self = shift;
-    my $path = shift;
+sub detect_date {
+    my($self, $content) = @_;
+
+    unless ($content->isa('PFT::Content::File')) {
+        confess 'Cannot determine path: ',
+            ref $content || $content, ' is not not PFT::Content::File'
+    }
+
+    my $path = $content->path;
+
+    return undef unless ($content->isa('PFT::Content::Blog'));
 
     my $rel = File::Spec->abs2rel($path, $self->dir_blog);
-    return undef unless index($rel, File::Spec->updir) < 0;
-
+    die $rel if index($rel, File::Spec->updir) >= 0;
     my($ym, $dt) = File::Spec->splitdir($rel);
+    die if $content->isa('PFT::Content::Month') && defined $dt;
 
     PFT::Date->new(
         substr($ym, 0, 4),
@@ -455,21 +467,29 @@ sub path_to_date {
     )
 }
 
-=item path_to_slug
+=item detect_slug
 
-Given a path (of a page) determine the corresponding slug string.
+Given a C<PFT::Content::File> object (or any subclass) determines the
+corresponding slug by analyzing the path. Returns the slug or undef if the
+content does not have a slug (e.g. months).
+
+This function is helpful for checking inconsistency between the slug
+declared in headers and the slug used on the file system.
 
 =cut
 
-sub path_to_slug {
-    my $self = shift;
-    my $path = shift;
+sub detect_slug {
+    my($self, $content) = @_;
 
-    my $fname = basename $path;
+    unless ($content->isa('PFT::Content::File')) {
+        confess 'Cannot determine path: ',
+            ref $content || $content, ' is not not PFT::Content::File'
+    }
 
-    my $rel = File::Spec->abs2rel($path, $self->dir_blog);
-    $fname =~ s/^\d{2}-// if index($rel, File::Spec->updir) < 0;
+    return undef if $content->isa('PFT::Content::Month');
 
+    my $fname = basename($content->path);
+    $fname =~ s/^\d{2}-// if $content->isa('PFT::Content::Blog');
     $fname
 }
 

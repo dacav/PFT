@@ -5,3 +5,6 @@ Revision history for App-PFT
 
 0.5.1   2016-04-11
         Quite stable, used for App::PFT successfully
+
+0.5.3   2016-05-21
+        Changes needed to reflect App::PFT version 1.0.x, which is ready.
