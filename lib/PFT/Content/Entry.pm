@@ -158,7 +158,7 @@ sub make_consistent {
     my $hdr = $self->header;
     my($done, $rename);
 
-    my $pdate = $self->tree->path_to_date($self->path);
+    my $pdate = $self->tree->detect_date($self);
     if (defined $pdate) {
         my $hdt = $hdr->date;
         if (defined($hdt) and defined($hdt->y) and defined($hdt->m)) {
@@ -171,7 +171,7 @@ sub make_consistent {
         }
     } # else not in blog.
 
-    if ($hdr->slug ne $self->tree->path_to_slug($self->path)) {
+    if ($hdr->slug ne $self->tree->detect_slug($self)) {
         $rename ++;
     }
 
