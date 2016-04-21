@@ -148,19 +148,19 @@ my %CONF_RECIPE = do {
         'site-encoding'   => [1, '=s', $Encode::Locale::ENCODING_LOCALE,
             'Charset of the generated web pages'
         ],
-        'remote-method'   => [1, '=s', 'rsync+ssh',
+        'publish-method'  => [1, '=s', 'rsync+ssh',
             'Method used for publishing'
         ],
-        'remote-host'     => [0, '=s', 'example.org',
+        'publish-host'    => [0, '=s', 'example.org',
             'Remote host where to publish'
         ],
-        'remote-user'     => [0, '=s', $user,
+        'publish-user'    => [0, '=s', $user,
             'User login on publishing host'
         ],
-        'remote-port'     => [0, '=i', 22,
+        'publish-port'    => [0, '=i', 22,
             'Port for connection on publishing host'
         ],
-        'remote-path'     => [0, '=s', "/home/$user/public_html",
+        'publish-path'    => [0, '=s', "/home/$user/public_html",
             'Directory on publishing host'
         ],
         'system-editor'   => [0, '=s', "$editor %s",
