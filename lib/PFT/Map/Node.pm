@@ -139,7 +139,7 @@ sub seqnr { shift->{seqnr} }
 
 =item id
 
-Returns the mnemonic identifier, uniue for te whole site.
+Returns the mnemonic identifier, unique for the whole site.
 
 Reported verbatim as by constructor parameter.
 
