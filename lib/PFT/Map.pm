@@ -51,6 +51,7 @@ use PFT::Map::Node;
 use PFT::Map::Resolver qw/resolve/;
 use PFT::Text;
 use PFT::Header;
+use PFT::Date;
 
 sub new {
     my $cls = shift;
@@ -127,10 +128,10 @@ sub _content_id {
         't:' . ($hdr || $cntnt->header)->slug
     } elsif ($1 eq 'Blog') {
         my $hdr = ($hdr || $cntnt->header);
-        'b:' . $hdr->date->repr('') . ':' . $hdr->slug
+        'b:' . $hdr->date->repr . ':' . $hdr->slug
     } elsif ($1 eq 'Month') {
         my $hdr = ($hdr || $cntnt->header);
-        'm:' . $hdr->date->repr('')
+        'm:' . $hdr->date->repr
     } elsif ($1 eq 'Picture') {
         'i:' . join '/', $cntnt->relpath # No need for portability
     } elsif ($1 eq 'Attachment') {
@@ -412,6 +413,21 @@ zero the most recent entry is returned.
 =cut
 
 sub recent_months { shift->_recent('last_month', shift) }
+
+=item lookup_blog
+
+TODO doc
+
+=cut
+
+sub lookup_blog {
+    my $self = shift;
+    my $d = PFT::Date->new(shift, shift, shift)->repr(undef, '.*');
+    my $s = @_ ? PFT::Header::slugify(join ' ', @_) : '.*';
+    my $filter = qr/^b:$d:$s/;
+    my $idx = $self->{idx};
+    @{$idx}{grep m/$filter/, keys %$idx};
+}
 
 =back
 
