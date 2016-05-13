@@ -218,7 +218,14 @@ sub load {
 The following functions are not associated with an instance. Call them as
 C<PFT::Header::function(...)>
 
-=over 1 slugify
+=over
+
+=item slugify
+
+Given a string, construct a I<slug>, that is a simplified version of such
+string.
+
+(TODO: better describe it, also w.r.t. Unicode)
 
 =cut
 
@@ -233,9 +240,9 @@ sub slugify {
     lc $out
 };
 
-=head2 Properties
+=back
 
-=over 1
+=head2 Properties
 
     $hdr->title
     $hdr->author
@@ -246,7 +253,7 @@ sub slugify {
     $hdr->slug
     $hdr->tags_slug
 
-=cut
+=over
 
 =item title
 
@@ -316,13 +323,15 @@ sub tags_slug {
     map slugify($_) => @{shift->tags || []}
 }
 
-=over
+=back
 
 =head2 Methods
 
 =over
 
 =item set_date
+
+Setter for date. The parameter must be a PFT::Date object.
 
 =cut
 
