@@ -338,43 +338,76 @@ associated node, or undef if such node does not exist.
 sub node_of {
     my $self = shift;
     my $id = $self->_content_id(@_);
-
     exists $self->{idx}{$id} ? $self->{idx}{$id} : undef
+}
+
+=item id_to_node
+
+Given a unique mnemonic id (as in C<PFT::Content::Node::id>) returns the
+associated node, or C<undef> if there is no such node.
+
+=cut
+
+sub id_to_node {
+    my $idx = shift->{idx};
+    my $id = shift;
+    exists $idx->{$id} ? $idx->{$id} : undef
 }
 
 =item recent_blog
 
-The I<N> most recent blog nodes.
+Getter for the most recent blog nodes.
 
-The number I<N> is given as parameter, and defaults to 1. The method
-returns up to I<N> nodes, ordered by date, from most to least recent.
+The number I<N> can be provided as parameter, and defaults to 1 if not
+provided.
+
+In list context returns the I<N> most recent blog nodes, ordered by date,
+from most to least recent. Less than I<N> nodes will be returned if I<N>
+is greater than the number of available entries.
+
+In scalar context returns the I<N>-th to last entry. For I<N> equal to
+zero the most recent entry is returned.
 
 =cut
 
 sub _recent {
     my($self, $key, $n) = @_;
 
-    $n = 1 unless defined $n;
-    confess "Requires N > 0, got $n" if $n < 1;
+    $n = 0 unless defined $n;
+    confess "Requires N > 0, got $n" if $n < 0;
 
-    my @out;
     my $cursor = $self->{$key};
-    while ($n -- && defined $cursor) {
-        push @out, $cursor;
-        $cursor = $cursor->prev;
-    }
 
-    @out;
+    wantarray ? do {
+        my @out;
+        while ($n -- && defined $cursor) {
+            push @out, $cursor;
+            $cursor = $cursor->prev;
+        }
+        @out;
+    } : do {
+        while ($n -- && defined $cursor) {
+            $cursor = $cursor->prev;
+        }
+        $cursor;
+    }
 }
 
 sub recent_blog { shift->_recent('last', shift) }
 
 =item recent_months
 
-The I<N> most recent months node.
+Getter for the most recent month nodes.
 
-The number I<N> is given as parameter, and defaults to 1. The method
-returns up to I<N> nodes, ordered by date, from most to least recent.
+The number I<N> can be provided as parameter, and defaults to 1 if not
+provided.
+
+In list context returns the I<N> most recent month nodes, ordered by date,
+from most to least recent. Less than I<N> nodes will be returned if I<N>
+is greater than the number of available entries.
+
+In scalar context returns the I<N>-th to last entry. For I<N> equal to
+zero the most recent entry is returned.
 
 =cut
 

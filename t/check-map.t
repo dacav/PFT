@@ -140,4 +140,17 @@ while (my($i, $node) = each @dumped) {
     }
 }
 
+# Testing locating capabilities
+is_deeply(
+    scalar $map->recent_blog(),
+    $map->id_to_node('b:2014-02-05:blog-post-nr-12'),
+    'Scalar recent_blog()'
+);
+
+is_deeply(
+    scalar $map->recent_blog(2),
+    $map->id_to_node('b:2014-01-03:blog-post-nr-3'),
+    'Scalar recent_blog(N)'
+);
+
 done_testing();
