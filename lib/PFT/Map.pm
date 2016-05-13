@@ -361,7 +361,7 @@ Getter for the most recent blog nodes.
 The number I<N> can be provided as parameter, and defaults to 1 if not
 provided.
 
-In list context returns the I<N> most recent blog nodes, ordered by date,
+In list context returns the I<N> + 1 most recent blog nodes, ordered by date,
 from most to least recent. Less than I<N> nodes will be returned if I<N>
 is greater than the number of available entries.
 
@@ -379,10 +379,10 @@ sub _recent {
     my $cursor = $self->{$key};
 
     wantarray ? do {
-        my @out;
+        my @out = $cursor;
         while ($n -- && defined $cursor) {
-            push @out, $cursor;
             $cursor = $cursor->prev;
+            push @out, $cursor;
         }
         @out;
     } : do {
@@ -402,7 +402,7 @@ Getter for the most recent month nodes.
 The number I<N> can be provided as parameter, and defaults to 1 if not
 provided.
 
-In list context returns the I<N> most recent month nodes, ordered by date,
+In list context returns the I<N> + 1 most recent month nodes, ordered by date,
 from most to least recent. Less than I<N> nodes will be returned if I<N>
 is greater than the number of available entries.
 

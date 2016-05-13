@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 21;
+use Test::More tests => 25;
 
 use PFT::Content;
 use PFT::Header;
@@ -151,6 +151,27 @@ is_deeply(
     scalar $map->recent_blog(2),
     $map->id_to_node('b:2014-01-03:blog-post-nr-3'),
     'Scalar recent_blog(N)'
+);
+
+is_deeply(
+    [$map->recent_blog()],
+    [$map->id_to_node('b:2014-02-05:blog-post-nr-12')],
+    'List recent_blog()'
+);
+
+is_deeply(
+    [
+        $map->recent_blog(3)
+    ],
+    [
+        map{ $map->id_to_node($_) } qw(
+            b:2014-02-05:blog-post-nr-12
+            b:2014-02-04:blog-post-nr-2
+            b:2014-01-03:blog-post-nr-3
+            b:2014-01-02:blog-post-nr-11
+        )
+    ],
+    'List recent_blog(3)'
 );
 
 done_testing();
