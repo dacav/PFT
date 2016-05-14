@@ -414,21 +414,6 @@ zero the most recent entry is returned.
 
 sub months_recent { shift->_recent('last_month', shift) }
 
-=item blog_lookup
-
-TODO doc
-
-=cut
-
-sub blog_lookup {
-    my $self = shift;
-    my $d = PFT::Date->new(shift, shift, shift)->repr(undef, '.*');
-    my $s = @_ ? PFT::Header::slugify(join ' ', @_) : '.*';
-    my $filter = qr/^b:$d:$s/;
-    my $idx = $self->{idx};
-    @{$idx}{grep m/$filter/, keys %$idx};
-}
-
 =back
 
 =cut
