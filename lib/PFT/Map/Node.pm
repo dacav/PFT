@@ -361,7 +361,7 @@ sub html {
     my $self = shift;
     return undef if $self->virtual;
 
-    my $mkhref = shift;
+    my $mkhref = shift or confess "Missing mkref parameter";
     $self->_text->html_resolved(
         map {
             defined($_)
