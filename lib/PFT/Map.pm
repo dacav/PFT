@@ -355,7 +355,7 @@ sub id_to_node {
     exists $idx->{$id} ? $idx->{$id} : undef
 }
 
-=item recent_blog
+=item blog_recent
 
 Getter for the most recent blog nodes.
 
@@ -394,9 +394,9 @@ sub _recent {
     }
 }
 
-sub recent_blog { shift->_recent('last', shift) }
+sub blog_recent { shift->_recent('last', shift) }
 
-=item recent_months
+=item months_recent
 
 Getter for the most recent month nodes.
 
@@ -412,15 +412,15 @@ zero the most recent entry is returned.
 
 =cut
 
-sub recent_months { shift->_recent('last_month', shift) }
+sub months_recent { shift->_recent('last_month', shift) }
 
-=item lookup_blog
+=item blog_lookup
 
 TODO doc
 
 =cut
 
-sub lookup_blog {
+sub blog_lookup {
     my $self = shift;
     my $d = PFT::Date->new(shift, shift, shift)->repr(undef, '.*');
     my $s = @_ ? PFT::Header::slugify(join ' ', @_) : '.*';
