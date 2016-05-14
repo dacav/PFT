@@ -310,14 +310,33 @@ sub _text {
 sub symbols { shift->_text->symbols }
 
 sub add_symbol_unres {
-    push @{shift->{unres_syms}}, [@_]
+    # Arguments: symbol => error message
+    my $self = shift;
+
+    $self->{unres_syms_flush} ++;
+    push @{$self->{unres_syms}}, [@_]
 }
 
+# NOTE:
+#
+# Unresolved symbols are not bad per se, but should probably be notified
+# to the user. Since this is a library, the calling code is responsible
+# for notifying the user whenever it feels like. We warn on STDERR if the
+# list of unresolved symbols is never retrieved.
 sub symbols_unres {
     my $self = shift;
+    delete $self->{unres_syms_flush};
+
     exists $self->{unres_syms}
         ? @{$self->{unres_syms}}
         : ()
+}
+
+sub DESTROY {
+    my $self = shift;
+    return unless exists $self->{unres_syms_flush};
+    warn 'Unnoticed unresolved symbols for PFT::Map::Node ', $self->id,
+         '. Please use PFT::Map::Node::symbols_unres'
 }
 
 =head2 More complex methods

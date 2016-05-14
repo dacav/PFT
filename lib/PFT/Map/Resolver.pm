@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Map::Resolver v0.5.4;
+package PFT::Map::Resolver v0.6.0;
 
 =encoding utf8
 
@@ -65,6 +65,10 @@ use PFT::Header;
 
 sub resolve {
     my($map, $node, $symbol) = @_;
+
+    confess 'Third argument (', ($symbol || 'undef'),
+            ') must be PFT::Text::Symbol'
+        unless $symbol && $symbol->isa('PFT::Text::Symbol');
 
     my $kwd = $symbol->keyword;
     if ($kwd =~ /^(pic|page|blog|attach|tag)$/n) {

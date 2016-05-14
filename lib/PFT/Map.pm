@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Map v0.5.4;
+package PFT::Map v0.6.4;
 
 =encoding utf8
 
