@@ -24,6 +24,7 @@ lib/PFT/Date.pm
 lib/PFT/Header.pm
 lib/PFT/Map
 lib/PFT/Map.pm
+lib/PFT/Map/Index.pm
 lib/PFT/Map/Node.pm
 lib/PFT/Map/Resolver.pm
 lib/PFT/Text.pm

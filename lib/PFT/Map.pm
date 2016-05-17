@@ -49,6 +49,7 @@ use Encode::Locale qw/$ENCODING_LOCALE/;
 
 use PFT::Map::Node;
 use PFT::Map::Resolver qw/resolve/;
+use PFT::Map::Index;
 use PFT::Text;
 use PFT::Header;
 use PFT::Date;
@@ -102,50 +103,13 @@ sub _resolve {
     delete $self->{toresolve}
 };
 
-sub _content_id {
-    # Given a PFT::Content::Base (or any subclass) object, returns a
-    # string uniquely identifying it across the site. E.g.:
-    #
-    #     my $id = $map->_content_id($content);
-    #     my $id = $map->_content_id($virtual_page, $hdr);
-    #     my $id = $map->_content_id(undef, $hdr);
-    #
-    # Form 1: for any content
-
-    my($self, $cntnt, $hdr) = @_;
-
-    unless (defined $cntnt) {
-        confess 'No content, no header?' unless defined $hdr;
-        $cntnt = $self->{tree}->entry($hdr);
-    }
-
-    ref($cntnt) =~ /PFT::Content::(Page|Blog|Picture|Attachment|Tag|Month)/
-        or confess 'Unsupported in content to id: ' . ref($cntnt);
-
-    if ($1 eq 'Page') {
-        'p:' . ($hdr || $cntnt->header)->slug
-    } elsif ($1 eq 'Tag') {
-        't:' . ($hdr || $cntnt->header)->slug
-    } elsif ($1 eq 'Blog') {
-        my $hdr = ($hdr || $cntnt->header);
-        'b:' . $hdr->date->repr . ':' . $hdr->slug
-    } elsif ($1 eq 'Month') {
-        my $hdr = ($hdr || $cntnt->header);
-        'm:' . $hdr->date->repr
-    } elsif ($1 eq 'Picture') {
-        'i:' . join '/', $cntnt->relpath # No need for portability
-    } elsif ($1 eq 'Attachment') {
-        'a:' . join '/', $cntnt->relpath # Ditto
-    } else { die };
-}
-
 sub _mknod {
     my $self = shift;
     my($cntnt, $hdr) = @_;
 
     my $node = PFT::Map::Node->new(
         $self->{next} ++,
-        (my $id = $self->_content_id(@_)),
+        (my $id = $self->index->content_id(@_)),
         @_,
     );
 
@@ -270,7 +234,20 @@ List of tag nodes
 
 sub tags { shift->_grep_content('PFT::Content::Tag') }
 
+=item index
+
+The PFT::Map::Index object associated to this map.
+
+It handles the unique identifiers of content items and can be used to
+query the map.
+
+=cut
+
+sub index { PFT::Map::Index->new(shift) }
+
 =item dump
+
+# TODO: move forward this description, as method
 
 Dump of the nodes in a easy-to-display form, that is a list of
 dictionaries.
@@ -338,7 +315,7 @@ associated node, or undef if such node does not exist.
 
 sub node_of {
     my $self = shift;
-    my $id = $self->_content_id(@_);
+    my $id = $self->index->content_id(@_);
     exists $self->{idx}{$id} ? $self->{idx}{$id} : undef
 }
 
