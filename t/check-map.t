@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 21;
+use Test::More tests => 25;
 
 use PFT::Content;
 use PFT::Header;
@@ -139,5 +139,39 @@ while (my($i, $node) = each @dumped) {
         );
     }
 }
+
+# Testing locating capabilities
+is_deeply(
+    scalar $map->blog_recent(),
+    $map->id_to_node('b:2014-02-05:blog-post-nr-12'),
+    'Scalar blog_recent()'
+);
+
+is_deeply(
+    scalar $map->blog_recent(2),
+    $map->id_to_node('b:2014-01-03:blog-post-nr-3'),
+    'Scalar blog_recent(N)'
+);
+
+is_deeply(
+    [$map->blog_recent()],
+    [$map->id_to_node('b:2014-02-05:blog-post-nr-12')],
+    'List blog_recent()'
+);
+
+is_deeply(
+    [
+        $map->blog_recent(3)
+    ],
+    [
+        map{ $map->id_to_node($_) } qw(
+            b:2014-02-05:blog-post-nr-12
+            b:2014-02-04:blog-post-nr-2
+            b:2014-01-03:blog-post-nr-3
+            b:2014-01-02:blog-post-nr-11
+        )
+    ],
+    'List blog_recent(3)'
+);
 
 done_testing();

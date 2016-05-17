@@ -188,10 +188,14 @@ string, by default C<'-'>
 
 sub repr {
     my $self = shift;
-    join shift || '-',
-        defined $self->[0] ? sprintf('%04d', $self->[0]) : '*',
-        defined $self->[1] ? sprintf('%02d', $self->[1]) : '*',
-        defined $self->[2] ? sprintf('%02d', $self->[2]) : '*';
+    my $sep = shift;
+    my $none = shift;
+
+    $none = '*' unless defined $none;
+    join defined $sep ? $sep : '-',
+        defined $self->[0] ? sprintf('%04d', $self->[0]) : $none,
+        defined $self->[1] ? sprintf('%02d', $self->[1]) : $none,
+        defined $self->[2] ? sprintf('%02d', $self->[2]) : $none;
 }
 
 =item derive

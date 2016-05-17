@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Map v0.5.4;
+package PFT::Map v0.6.4;
 
 =encoding utf8
 
@@ -51,6 +51,7 @@ use PFT::Map::Node;
 use PFT::Map::Resolver qw/resolve/;
 use PFT::Text;
 use PFT::Header;
+use PFT::Date;
 
 sub new {
     my $cls = shift;
@@ -127,10 +128,10 @@ sub _content_id {
         't:' . ($hdr || $cntnt->header)->slug
     } elsif ($1 eq 'Blog') {
         my $hdr = ($hdr || $cntnt->header);
-        'b:' . $hdr->date->repr('') . ':' . $hdr->slug
+        'b:' . $hdr->date->repr . ':' . $hdr->slug
     } elsif ($1 eq 'Month') {
         my $hdr = ($hdr || $cntnt->header);
-        'm:' . $hdr->date->repr('')
+        'm:' . $hdr->date->repr
     } elsif ($1 eq 'Picture') {
         'i:' . join '/', $cntnt->relpath # No need for portability
     } elsif ($1 eq 'Attachment') {
@@ -338,47 +339,80 @@ associated node, or undef if such node does not exist.
 sub node_of {
     my $self = shift;
     my $id = $self->_content_id(@_);
-
     exists $self->{idx}{$id} ? $self->{idx}{$id} : undef
 }
 
-=item recent_blog
+=item id_to_node
 
-The I<N> most recent blog nodes.
+Given a unique mnemonic id (as in C<PFT::Content::Node::id>) returns the
+associated node, or C<undef> if there is no such node.
 
-The number I<N> is given as parameter, and defaults to 1. The method
-returns up to I<N> nodes, ordered by date, from most to least recent.
+=cut
+
+sub id_to_node {
+    my $idx = shift->{idx};
+    my $id = shift;
+    exists $idx->{$id} ? $idx->{$id} : undef
+}
+
+=item blog_recent
+
+Getter for the most recent blog nodes.
+
+The number I<N> can be provided as parameter, and defaults to 1 if not
+provided.
+
+In list context returns the I<N> + 1 most recent blog nodes, ordered by date,
+from most to least recent. Less than I<N> nodes will be returned if I<N>
+is greater than the number of available entries.
+
+In scalar context returns the I<N>-th to last entry. For I<N> equal to
+zero the most recent entry is returned.
 
 =cut
 
 sub _recent {
     my($self, $key, $n) = @_;
 
-    $n = 1 unless defined $n;
-    confess "Requires N > 0, got $n" if $n < 1;
+    $n = 0 unless defined $n;
+    confess "Requires N > 0, got $n" if $n < 0;
 
-    my @out;
     my $cursor = $self->{$key};
-    while ($n -- && defined $cursor) {
-        push @out, $cursor;
-        $cursor = $cursor->prev;
-    }
 
-    @out;
+    wantarray ? do {
+        my @out = $cursor;
+        while ($n -- && defined $cursor) {
+            $cursor = $cursor->prev;
+            push @out, $cursor;
+        }
+        @out;
+    } : do {
+        while ($n -- && defined $cursor) {
+            $cursor = $cursor->prev;
+        }
+        $cursor;
+    }
 }
 
-sub recent_blog { shift->_recent('last', shift) }
+sub blog_recent { shift->_recent('last', shift) }
 
-=item recent_months
+=item months_recent
 
-The I<N> most recent months node.
+Getter for the most recent month nodes.
 
-The number I<N> is given as parameter, and defaults to 1. The method
-returns up to I<N> nodes, ordered by date, from most to least recent.
+The number I<N> can be provided as parameter, and defaults to 1 if not
+provided.
+
+In list context returns the I<N> + 1 most recent month nodes, ordered by date,
+from most to least recent. Less than I<N> nodes will be returned if I<N>
+is greater than the number of available entries.
+
+In scalar context returns the I<N>-th to last entry. For I<N> equal to
+zero the most recent entry is returned.
 
 =cut
 
-sub recent_months { shift->_recent('last_month', shift) }
+sub months_recent { shift->_recent('last_month', shift) }
 
 =back
 
