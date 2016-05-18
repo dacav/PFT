@@ -198,6 +198,20 @@ List of the nodes
 
 sub nodes { values %{shift->{idx}} }
 
+=item ids
+
+List of the mnemonic ids.
+
+    map $m->id_to_node($_), $m->ids
+
+is equivalent to
+
+    $m->nodes
+
+=cut
+
+sub ids { keys %{shift->{idx}} }
+
 =item tree
 
 The associated content tree
