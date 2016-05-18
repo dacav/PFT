@@ -79,10 +79,11 @@ sub new {
 sub _resolve {
     # Resolving items in $self->{toresolve}. They are inserted in _mknod.
     my $self = shift;
+    my $index = $self->index;
 
     for my $node (@{$self->{toresolve}}) {
         for my $s ($node->symbols) {
-            my $resolved = eval { resolve($self, $node, $s) };
+            my $resolved = eval { $index->resolve($node, $s) };
             if (defined $resolved) {
                 if (!ref($resolved) || $resolved->isa('PFT::Map::Node')) {
                     # scalar or other node
