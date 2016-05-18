@@ -150,13 +150,13 @@ sub resolve {
 
     my $kwd = $symbol->keyword;
     if ($kwd =~ /^(pic|page|blog|attach|tag)$/n) {
-        &resolve_local
+        &_resolve_local
     } else {
-        &resolve_remote
+        &_resolve_remote
     }
 }
 
-sub resolve_local {
+sub _resolve_local {
     my($self, $node, $symbol) = @_;
 
     my $map = $self->map;
@@ -171,7 +171,7 @@ sub resolve_local {
         );
         $map->node_of($map->tree->entry($hdr), $hdr);
     } elsif ($kwd eq 'blog') {
-        &resolve_local_blog;
+        &_resolve_local_blog;
     } elsif ($kwd eq 'tag') {
         my $hdr = PFT::Header->new(
             title => join(' ', $symbol->args),
@@ -182,7 +182,7 @@ sub resolve_local {
     }
 }
 
-sub resolve_local_blog {
+sub _resolve_local_blog {
     my($self, $node, $symbol) = @_;
 
     my @args = $symbol->args;
@@ -199,7 +199,7 @@ sub resolve_local_blog {
     }
 }
 
-sub resolve_remote {
+sub _resolve_remote {
     my($self, $node, $symbol) = @_;
 
     my $out;
