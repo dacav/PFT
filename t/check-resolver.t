@@ -23,53 +23,79 @@ use Encode;
 my $root = File::Temp->newdir;
 my $tree = PFT::Tree->new($root, {create=>1})->content;
 
-# Populating
+# --- Populating  ------------------------------------------------------
 
-do {
-    my $page = $tree->new_entry(PFT::Header->new(title => 'A page¹'));
-    my $f = $page->open('a');
-    binmode $f, 'utf8';
-    print $f <<'    EOF' =~ s/^    //rgms;
-    This is a page, referring [the blog page](:blog:back)
-    EOF
+sub enter {
+    my $f = $tree->new_entry(shift)->open('a');
+    print $f @_;
     close $f;
 };
-do {
-    my $entry = $tree->new_entry(PFT::Header->new(
-        title => 'Hello',
+
+enter(
+    PFT::Header->new(title => 'A page¹'),
+    <<'    EOF' =~ s/^    //rgms
+    This is a page, referring [the blog page](:blog:back) will fail.
+    I can however refer to [this page](:page:a-page).
+    EOF
+);
+enter(
+    PFT::Header->new(
+        title => 'Hello 1',
         date => PFT::Date->new(2014, 1, 3),
         tags => ['tag1'],
-    ));
-    my $f = $entry->open('a');
-
-    print $f <<'    EOF' =~ s/^    //rgms;
+    ),
+    <<'    EOF' =~ s/^    //rgms
     This is an entry where I refer to [some page][1]
 
     [1]: :page:a-page
     EOF
-    close $f;
-};
-do {
-    my $entry = $tree->new_entry(PFT::Header->new(
+);
+enter(
+    PFT::Header->new(
         title => 'Hello 2',
         date => PFT::Date->new(2014, 1, 4),
         tags => ['tag1'],
-    ));
-    my $f = $entry->open('a');
-
-    print $f <<'    EOF' =~ s/^    //rgms;
-    This is an entry where I refer to [previous one][1]
+    ),
+    <<'    EOF' =~ s/^    //rgms
+    This is another entry where I refer to [previous one][1]
 
     [1]: :blog:back
     EOF
-    close $f;
-};
+);
+enter(
+    PFT::Header->new(
+        title => 'Hello 3',
+        date => PFT::Date->new(2014, 1, 5),
+        tags => ['tag1'],
+    ),
+    <<'    EOF' =~ s/^    //rgms
+    This is another entry where I refer to [previous one][1]
+    And to the [first](:blog:back/2)
+
+    [1]: :blog:back
+    EOF
+);
+
+# --/ Populating  ------------------------------------------------------
 
 my $map = PFT::Map->new($tree);
 
-ok_corresponds('p:a-page');
-ok_corresponds('b:2014-01-03:hello', 'p:a-page');
-ok_corresponds('b:2014-01-04:hello-2', 'b:2014-01-03:hello');
+ok_corresponds('p:a-page',
+    'p:a-page'
+);
+
+ok_corresponds('b:2014-01-03:hello-1',
+    'p:a-page'
+);
+
+ok_corresponds('b:2014-01-04:hello-2',
+    'b:2014-01-03:hello-1'
+);
+
+ok_corresponds('b:2014-01-05:hello-3',
+    'b:2014-01-04:hello-2',
+    'b:2014-01-03:hello-1'
+);
 
 do {
     # Point is: a page cannot point to :blog:back, because there's no
