@@ -36,8 +36,14 @@ enter(
     <<'    EOF' =~ s/^    //rgms
     This is a page, referring [the blog page](:blog:back) will fail.
     I can however refer to [this page](:page:a-page).
+
+    There's one picture:
+    ![test](:pic:foo/bar.png)
     EOF
 );
+
+$tree->pic('foo', 'bar.png')->open('a');
+
 enter(
     PFT::Header->new(
         title => 'Hello 1',
@@ -81,26 +87,29 @@ enter(
 my $map = PFT::Map->new($tree);
 
 ok_corresponds('p:a-page',
-    'p:a-page'
+    'p:a-page',
+    'i:foo/bar.png',
 );
 
 ok_corresponds('b:2014-01-03:hello-1',
-    'p:a-page'
+    'p:a-page',
 );
 
 ok_corresponds('b:2014-01-04:hello-2',
-    'b:2014-01-03:hello-1'
+    'b:2014-01-03:hello-1',
 );
 
 ok_corresponds('b:2014-01-05:hello-3',
     'b:2014-01-04:hello-2',
-    'b:2014-01-03:hello-1'
+    'b:2014-01-03:hello-1',
 );
 
 do {
     # Point is: a page cannot point to :blog:back, because there's no
     # relative number of steps back!
     my @unres = $map->id_to_node('p:a-page')->symbols_unres;
+    diag('Listing links in p:a-page:');
+    diag(' - ', join(' ', grep defined, @$_)) for @unres;
     is(scalar(@unres), 1,      'Broken link test');
     my($sym, $err) = @{$unres[0]};
     is($sym->keyword, 'blog',         '  key=blog');
