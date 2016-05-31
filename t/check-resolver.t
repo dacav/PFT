@@ -108,9 +108,9 @@ do {
     # Point is: a page cannot point to :blog:back, because there's no
     # relative number of steps back!
     my @unres = $map->id_to_node('p:a-page')->symbols_unres;
-    diag('Listing links in p:a-page:');
+    diag('Listing unresolved links in p:a-page:');
     diag(' - ', join(' ', grep defined, @$_)) for @unres;
-    is(scalar(@unres), 1,      'Broken link test');
+    is(scalar(@unres), 1,      'Broken link test, expected 1 unresolved');
     my($sym, $err) = @{$unres[0]};
     is($sym->keyword, 'blog',         '  key=blog');
     is_deeply([$sym->args], ['back'], '  args=[back]');
