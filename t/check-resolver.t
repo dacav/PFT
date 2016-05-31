@@ -39,10 +39,13 @@ enter(
 
     There's one picture:
     ![test](:pic:foo/bar.png)
+
+    Here's an [attachment](:attach:badhorse/evil.mov)
     EOF
 );
 
 $tree->pic('foo', 'bar.png')->open('a');
+$tree->attachment('badhorse', 'evil.mov')->open('a');
 
 enter(
     PFT::Header->new(
@@ -89,6 +92,7 @@ my $map = PFT::Map->new($tree);
 ok_corresponds('p:a-page',
     'p:a-page',
     'i:foo/bar.png',
+    'a:badhorse/evil.mov',
 );
 
 ok_corresponds('b:2014-01-03:hello-1',
