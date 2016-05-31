@@ -164,7 +164,7 @@ sub _resolve_local {
     if ($kwd eq 'pic') {
         $map->id_to_node('i:' . join '/', $symbol->args);
     } elsif ($kwd eq 'attach') {
-        $map->node_of($map->tree->attachment($symbol->args));
+        $map->id_to_node('a:' . join '/', $symbol->args);
     } elsif ($kwd eq 'page') {
         my $hdr = PFT::Header->new(
             title => join(' ', $symbol->args),
