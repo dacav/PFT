@@ -168,10 +168,7 @@ sub _resolve_local {
     } elsif ($kwd eq 'attach') {
         $map->id_to_node('a:' . join '/', $symbol->args);
     } elsif ($kwd eq 'page') {
-        my $hdr = PFT::Header->new(
-            title => join(' ', $symbol->args),
-        );
-        $map->node_of($map->tree->entry($hdr), $hdr);
+        $map->id_to_node('p:' . PFT::Header::slugify(join ' ', $symbol->args));
     } elsif ($kwd eq 'blog') {
         &_resolve_local_blog;
     } elsif ($kwd eq 'tag') {
