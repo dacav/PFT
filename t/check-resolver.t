@@ -113,7 +113,11 @@ do {
     # relative number of steps back!
     my @unres = $map->id_to_node('p:a-page')->symbols_unres;
     diag('Listing unresolved links in p:a-page:');
+
+    # Beware: if something is broken, the second element of each @unres is
+    # going to be the error message!
     diag(' - ', join(' ', grep defined, @$_)) for @unres;
+
     is(scalar(@unres), 1,      'Broken link test, expected 1 unresolved');
     my($sym, $err) = @{$unres[0]};
     is($sym->keyword, 'blog',         '  key=blog');

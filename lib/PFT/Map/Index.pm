@@ -107,6 +107,8 @@ sub content_id {
     ref($cntnt) =~ /PFT::Content::(Page|Blog|Picture|Attachment|Tag|Month)/
         or confess 'Unsupported in content to id: ' . ref($cntnt);
 
+    # NOTE: changes here must be reflected down this file, in
+    #       _resolve_local
     if ($1 eq 'Page') {
         'p:' . ($hdr || $cntnt->header)->slug
     } elsif ($1 eq 'Tag') {
