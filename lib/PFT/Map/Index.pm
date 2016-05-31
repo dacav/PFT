@@ -162,7 +162,7 @@ sub _resolve_local {
     my $map = $self->map;
     my $kwd = $symbol->keyword;
     if ($kwd eq 'pic') {
-        $map->node_of($map->tree->pic($symbol->args));
+        $map->id_to_node('i:' . join '/', $symbol->args);
     } elsif ($kwd eq 'attach') {
         $map->node_of($map->tree->attachment($symbol->args));
     } elsif ($kwd eq 'page') {
