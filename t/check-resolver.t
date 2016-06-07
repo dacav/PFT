@@ -68,7 +68,10 @@ enter(
     <<'    EOF' =~ s/^    //rgms
     This is another entry where I refer to [previous one][1]
 
+    All these entries are tagged with [the infamous tag1][t1]!
+
     [1]: :blog:back
+    [t1]: :tag:tag1
     EOF
 );
 enter(
@@ -101,6 +104,7 @@ ok_corresponds('b:2014-01-03:hello-1',
 
 ok_corresponds('b:2014-01-04:hello-2',
     'b:2014-01-03:hello-1',
+    't:tag1',
 );
 
 ok_corresponds('b:2014-01-05:hello-3',
