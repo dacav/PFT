@@ -196,7 +196,14 @@ List of the nodes
 
 =cut
 
-sub nodes { values %{shift->{idx}} }
+sub nodes {
+    my $self = shift;
+    if (@_) {
+        @{$self->{idx}}{@_}
+    } else {
+        values %{$self->{idx}}
+    }
+}
 
 =item ids
 

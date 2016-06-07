@@ -88,6 +88,15 @@ enter(
     EOF
 );
 
+enter(
+    PFT::Header->new(title => 'Another page'),
+    <<'    EOF' =~ s/^    //rgms
+    This is another page, referencing [the post of 2014/1/5][1]
+
+    [1]: :blog:d/2014/1/5
+    EOF
+);
+
 # --/ Populating  ------------------------------------------------------
 
 my $map = PFT::Map->new($tree);
@@ -110,6 +119,10 @@ ok_corresponds('b:2014-01-04:hello-2',
 ok_corresponds('b:2014-01-05:hello-3',
     'b:2014-01-04:hello-2',
     'b:2014-01-03:hello-1',
+);
+
+ok_corresponds('p:another-page',
+    'b:2014-01-05:hello-3',
 );
 
 do {
