@@ -12,7 +12,6 @@ use PFT::Tree;
 use PFT::Content;
 use PFT::Header;
 use PFT::Map;
-use PFT::Map::Resolver qw(resolve);
 
 use File::Spec;
 use File::Temp;
@@ -87,13 +86,43 @@ enter(
     [1]: :blog:back
     EOF
 );
-
 enter(
     PFT::Header->new(title => 'Another page'),
     <<'    EOF' =~ s/^    //rgms
     This is another page, referencing [the post of 2014/1/5][1]
 
     [1]: :blog:d/2014/1/5
+    EOF
+);
+
+# -- Simulating multiple entries per day ---------------------------------
+
+enter(
+    PFT::Header->new(
+        title => 'Hello 4',
+        date => PFT::Date->new(2014, 1, 6),
+    ),
+    <<'    EOF' =~ s/^    //rgms
+    The first entry of 2014/1/6
+    EOF
+);
+enter(
+    PFT::Header->new(
+        title => 'Hello 5',
+        date => PFT::Date->new(2014, 1, 6),
+    ),
+    <<'    EOF' =~ s/^    //rgms
+    The the second entry of 2014/1/6. Links to this day *must* specify
+    also the title, or will get an ambiguous selection of entry.
+    EOF
+);
+enter(
+    PFT::Header->new(
+        title => 'A page testing multi-entry days',
+        slug => 'multi-test',
+    ),
+    <<'    EOF' =~ s/^    //rgms
+    The entry (which one?) of day [2014/1/6](:blog:d/2014/1/6)
     EOF
 );
 
@@ -106,6 +135,7 @@ ok_corresponds('p:a-page',
     'i:foo/bar.png',
     'a:badhorse/evil.mov',
 );
+ok_broken('p:a-page', qr/blog/ => ['back']);
 
 ok_corresponds('b:2014-01-03:hello-1',
     'p:a-page',
@@ -125,21 +155,37 @@ ok_corresponds('p:another-page',
     'b:2014-01-05:hello-3',
 );
 
-do {
-    # Point is: a page cannot point to :blog:back, because there's no
-    # relative number of steps back!
-    my @unres = $map->id_to_node('p:a-page')->symbols_unres;
-    diag('Listing unresolved links in p:a-page:');
+ok_corresponds('p:multi-test');
+ok_broken('p:multi-test',
+    qr/blog/ => ['d', 2014, 1, 6]
+);
 
+sub ok_broken {
+    # NOTE: because of side-effects of symbol resolutions, calling
+    # ok_broken works onli if you called ok_corresponds first.
+
+    my $nodeid = shift;
+    my @unres = $map->id_to_node($nodeid)->symbols_unres;
+
+    is(scalar(@unres), (@_ / 2),
+        'Expected '.(@_/2)." unresolved for $nodeid, got ".scalar(@unres)
+    );
     # Beware: if something is broken, the second element of each @unres is
     # going to be the error message!
+    diag('Listing them all:');
     diag(' - ', join(' ', grep defined, @$_)) for @unres;
 
-    is(scalar(@unres), 1,      'Broken link test, expected 1 unresolved');
-    my($sym, $err) = @{$unres[0]};
-    is($sym->keyword, 'blog',         '  key=blog');
-    is_deeply([$sym->args], ['back'], '  args=[back]');
-};
+    foreach (@unres) {
+        my($sym, $err) = @{$_};
+        my $exp_kw = shift @_;
+        my $exp_args = shift @_;
+
+        ok($sym->keyword =~ $exp_kw, "Symbol $sym =~ $exp_kw");
+        is_deeply([$sym->args], $exp_args,
+            '  with args: [' . join(' ', $sym->args). "] is [@$exp_args]"
+        )
+    }
+}
 
 sub ok_corresponds {
     my $nodeid = shift;

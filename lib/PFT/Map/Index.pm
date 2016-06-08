@@ -193,7 +193,8 @@ sub _resolve_local_blog {
         $node;
     } elsif ($method =~ /^(d|date)$/n) {
         confess "Incomplete date" if 3 > grep defined, @args;
-        my $pattern = sprintf 'b:%04d-%02d-%02d:.*', @args;
+        push @args, '.*' if 3 == @args;
+        my $pattern = sprintf 'b:%04d-%02d-%02d:%s', @args;
         $map->nodes(grep /^$pattern$/, $map->ids);
     } else {
         confess "Unrecognized blog lookup $method";

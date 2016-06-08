@@ -48,7 +48,6 @@ use File::Spec;
 use Encode::Locale qw/$ENCODING_LOCALE/;
 
 use PFT::Map::Node;
-use PFT::Map::Resolver qw/resolve/;
 use PFT::Map::Index;
 use PFT::Text;
 use PFT::Header;
@@ -83,7 +82,12 @@ sub _resolve {
 
     for my $node (@{$self->{toresolve}}) {
         for my $s ($node->symbols) {
-            my $resolved = eval { $index->resolve($node, $s) };
+            my $resolved = eval {
+                my @rs = $index->resolve($node, $s);
+                croak "Multiple results: @rs\n" if @rs > 1;
+                $rs[0]
+            };
+
             if (defined $resolved) {
                 if (!ref($resolved) || $resolved->isa('PFT::Map::Node')) {
                     # scalar or other node

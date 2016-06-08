@@ -63,9 +63,13 @@ public construction. Use the C<scan_html> multi-constructor instead.
 
 =head2 Construction
 
-There's no single object constructor. Construction goes through
-C<PFT::Text::Symbol-E<gt>scan_html>, which expects an HTML string as
-parameter and returns a list of blessed symbols.
+Construction usually goes through C<PFT::Text::Symbol-E<gt>scan_html>,
+which expects an HTML string as parameter and returns a list of blessed
+symbols.
+
+For other needs (e.g. testing):
+
+    PFT::Text::Symbol->new($keyword, [$arg1, …, $argn], $start, $length)
 
 =cut
 
@@ -93,6 +97,11 @@ sub scan_html {
     }
 
     sort { $a->start <=> $b->start } @out;
+}
+
+sub new {
+    my $cls = shift;
+    bless [@_], $cls;
 }
 
 use utf8;
