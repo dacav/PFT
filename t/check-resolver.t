@@ -123,6 +123,7 @@ enter(
     ),
     <<'    EOF' =~ s/^    //rgms
     The entry (which one?) of day [2014/1/6](:blog:d/2014/1/6)
+    This should give me a error, as there's no such name: [here](:blog:d/2014/1/6/hello-9000)
     EOF
 );
 
@@ -157,7 +158,8 @@ ok_corresponds('p:another-page',
 
 ok_corresponds('p:multi-test');
 ok_broken('p:multi-test',
-    qr/blog/ => ['d', 2014, 1, 6]
+    qr/blog/ => ['d', 2014, 1, 6],
+    qr/blog/ => ['d', 2014, 1, 6, 'hello-9000'],
 );
 
 sub ok_broken {

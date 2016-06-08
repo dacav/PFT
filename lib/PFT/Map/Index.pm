@@ -195,7 +195,9 @@ sub _resolve_local_blog {
         confess "Incomplete date" if 3 > grep defined, @args;
         push @args, '.*' if 3 == @args;
         my $pattern = sprintf 'b:%04d-%02d-%02d:%s', @args;
-        $map->nodes(grep /^$pattern$/, $map->ids);
+        my @select = grep /^$pattern$/, $map->ids;
+        confess 'No entry matches ', join('/', @select), "\n" unless @select;
+        $map->nodes(@select);
     } else {
         confess "Unrecognized blog lookup $method";
     }
