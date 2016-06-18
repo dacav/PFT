@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Content::Blob v0.5.4;
+package PFT::Content::Blob v1.0.0;
 
 use v5.16;
 

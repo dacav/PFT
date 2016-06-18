@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Date v0.5.4;
+package PFT::Date v1.0.0;
 
 =pod
 
@@ -188,10 +188,14 @@ string, by default C<'-'>
 
 sub repr {
     my $self = shift;
-    join shift || '-',
-        defined $self->[0] ? sprintf('%04d', $self->[0]) : '*',
-        defined $self->[1] ? sprintf('%02d', $self->[1]) : '*',
-        defined $self->[2] ? sprintf('%02d', $self->[2]) : '*';
+    my $sep = shift;
+    my $none = shift;
+
+    $none = '*' unless defined $none;
+    join defined $sep ? $sep : '-',
+        defined $self->[0] ? sprintf('%04d', $self->[0]) : $none,
+        defined $self->[1] ? sprintf('%02d', $self->[1]) : $none,
+        defined $self->[2] ? sprintf('%02d', $self->[2]) : $none;
 }
 
 =item derive

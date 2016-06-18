@@ -99,12 +99,15 @@ is_deeply([sort @ids], [qw<
     "All content is present"
 );
 
+diag('Listing missing symbols:');
 is_deeply([
         map {
             my $s = $_->[0];
+            diag('    missing ', $s->keyword, ', reason ', $_->[1]);
             join '|', $s->keyword, $s->args
         } @all_unres
-    ], ["pic|baz|bar→foo.png"], "Missing symbols"
+    ], ["pic|baz|bar→foo.png"],
+    "Missing symbols differ"
 );
 
 my @dumped = $map->dump;
