@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Map v0.6.4;
+package PFT::Map v1.0.0;
 
 =encoding utf8
 
@@ -48,7 +48,7 @@ use File::Spec;
 use Encode::Locale qw/$ENCODING_LOCALE/;
 
 use PFT::Map::Node;
-use PFT::Map::Resolver qw/resolve/;
+use PFT::Map::Index;
 use PFT::Text;
 use PFT::Header;
 use PFT::Date;
@@ -78,10 +78,16 @@ sub new {
 sub _resolve {
     # Resolving items in $self->{toresolve}. They are inserted in _mknod.
     my $self = shift;
+    my $index = $self->index;
 
     for my $node (@{$self->{toresolve}}) {
         for my $s ($node->symbols) {
-            my $resolved = eval { resolve($self, $node, $s) };
+            my $resolved = eval {
+                my @rs = $index->resolve($node, $s);
+                croak "Multiple results: @rs\n" if @rs > 1;
+                $rs[0]
+            };
+
             if (defined $resolved) {
                 if (!ref($resolved) || $resolved->isa('PFT::Map::Node')) {
                     # scalar or other node
@@ -102,50 +108,13 @@ sub _resolve {
     delete $self->{toresolve}
 };
 
-sub _content_id {
-    # Given a PFT::Content::Base (or any subclass) object, returns a
-    # string uniquely identifying it across the site. E.g.:
-    #
-    #     my $id = $map->_content_id($content);
-    #     my $id = $map->_content_id($virtual_page, $hdr);
-    #     my $id = $map->_content_id(undef, $hdr);
-    #
-    # Form 1: for any content
-
-    my($self, $cntnt, $hdr) = @_;
-
-    unless (defined $cntnt) {
-        confess 'No content, no header?' unless defined $hdr;
-        $cntnt = $self->{tree}->entry($hdr);
-    }
-
-    ref($cntnt) =~ /PFT::Content::(Page|Blog|Picture|Attachment|Tag|Month)/
-        or confess 'Unsupported in content to id: ' . ref($cntnt);
-
-    if ($1 eq 'Page') {
-        'p:' . ($hdr || $cntnt->header)->slug
-    } elsif ($1 eq 'Tag') {
-        't:' . ($hdr || $cntnt->header)->slug
-    } elsif ($1 eq 'Blog') {
-        my $hdr = ($hdr || $cntnt->header);
-        'b:' . $hdr->date->repr . ':' . $hdr->slug
-    } elsif ($1 eq 'Month') {
-        my $hdr = ($hdr || $cntnt->header);
-        'm:' . $hdr->date->repr
-    } elsif ($1 eq 'Picture') {
-        'i:' . join '/', $cntnt->relpath # No need for portability
-    } elsif ($1 eq 'Attachment') {
-        'a:' . join '/', $cntnt->relpath # Ditto
-    } else { die };
-}
-
 sub _mknod {
     my $self = shift;
     my($cntnt, $hdr) = @_;
 
     my $node = PFT::Map::Node->new(
         $self->{next} ++,
-        (my $id = $self->_content_id(@_)),
+        (my $id = $self->index->content_id(@_)),
         @_,
     );
 
@@ -231,7 +200,28 @@ List of the nodes
 
 =cut
 
-sub nodes { values %{shift->{idx}} }
+sub nodes {
+    my $self = shift;
+    if (@_) {
+        @{$self->{idx}}{@_}
+    } else {
+        values %{$self->{idx}}
+    }
+}
+
+=item ids
+
+List of the mnemonic ids.
+
+    map $m->id_to_node($_), $m->ids
+
+is equivalent to
+
+    $m->nodes
+
+=cut
+
+sub ids { keys %{shift->{idx}} }
 
 =item tree
 
@@ -270,7 +260,20 @@ List of tag nodes
 
 sub tags { shift->_grep_content('PFT::Content::Tag') }
 
+=item index
+
+The PFT::Map::Index object associated to this map.
+
+It handles the unique identifiers of content items and can be used to
+query the map.
+
+=cut
+
+sub index { PFT::Map::Index->new(shift) }
+
 =item dump
+
+# TODO: move forward this description, as method
 
 Dump of the nodes in a easy-to-display form, that is a list of
 dictionaries.
@@ -338,7 +341,7 @@ associated node, or undef if such node does not exist.
 
 sub node_of {
     my $self = shift;
-    my $id = $self->_content_id(@_);
+    my $id = $self->index->content_id(@_);
     exists $self->{idx}{$id} ? $self->{idx}{$id} : undef
 }
 
