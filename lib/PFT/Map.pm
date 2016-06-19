@@ -43,7 +43,6 @@ use utf8;
 use v5.16;
 
 use Carp;
-use WeakRef;
 use File::Spec;
 use Encode::Locale qw/$ENCODING_LOCALE/;
 

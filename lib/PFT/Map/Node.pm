@@ -61,7 +61,7 @@ use warnings;
 use PFT::Text;
 
 use Carp;
-use WeakRef;
+use Scalar::Util qw/weaken/;
 
 sub new {
     my($cls, $seqnr, $id, $cont, $hdr) = @_;
