@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Map::Node v1.0.0;
+package PFT::Map::Node v1.0.1;
 
 =encoding utf8
 
@@ -61,7 +61,7 @@ use warnings;
 use PFT::Text;
 
 use Carp;
-use WeakRef;
+use Scalar::Util qw/weaken/;
 
 sub new {
     my($cls, $seqnr, $id, $cont, $hdr) = @_;

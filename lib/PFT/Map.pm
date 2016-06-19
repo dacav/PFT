@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Map v1.0.0;
+package PFT::Map v1.0.1;
 
 =encoding utf8
 
@@ -43,7 +43,6 @@ use utf8;
 use v5.16;
 
 use Carp;
-use WeakRef;
 use File::Spec;
 use Encode::Locale qw/$ENCODING_LOCALE/;
 

@@ -29,7 +29,7 @@ WriteMakefile1(
         'File::Spec::Functions' => 0,
         'IO::File'              => 0,
         'Text::Markdown'        => 0,
-        'WeakRef'               => 0,
+        'Scalar::Util'          => 0,
         'YAML::Tiny'            => 0,
     },
     META_MERGE => {
