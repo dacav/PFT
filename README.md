@@ -7,6 +7,9 @@ It is yet another static website generator. This means your content is
 compiled once and the result can be served by a simple HTTP server,
 without need of server-side dynamic content generation.
 
+This package provides the core library which abstracts away the filesystem
+access.
+
 I started it from scratch, both because as I was not entirely satisfied
 with the ones I tried, and because I wanted to learn another language
 (Perl) with a side project. While writing it I got inspired by
