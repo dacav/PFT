@@ -2,7 +2,7 @@
 Name:           perl-%{module}
 Version:        1.0.1
 Release:        1%{?dist}
-Summary:        Hacker friendly static blog generator
+Summary:        Hacker friendly static blog generator, core library
 
 License:        GPL+
 URL:            https://github.com/dacav/%{module}
@@ -26,6 +26,8 @@ It is yet another static website generator. This means your content is
 compiled once and the result can be served by a simple HTTP server,
 without need of server-side dynamic content generation.
 
+This package provides the core library which abstracts away the filesystem
+access.
 
 %prep
 %setup -q -n %{module}-%{version}
