@@ -151,7 +151,7 @@ sub resolve {
         unless $symbol && $symbol->isa('PFT::Text::Symbol');
 
     my $kwd = $symbol->keyword;
-    if ($kwd =~ /^(pic|page|blog|attach|tag)$/n) {
+    if ($kwd =~ /^(?:pic|page|blog|attach|tag)$/) {
         &_resolve_local
     } else {
         &_resolve_remote
