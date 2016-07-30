@@ -41,6 +41,9 @@ $act =~ /-*h(?:elp)/ and nope;
 if ($act eq 'bump') {
     defined $par or nope;
     $par =~ /(?:major|minor|patch)/ or nope 'invalid bump';
+
+    scalar(grep !/^\?\?/, `git status --porcelain`) and die
+        'Tree is not clean. Please stash or commit, then retry'
 }
 
 my @modules;
@@ -71,25 +74,23 @@ if ($act eq 'list') {
     }
 } else {
     my $new_version;
-
-    # TODO Check index is clean;
-
     my @rollback_cbs;
-    my $rollback = sub {
+
+    $SIG{__DIE__} = sub {
         select STDOUT;
 
+        say "On error. Rolling back…";
         $_->() foreach @rollback_cbs;
 
         system git => checkout => '.'
             and die "PANIC, cannot git checkout for rollback. Error was: @_";
-        die @_
     };
 
     for my $orig (@modules) {
         my $fix = "$orig.fix";
 
-        open my $fin, '<:encoding(locale)', $orig or $rollback->("Cannot open $orig: $!");
-        open my $fout, '>:encoding(locale)', $fix or $rollback->("Cannot open $fix: $!");
+        open my $fin, '<:encoding(locale)', $orig or die "Cannot open $orig: $!";
+        open my $fout, '>:encoding(locale)', $fix or die "Cannot open $fix: $!";
         push @rollback_cbs, sub { unlink $fix };
 
         select $fout;
@@ -102,7 +103,7 @@ if ($act eq 'list') {
                 my $nv = version->parse("@mmp");
                 if (defined $new_version) {
                     if ($new_version != $nv) {
-                        $rollback->("Mismatching version for $orig, $nv != $new_version")
+                        die "Mismatching version for $orig, $nv != $new_version"
                     }
                 } else {
                     $new_version = $nv;
@@ -110,7 +111,7 @@ if ($act eq 'list') {
 
                 s/\Q$cur\E/@mmp/;
             }
-            print or $rollback->("Cannot print in $fix: $!")
+            print or die "Cannot print in $fix: $!"
         }
         close $fin;
         close $fout;
@@ -119,9 +120,15 @@ if ($act eq 'list') {
     }
 
     select STDOUT;
-    system git => commit => -a => -m => "Bumped $par"
-        and $rollback->('Cannot commit');
 
-    system git => tag => -s => -m => "Release $new_version" => "v$new_version"
-        and say "Everything ok, except cannot tag!";
+    my $tag = "v$new_version";
+
+    system qw/git rev-parse --verify -q/ => $tag
+        or die "Existing tag $tag. Rolling back";
+
+    system git => commit => -a => -m => "Bumped $par"
+        and die 'Cannot commit';
+
+    system git => tag => -s => -m => "Release $new_version" => $tag
+        and say "Everything ok, except I cannot tag!";
 }
