@@ -7,9 +7,7 @@ README
 LICENSE
 README.md
 
-lib/PFT.pm
 lib/PFT/Conf.pm
-lib/PFT/Content.pm
 lib/PFT/Content/Attachment.pm
 lib/PFT/Content/Base.pm
 lib/PFT/Content/Blob.pm
@@ -19,27 +17,27 @@ lib/PFT/Content/File.pm
 lib/PFT/Content/Month.pm
 lib/PFT/Content/Page.pm
 lib/PFT/Content/Picture.pm
+lib/PFT/Content.pm
 lib/PFT/Content/Tag.pm
 lib/PFT/Date.pm
 lib/PFT/Header.pm
-lib/PFT/Map
-lib/PFT/Map.pm
 lib/PFT/Map/Index.pm
 lib/PFT/Map/Node.pm
-lib/PFT/Map/Resolver.pm
+lib/PFT/Map.pm
+lib/PFT.pm
 lib/PFT/Text.pm
 lib/PFT/Text/Symbol.pm
 lib/PFT/Tree.pm
 lib/PFT/Util.pm
 
 t/00-load.t
-t/check-backend.t
 t/check-conf.t
 t/check-contenttree.t
 t/check-date.t
 t/check-files.t
 t/check-header.t
 t/check-map.t
+t/check-resolver.t
 t/check-text.t
 t/check-tree.t
 t/manifest.t
