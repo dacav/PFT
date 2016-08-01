@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Content::Blog v1.0.2;
+package PFT::Content::Blog v1.0.3;
 
 =encoding utf8
 
