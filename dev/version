@@ -74,18 +74,16 @@ if ($act eq 'list') {
     }
 } else {
     my $new_version;
-    my @rollback_cbs;
 
+    my @rollback_cbs;
     $SIG{__DIE__} = sub {
         select STDOUT;
 
-        say "On error. Rolling back…";
+        say 'Rolling back:';
         $_->() foreach @rollback_cbs;
-
-        system git => checkout => '.'
-            and die "PANIC, cannot git checkout for rollback. Error was: @_";
     };
 
+    push @rollback_cbs, sub { system qw/git checkout ./ };
     for my $orig (@modules) {
         my $fix = "$orig.fix";
 
@@ -118,9 +116,10 @@ if ($act eq 'list') {
         rename $fix, $orig;
         pop @rollback_cbs;
     }
+    pop @rollback_cbs;
 
     select STDOUT;
-
+    push @rollback_cbs, sub { system qw/git reset --hard @^/ };
     my $tag = "v$new_version";
 
     system qw/git rev-parse --verify -q/ => $tag
@@ -130,5 +129,5 @@ if ($act eq 'list') {
         and die 'Cannot commit';
 
     system git => tag => -s => -m => "Release $new_version" => $tag
-        and say "Everything ok, except I cannot tag!";
+        and die 'Cannot tag';
 }
