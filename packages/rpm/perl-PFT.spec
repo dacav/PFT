@@ -1,6 +1,6 @@
 %define module PFT
 Name:           perl-%{module}
-Version:        1.0.1
+Version:        1.0.3
 Release:        1%{?dist}
 Summary:        Hacker friendly static blog generator, core library
 
