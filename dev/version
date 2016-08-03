@@ -15,7 +15,7 @@ binmode STDOUT, ":encoding(console_out)" if -t STDOUT;
 binmode STDERR, ":encoding(console_out)" if -t STDERR;
 
 
-my $basedir = encode locale => 'lib';
+my $basedir = encode locale_fs => 'lib';
 
 -e $basedir or do {
     say "Run me from project root";
