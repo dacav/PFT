@@ -126,7 +126,6 @@ if ($act eq 'list') {
     pop @rollback_cbs;
 
     select STDOUT;
-    push @rollback_cbs, sub { system qw/git reset --hard @^/ };
     my $tag = "v$new_version";
 
     system qw/git rev-parse --verify -q/ => $tag
@@ -134,6 +133,10 @@ if ($act eq 'list') {
 
     system git => commit => -a => -m => "Bumped $par"
         and die 'Cannot commit';
+
+    # Once we commited, the correct rollback strategy is a reset to the
+    # previous commit.
+    push @rollback_cbs, sub { system qw/git reset --hard HEAD^/ };
 
     system git => tag => -s => -m => "Release $new_version" => $tag
         and die 'Cannot tag';
