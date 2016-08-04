@@ -14,8 +14,8 @@ binmode STDIN,  ":encoding(console_in)"  if -t STDIN;
 binmode STDOUT, ":encoding(console_out)" if -t STDOUT;
 binmode STDERR, ":encoding(console_out)" if -t STDERR;
 
-
 my $basedir = encode locale_fs => 'lib';
+my $rpmspec = encode locale_fs => 'packages/rpm/perl-PFT.spec';
 
 -e $basedir or do {
     say "Run me from project root";
@@ -116,6 +116,13 @@ if ($act eq 'list') {
         rename $fix, $orig;
         pop @rollback_cbs;
     }
+
+    system 'rpmdev-bumpspec',
+        -c => "Release $new_version",
+        -n => "$new_version",
+        $rpmspec
+        and die "Cannot bump version in $rpmspec";
+
     pop @rollback_cbs;
 
     select STDOUT;
