@@ -55,5 +55,8 @@ LC_ALL="en_US.utf8" make test
 
 
 %changelog
+* Thu Aug 04 2016 dacav@openmailbox.org - 1.0.3-1
+- Release 1.0.3
+
 * Mon Jun 20 2016 dacav openmailbox.org 1.0.1-1.fc23
 - First packaging
