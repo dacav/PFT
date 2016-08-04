@@ -125,8 +125,6 @@ if ($act eq 'list') {
         $rpmspec
         and die "Cannot bump version in $rpmspec";
 
-    pop @rollback_cbs;
-
     select STDOUT;
     my $tag = "v$new_version";
 
@@ -138,6 +136,7 @@ if ($act eq 'list') {
 
     # Once we commited, the correct rollback strategy is a reset to the
     # previous commit.
+    pop @rollback_cbs;
     push @rollback_cbs, sub { system qw/git reset --hard HEAD^/ };
 
     system git => tag => -s => -m => "Release $new_version" => $tag
