@@ -26,7 +26,7 @@ It is yet another static website generator. This means your content is
 compiled once and the result can be served by a simple HTTP server,
 without need of server-side dynamic content generation.
 
-This package provides the core library which abstracts away the filesystem
+This package provides the core library which abstracts away the file-system
 access.
 
 %prep
