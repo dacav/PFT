@@ -1,19 +1,26 @@
-%define module PFT
+%global module PFT
 Name:           perl-%{module}
 Version:        1.0.3
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Hacker friendly static blog generator, core library
 
-License:        GPL+
+License:        GPLv3+
 URL:            https://github.com/dacav/%{module}
 Source0:        https://github.com/dacav/%{module}/archive/v%{version}.tar.gz#/%{module}-%{version}.tar.gz
 BuildArch:      noarch
-# Correct for lots of packages, other common choices include eg. Module::Build
+
+# As by /etc/rpmdevtools/spectemplate-perl.spec
+BuildRequires:  perl
+BuildRequires:  perl-generators
 BuildRequires:  perl(ExtUtils::MakeMaker)
+
+# Additional dependencies at build time
 BuildRequires:  perl(Test::More)
 BuildRequires:  perl(Text::Markdown)
 BuildRequires:  perl(Encode), perl(Encode::Locale)
 BuildRequires:  perl(YAML::Tiny)
+
+# As by /etc/rpmdevtools/spectemplate-perl.spec
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %{?perl_default_filter}
@@ -34,16 +41,15 @@ access.
 
 
 %build
-# Remove OPTIMIZE=... from noarch packages (unneeded)
-%{__perl} Makefile.PL INSTALLDIRS=vendor OPTIMIZE="$RPM_OPT_FLAGS"
+%{__perl} Makefile.PL INSTALLDIRS=vendor
 make %{?_smp_mflags}
 
 
 %install
-rm -rf %{buildroot}
 make pure_install DESTDIR=%{buildroot}
 find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
-
+find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
+%{_fixperms} %{buildroot}/*
 
 %check
 LC_ALL="en_US.utf8" make test
@@ -51,10 +57,21 @@ LC_ALL="en_US.utf8" make test
 
 %files
 %doc %{_mandir}/man3/* 
+%{!?_licensedir:%global license %%doc}
 %{perl_vendorlib}/*
-
+%doc README.md
+%license LICENSE
 
 %changelog
+* Mon Aug 22 2016 dacav openmailbox org - 1.0.3-3
+- Using global instead of define
+- GPLv3+
+- Added perl and perl-generators as by template
+- Removed unneded optimization flag
+- Misc install fixes
+- License fixes
+- Added README as doc
+
 * Sun Aug 14 2016 dacav openmailbox org - 1.0.3-2
 - Fixed US English
 
