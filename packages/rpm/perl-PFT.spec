@@ -1,7 +1,7 @@
 %global module PFT
 Name:           perl-%{module}
 Version:        1.0.3
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Hacker friendly static blog generator, core library
 
 License:        GPLv3+
@@ -15,9 +15,30 @@ BuildRequires:  perl-generators
 BuildRequires:  perl(ExtUtils::MakeMaker)
 
 # Additional dependencies at build time
+# tangerine -c Makefile.PL lib \|
+#       perl -nE '/^\s/ and next; s/^/BuildRequires:  perl(/; s/$/)/; print'
+BuildRequires:  perl(Carp)
+BuildRequires:  perl(constant)
+BuildRequires:  perl(Cwd)
+BuildRequires:  perl(Encode)
+BuildRequires:  perl(Encode::Locale)
+BuildRequires:  perl(Exporter)
+BuildRequires:  perl(ExtUtils::MakeMaker)
+BuildRequires:  perl(feature)
+BuildRequires:  perl(File::Basename)
+BuildRequires:  perl(File::Path)
+BuildRequires:  perl(File::Spec)
+BuildRequires:  perl(File::Spec::Functions)
+BuildRequires:  perl(File::Temp)
+BuildRequires:  perl(IO::File)
+BuildRequires:  perl(overload)
+BuildRequires:  perl(parent)
+BuildRequires:  perl(Scalar::Util)
+BuildRequires:  perl(strict)
 BuildRequires:  perl(Test::More)
 BuildRequires:  perl(Text::Markdown)
-BuildRequires:  perl(Encode), perl(Encode::Locale)
+BuildRequires:  perl(utf8)
+BuildRequires:  perl(warnings)
 BuildRequires:  perl(YAML::Tiny)
 
 # As by /etc/rpmdevtools/spectemplate-perl.spec
@@ -63,7 +84,11 @@ LC_ALL="en_US.utf8" make test
 %license LICENSE
 
 %changelog
-* Mon Aug 22 2016 dacav openmailbox org - 1.0.3-3
+* Fri Aug 26 2016 <dacav@openmailbox.org> - 1.0.3-4
+- Using tangerine for BuildRequires
+- Fixed changelog
+
+* Mon Aug 22 2016 <dacav@openmailbox.org> - 1.0.3-3
 - Using global instead of define
 - GPLv3+
 - Added perl and perl-generators as by template
@@ -72,11 +97,11 @@ LC_ALL="en_US.utf8" make test
 - License fixes
 - Added README as doc
 
-* Sun Aug 14 2016 dacav openmailbox org - 1.0.3-2
+* Sun Aug 14 2016 <dacav@openmailbox.org> - 1.0.3-2
 - Fixed US English
 
-* Thu Aug 04 2016 dacav@openmailbox.org - 1.0.3-1
+* Thu Aug 04 2016 <dacav@openmailbox.org> - 1.0.3-1
 - Release 1.0.3
 
-* Mon Jun 20 2016 dacav openmailbox.org 1.0.1-1.fc23
+* Mon Jun 20 2016 <dacav@openmailbox.org> 1.0.1-1.fc23
 - First packaging
