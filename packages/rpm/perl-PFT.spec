@@ -1,7 +1,7 @@
 %global module PFT
 Name:           perl-%{module}
-Version:        1.0.3
-Release:        4%{?dist}
+Version:        1.0.4
+Release:        1%{?dist}
 Summary:        Hacker friendly static blog generator, core library
 
 License:        GPLv3+
@@ -84,6 +84,9 @@ LC_ALL="en_US.utf8" make test
 %license LICENSE
 
 %changelog
+* Sat Sep 03 2016 <dacav@openmailbox.org> - 1.0.4-1
+- Release 1.0.4
+
 * Fri Aug 26 2016 <dacav@openmailbox.org> - 1.0.3-4
 - Using tangerine for BuildRequires
 - Fixed changelog
