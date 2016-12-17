@@ -169,6 +169,21 @@ sub title {
     }
 }
 
+=item author
+
+Returns the author of the content.
+
+The author is retrieved from the header. Content items like pictures do not
+have a header, so they don't have an author: C<undef> is returned if this is
+the case.
+
+=cut
+
+sub author {
+    my $hdr = shift->header;
+    defined $hdr ? $hdr->author : undef
+}
+
 =item virtual
 
 Returns 1 if the node is I<virtual>.
