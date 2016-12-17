@@ -1,4 +1,4 @@
-# App-PFT
+# PFT
 
 PFT stands for *Plain F. Text*, where the meaning of *F.* is up to
 personal interpretation. Like *Fancy* or *Fantastic*.
@@ -7,17 +7,13 @@ It is yet another static website generator. This means your content is
 compiled once and the result can be served by a simple HTTP server,
 without need of server-side dynamic content generation.
 
-This package provides the core library which abstracts away the filesystem
-access.
+This project provides a library which abstracts the file system access and
+maintains a clean directory layout. It allows to store content in the
+content directory and to handle text files with blog entries.
 
-I started it from scratch, both because as I was not entirely satisfied
-with the ones I tried, and because I wanted to learn another language
-(Perl) with a side project. While writing it I got inspired by
-the *App::Dapper* project.
-
-In the beginning it was called _Backport_, then it became _App::PFT_.
-Later I decided to split the abstraction of PFT into a separate library,
-so in a near future _App::PFT_ will depend on this library.
+The library is used by the [App::PFT](https://github.com/dacav/app-pft)
+project, which provides the command line tools needed for managing the blog
+and compile it in web pages.
 
 # INSTALLATION
 

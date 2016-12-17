@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Text v1.0.3;
+package PFT::Text v1.0.4;
 
 =encoding utf8
 
@@ -56,6 +56,7 @@ sub new {
 
     bless {
         page => $page,
+        html => undef,
     }, $cls;
 }
 
@@ -73,6 +74,9 @@ The conetnet will retain symbol placeholders. See the C<html_resolved> method.
 
 sub html {
     my $self = shift;
+    my $html = $self->{html};
+    return $html if defined $html;
+
     my $md = do {
         my $page = $self->{page};
         confess "$page is virtual" unless $page->exists;
@@ -80,7 +84,7 @@ sub html {
         local $/ = undef;
         <$fd>;
     };
-    defined $md ? markdown($md) : ''
+    $self->{html} = defined $md ? markdown($md) : ''
 }
 
 =item symbols
