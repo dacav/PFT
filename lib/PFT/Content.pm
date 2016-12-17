@@ -420,12 +420,12 @@ sub blog_back {
     my $path = (sort { $b cmp $a } @globs)[$back];
 
     my $h = eval { PFT::Header->load($path) };
-    $h or croak "Loading $path: " . $@ =~ s/ at .*$//rs;
+    $h or carp "Loading $path: " . $@ =~ s/ at .*$//rs;
 
     PFT::Content::Blog->new({
         tree => $self,
         path => $path,
-        name => $h->title,
+        name => $h ? $h->title : '?',
     })
 }
 
