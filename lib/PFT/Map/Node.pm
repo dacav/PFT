@@ -151,7 +151,7 @@ sub id { shift->{id} }
 
 Returns the title of the content.
 
-The title is retrieved by the header. Content items like pictures do not
+The title is retrieved from the header. Content items like pictures do not
 have a header, so they don't have a title: C<undef> is returned if this is
 the case.
 
