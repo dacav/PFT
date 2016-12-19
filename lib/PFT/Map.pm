@@ -359,12 +359,10 @@ sub id_to_node {
 
 =item blog_recent
 
-Getter for the most recent blog nodes.
+Getter for the most I<N> recent blog nodes.  Accepts I<N> as positive integer
+parameter.
 
-The number I<N> can be provided as parameter, and defaults to 1 if not
-provided.
-
-In list context returns the I<N> + 1 most recent blog nodes, ordered by date,
+In list context returns the I<N> most recent blog nodes, ordered by date,
 from most to least recent. Less than I<N> nodes will be returned if I<N>
 is greater than the number of available entries.
 
@@ -373,13 +371,48 @@ zero the most recent entry is returned.
 
 =cut
 
+sub blog_recent {
+    shift->_recent(last => shift)
+}
+
+=item months_recent
+
+Getter for the most I<N> recent month nodes.  Accepts I<N> as positive integer
+parameter.
+
+In list context returns the I<N> most recent month nodes, ordered by date,
+from most to least recent. Less than I<N> nodes will be returned if I<N>
+is greater than the number of available entries.
+
+In scalar context returns the I<N>-th to last entry. For I<N> equal to
+zero the most recent entry is returned.
+
+=cut
+
+sub months_recent {
+    shift->_recent(last_month => shift)
+}
+
+=item blog_exists
+
+Checker for blog history.
+
+Returns a boolean value telling if the site contains at least one blog entry.
+
+=cut
+
+sub blog_exists {
+    defined shift->_recent(last => 1);
+}
+
 sub _recent {
     my($self, $key, $n) = @_;
-
-    $n = 0 unless defined $n;
-    confess "Requires N > 0, got $n" if $n < 0;
-
     my $cursor = $self->{$key};
+
+    if (!defined $n or $n <= 0) {
+        croak "Invalid N, expected positive integer, got: ",
+            defined $n ? $n : 'undef'
+    }
 
     wantarray ? do {
         my @out = $cursor;
@@ -395,26 +428,6 @@ sub _recent {
         $cursor;
     }
 }
-
-sub blog_recent { shift->_recent('last', shift) }
-
-=item months_recent
-
-Getter for the most recent month nodes.
-
-The number I<N> can be provided as parameter, and defaults to 1 if not
-provided.
-
-In list context returns the I<N> + 1 most recent month nodes, ordered by date,
-from most to least recent. Less than I<N> nodes will be returned if I<N>
-is greater than the number of available entries.
-
-In scalar context returns the I<N>-th to last entry. For I<N> equal to
-zero the most recent entry is returned.
-
-=cut
-
-sub months_recent { shift->_recent('last_month', shift) }
 
 =back
 
