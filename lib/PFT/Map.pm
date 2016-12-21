@@ -80,10 +80,13 @@ sub _resolve {
     my $index = $self->index;
 
     for my $node (@{$self->{toresolve}}) {
-        for my $s ($node->symbols) {
+        for my $symbol ($node->symbols) {
             my $resolved = eval {
-                my @rs = $index->resolve($node, $s);
-                croak "Multiple results: @rs\n" if @rs > 1;
+                my @rs = $index->resolve($node, $symbol);
+                if (@rs > 1) {
+                    local $" = ', ';
+                    croak "Ambiguously resolved, matching { @rs }\n";
+                }
                 $rs[0]
             };
 
@@ -92,15 +95,14 @@ sub _resolve {
                     # scalar or other node
                     $node->add_outlink($resolved);
                 } else {
-                    confess "Buggy resolver: searching $s",
+                    confess "Buggy resolver: searching $symbol",
                         ', expected node, got ', $resolved
                 }
             }
             else {
                 $node->add_outlink(undef);
-                $node->add_symbol_unres(
-                    $s => ($@ ? $@ =~ s/\v.*//rs : undef)
-                );
+                my $reason = ($@ ? $@ =~ s/\v.*//rs : undef);
+                $node->add_symbol_unres($symbol => $reason);
             }
         }
     }

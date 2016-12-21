@@ -325,23 +325,24 @@ sub _text {
 sub symbols { shift->_text->symbols }
 
 sub add_symbol_unres {
-    # Arguments: symbol => error message
-    my $self = shift;
+    my($self, $symbol, $reason) = @_;
 
     $self->{unres_syms_flush} ++;
-    push @{$self->{unres_syms}}, [@_]
+    push @{$self->{unres_syms}}, [$symbol, $reason];
 }
 
 # NOTE:
 #
-# Unresolved symbols are not bad per se, but should probably be notified
-# to the user. Since this is a library, the calling code is responsible
-# for notifying the user whenever it feels like. We warn on STDERR if the
-# list of unresolved symbols is never retrieved.
+# Unresolved symbols should be notified to the user. Since this is a library,
+# the calling code is responsible for notifying the user.
+#
+# As 'relaxed enforcement' we warn on STDERR if the list of unresolved symbols
+# is never retrieved.
 sub symbols_unres {
     my $self = shift;
     delete $self->{unres_syms_flush};
 
+    # Returns a list of pairs [symbol, reason]
     exists $self->{unres_syms}
         ? @{$self->{unres_syms}}
         : ()
