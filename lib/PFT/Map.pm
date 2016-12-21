@@ -415,10 +415,10 @@ sub _recent {
     }
 
     wantarray ? do {
-        my @out = $cursor;
+        my @out;
         while ($n -- && defined $cursor) {
-            $cursor = $cursor->prev;
             push @out, $cursor;
+            $cursor = $cursor->prev;
         }
         @out;
     } : do {
