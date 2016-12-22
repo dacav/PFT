@@ -123,7 +123,22 @@ use Exporter 'import';
 our @EXPORT_OK = qw/pod_autogen/;
 our $CONF_NAME = 'pft.yaml';
 
-my($IDX_MANDATORY, $IDX_GETOPT_SUFFIX, $IDX_DEFAULT, $IDX_HELP) = 0 .. 3;
+# %CONF_RECIPE maps configuration names to an array.
+#
+# Keys of this map correspond to keys in the configuratoin file. They use dashes
+# to identify the hierarchy, so that, for instance, site-author corresponds to
+# the key 'author' in the section 'site' of the configuration file.
+#
+# Keys are also used for generating automatically the POD user guide and the
+# command line options of the `pft init` command.
+#
+# The semantics of each array item is defined by the following $IDX_* variables:
+my(
+    $IDX_MANDATORY,     # true if the configuration is mandatory
+    $IDX_GETOPT_SUFFIX, # the corresponding suffix in getopt (see Getopt::Long)
+    $IDX_DEFAULT,       # The default value when generating a configuration
+    $IDX_HELP           # A human readable text descrbing the option
+) = 0 .. 3;
 my %CONF_RECIPE = do {
     my $user = $ENV{USER} || 'anon';
     my $editor = $ENV{EDITOR} || 'vim';
@@ -176,7 +191,8 @@ my %CONF_RECIPE = do {
     )
 };
 
-# Transforms a flat mapping as $CONF_RECIPE into 'deep' hash table
+# Transforms a flat mapping as $CONF_RECIPE into 'deep' hash table. Items in the
+# form 'foo-bar-baz' will be accessible as _hashify()->{foo}{bar}{baz}.
 sub _hashify {
     my %out;
 
@@ -203,6 +219,10 @@ sub _hashify {
     \%out;
 }
 
+# Read the %CONF_RECIPE map and return a mapping between each key and the
+# associated field. The first parameter is the index to select. The second
+# parameter is optional: if true retrieves only the configuration which evaluate
+# as true.
 sub _read_recipe {
     my $select = shift;
     my @out;
