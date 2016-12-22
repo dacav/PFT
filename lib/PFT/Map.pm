@@ -240,7 +240,10 @@ List of page nodes
 
 sub _grep_content {
     my($self, $type) = @_;
-    grep{ $_->content_type eq $type } $self->nodes
+
+    sort{ $a <=> $b }
+    grep{ $_->content_type eq $type }
+    $self->nodes
 }
 
 sub pages { shift->_grep_content('PFT::Content::Page') }
