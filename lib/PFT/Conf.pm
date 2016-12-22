@@ -151,6 +151,11 @@ my %CONF_RECIPE = do {
             'Default template for compilation, can be overriden by single '.
             'entries'
         ],
+        'site-theme'      => [0, '=s', 'light',
+            'Global theme (e.g. "light" or "dark") optionally honored by '.
+            'templates. Specific accepted values depend on the template '.
+            'implementation'
+        ],
         'site-title'      => [1, '=s', 'My PFT website',
             'Title of the website',
         ],
