@@ -86,6 +86,11 @@ use overload
         my $self = shift;
         ref($self) . '({name => "' . $self->{name} . '"})'
     },
+    'cmp' => sub {
+        my($self, $oth, $swap) = @_;
+        my $out = $self->name cmp $oth->name;
+        $swap ? -$out : $out;
+    }
 ;
 
 =back

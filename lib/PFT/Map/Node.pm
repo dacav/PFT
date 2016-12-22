@@ -397,6 +397,11 @@ use overload
         my $out = $self->{seqnr} <=> $oth->{seqnr};
         $swap ? -$out : $out;
     },
+    'cmp' => sub {
+        my($self, $oth, $swap) = @_;
+        my $out = $self->{content} cmp $oth->{content};
+        $swap ? -$out : $out;
+    },
     '""' => sub {
         my $self = shift;
         'PFT::Map::Node[id=' . $self->id
