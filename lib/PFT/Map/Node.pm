@@ -151,7 +151,7 @@ sub id { shift->{id} }
 
 Returns the title of the content.
 
-The title is retrieved by the header. Content items like pictures do not
+The title is retrieved from the header. Content items like pictures do not
 have a header, so they don't have a title: C<undef> is returned if this is
 the case.
 
@@ -167,6 +167,21 @@ sub title {
     } else {
         $title;
     }
+}
+
+=item author
+
+Returns the author of the content.
+
+The author is retrieved from the header. Content items like pictures do not
+have a header, so they don't have an author: C<undef> is returned if this is
+the case.
+
+=cut
+
+sub author {
+    my $hdr = shift->header;
+    defined $hdr ? $hdr->author : undef
 }
 
 =item virtual
@@ -310,23 +325,24 @@ sub _text {
 sub symbols { shift->_text->symbols }
 
 sub add_symbol_unres {
-    # Arguments: symbol => error message
-    my $self = shift;
+    my($self, $symbol, $reason) = @_;
 
     $self->{unres_syms_flush} ++;
-    push @{$self->{unres_syms}}, [@_]
+    push @{$self->{unres_syms}}, [$symbol, $reason];
 }
 
 # NOTE:
 #
-# Unresolved symbols are not bad per se, but should probably be notified
-# to the user. Since this is a library, the calling code is responsible
-# for notifying the user whenever it feels like. We warn on STDERR if the
-# list of unresolved symbols is never retrieved.
+# Unresolved symbols should be notified to the user. Since this is a library,
+# the calling code is responsible for notifying the user.
+#
+# As 'relaxed enforcement' we warn on STDERR if the list of unresolved symbols
+# is never retrieved.
 sub symbols_unres {
     my $self = shift;
     delete $self->{unres_syms_flush};
 
+    # Returns a list of pairs [symbol, reason]
     exists $self->{unres_syms}
         ? @{$self->{unres_syms}}
         : ()
@@ -379,6 +395,11 @@ use overload
     '<=>' => sub {
         my($self, $oth, $swap) = @_;
         my $out = $self->{seqnr} <=> $oth->{seqnr};
+        $swap ? -$out : $out;
+    },
+    'cmp' => sub {
+        my($self, $oth, $swap) = @_;
+        my $out = $self->{content} cmp $oth->{content};
         $swap ? -$out : $out;
     },
     '""' => sub {

@@ -174,7 +174,7 @@ sub load {
     }
 
     my $hdr = eval { YAML::Tiny::Load($text) };
-    $hdr or confess 'Loading header: ' . $@ =~ s/ at .*$//rs;
+    $hdr or confess "File has corrupt header";
 
     my $date;
     $hdr->{Date} and $date = eval {

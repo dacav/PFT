@@ -150,7 +150,6 @@ Make page consistent with the filesystem tree.
 
 =cut
 
-# TODO:
 sub make_consistent {
 
     my $self = shift;
