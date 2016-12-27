@@ -1,6 +1,6 @@
 %global module PFT
 Name:           perl-%{module}
-Version:        1.0.4
+Version:        1.1.0
 Release:        1%{?dist}
 Summary:        Hacker friendly static blog generator, core library
 
@@ -84,6 +84,10 @@ LC_ALL="en_US.utf8" make test
 %license LICENSE
 
 %changelog
+* Tue Dec 27 2016 <Giovanni Simoni <dacav@openmailbox.org>
+> - 1.1.0-1
+- Release 1.1.0
+
 * Sat Sep 03 2016 <dacav@openmailbox.org> - 1.0.4-1
 - Release 1.0.4
 
