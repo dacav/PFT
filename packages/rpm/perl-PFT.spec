@@ -84,8 +84,7 @@ LC_ALL="en_US.utf8" make test
 %license LICENSE
 
 %changelog
-* Tue Dec 27 2016 <Giovanni Simoni <dacav@openmailbox.org>
-> - 1.1.0-1
+* Tue Dec 27 2016 <dacav@openmailbox.org> - 1.1.0-1
 - Release 1.1.0
 
 * Sat Sep 03 2016 <dacav@openmailbox.org> - 1.0.4-1
