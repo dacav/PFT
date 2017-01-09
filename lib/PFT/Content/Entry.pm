@@ -117,6 +117,25 @@ sub read {
     wantarray ? ($h, $fh) : $fh;
 }
 
+=item void
+
+Evaluates as true if the entry is void, that is if the file does not exist,
+or if it contains only the header.
+
+=cut
+
+sub void {
+    my($h, $fh) = shift->read;
+    return 1 unless defined $h;
+
+    local $_;
+    while (<$fh>) {
+        /\S/ and return ''; # a non-whitespace exists.
+    }
+
+    1 # No content found.
+}
+
 =item set_header
 
 Sets a new header, passed by parameter.
