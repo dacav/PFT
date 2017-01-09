@@ -495,8 +495,9 @@ sub detect_slug {
 
 =item was_renamed
 
-Notify a renaming of a inner file. First parameter is the original name,
-second parameter is the new name.
+Notify this content abstraction about the renaming of the corresponding
+content file.  First parameter is the original name, second parameter is the
+new name.
 
 =cut
 
@@ -504,9 +505,10 @@ sub was_renamed {
     my $self = shift;
     my $d = dirname shift;
 
-    # Actually, we internally ignore the original name. Who cares.
-    # $ignored = shift
-
+    # $ignored = shift;
+    # Actually, we internally ignore the original name. The parameter is
+    # maintained just in case we need it in future. For the moment we are
+    # interested in getting rid of empty directories.
     opendir(my $dh, $d) or return;
     rmdir $d unless File::Spec->no_upwards(readdir $dh);
     close $dh;

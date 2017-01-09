@@ -163,7 +163,8 @@ sub make_consistent {
         if (defined($hdt) and defined($hdt->y) and defined($hdt->m)) {
             $rename ++ if $hdt <=> $pdate; # else date is just fine.
         } else {
-            # Not declaring date, updating it w r t filesystem.
+            # The header does not declare a date, we figure it out from the
+            # position in the filesystem and update it.
             $hdr->set_date($pdate);
             $self->set_header($hdr);
             $done ++;
