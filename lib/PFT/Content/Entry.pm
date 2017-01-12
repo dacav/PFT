@@ -195,7 +195,11 @@ sub make_consistent {
     }
 
     if ($rename) {
-        $self->rename_as($self->tree->hdr_to_path($hdr));
+        my $newpath = $self->tree->hdr_to_path($hdr);
+        while (-e $newpath) {
+            $newpath =~ s/(\d*)$/($1 || 0) + 1/e
+        }
+        $self->rename_as($newpath);
         $done ++;
     }
 
