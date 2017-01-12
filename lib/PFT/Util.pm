@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Util v1.0.4;
+package PFT::Util v1.1.0;
 
 =encoding utf8
 
