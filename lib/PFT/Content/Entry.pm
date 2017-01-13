@@ -117,6 +117,25 @@ sub read {
     wantarray ? ($h, $fh) : $fh;
 }
 
+=item void
+
+Evaluates as true if the entry is void, that is if the file does not exist,
+or if it contains only the header.
+
+=cut
+
+sub void {
+    my($h, $fh) = shift->read;
+    return 1 unless defined $h;
+
+    local $_;
+    while (<$fh>) {
+        /\S/ and return ''; # a non-whitespace exists.
+    }
+
+    1 # No content found.
+}
+
 =item set_header
 
 Sets a new header, passed by parameter.
@@ -163,7 +182,8 @@ sub make_consistent {
         if (defined($hdt) and defined($hdt->y) and defined($hdt->m)) {
             $rename ++ if $hdt <=> $pdate; # else date is just fine.
         } else {
-            # Not declaring date, updating it w r t filesystem.
+            # The header does not declare a date, we figure it out from the
+            # position in the filesystem and update it.
             $hdr->set_date($pdate);
             $self->set_header($hdr);
             $done ++;
@@ -175,7 +195,11 @@ sub make_consistent {
     }
 
     if ($rename) {
-        $self->rename_as($self->tree->hdr_to_path($hdr));
+        my $newpath = $self->tree->hdr_to_path($hdr);
+        while (-e $newpath) {
+            $newpath =~ s/(\d*)$/($1 || 0) + 1/e
+        }
+        $self->rename_as($newpath);
         $done ++;
     }
 
