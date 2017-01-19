@@ -364,8 +364,8 @@ sub id_to_node {
 
 =item blog_recent
 
-Getter for the most I<N> recent blog nodes.  Accepts I<N> as positive integer
-parameter.
+Getter for the most I<N> recent blog nodes. Accepts I<N> as strictly
+positive integer parameter.
 
 In list context returns the I<N> most recent blog nodes, ordered by date,
 from most to least recent. Less than I<N> nodes will be returned if I<N>
@@ -382,15 +382,16 @@ sub blog_recent {
 
 =item months_recent
 
-Getter for the most I<N> recent month nodes.  Accepts I<N> as positive integer
-parameter.
+Getter for the most I<N> recent month nodes.  Accepts I<N> as strictly
+positive integer parameter.
 
 In list context returns the I<N> most recent month nodes, ordered by date,
 from most to least recent. Less than I<N> nodes will be returned if I<N>
 is greater than the number of available entries.
 
 In scalar context returns the I<N>-th to last entry. For I<N> equal to
-zero the most recent entry is returned.
+zero the most recent entry is returned. The C<undef> value is returned
+if there are less then I<N> available.
 
 =cut
 
@@ -421,13 +422,13 @@ sub _recent {
 
     wantarray ? do {
         my @out;
-        while ($n -- && defined $cursor) {
+        while (--$n && defined $cursor) {
             push @out, $cursor;
             $cursor = $cursor->prev;
         }
         @out;
     } : do {
-        while ($n -- && defined $cursor) {
+        while (--$n && defined $cursor) {
             $cursor = $cursor->prev;
         }
         $cursor;
