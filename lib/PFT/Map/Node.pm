@@ -399,7 +399,7 @@ use overload
     },
     'cmp' => sub {
         my($self, $oth, $swap) = @_;
-        my $out = $self->{content} cmp $oth->{content};
+        my $out = $self->{cont} cmp $oth->{cont};
         $swap ? -$out : $out;
     },
     '""' => sub {
