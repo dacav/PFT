@@ -392,6 +392,18 @@ sub attachments_ls {
         $self->_blob_ls($self->dir_attachments)
 }
 
+sub _blog_from_path {
+    my($self, $path) = @_;
+    my $h = eval { PFT::Header->load($path) };
+    $h or carp("Loading $path: " . $@ =~ s/ at .*$//rs);
+
+    PFT::Content::Blog->new({
+        tree => $self,
+        path => $path,
+        name => $h ? $h->title : '?',
+    })
+}
+
 =item blog_back
 
 Go back in blog history, return the corresponding entry.
@@ -417,16 +429,33 @@ sub blog_back {
 
     return undef if $back > scalar(@globs) - 1;
 
-    my $path = (sort { $b cmp $a } @globs)[$back];
+    $self->_blog_from_path((sort { $b cmp $a } @globs)[$back])
+}
 
-    my $h = eval { PFT::Header->load($path) };
-    $h or carp("Loading $path: " . $@ =~ s/ at .*$//rs);
+=item blog_at
 
-    PFT::Content::Blog->new({
-        tree => $self,
-        path => $path,
-        name => $h ? $h->title : '?',
-    })
+Go back in blog history to a certain date.
+
+Expects as argument a C<PFT::Date> item indicating a date to seek for blog
+entries.
+
+Returns a possibly empty list of C<PFT::Content::Blog> objects corresponding
+to the zero, one or more entries in the specified date.
+
+=cut
+
+sub blog_at {
+    my($self, $date) = @_;
+
+    confess "Expecting date" unless defined($date) && $date->isa('PFT::Date');
+
+    my $y = defined($date->y) ? sprintf('%04d', $date->y) : '*';
+    my $m = defined($date->m) ? sprintf('%02d', $date->m) : '*';
+    my $d = defined($date->d) ? sprintf('%02d', $date->d) : '*';
+
+    map $self->_blog_from_path($_), PFT::Util::locale_glob(
+        File::Spec->catfile($self->dir_blog, "$y-$m", "$d-*")
+    );
 }
 
 =item detect_date

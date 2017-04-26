@@ -38,6 +38,40 @@ do {
     is($tree->detect_date($p), undef, 'Path-to-date, no date')
 };
 
+# Testing blog_at
+do {
+    for my $y (2014, 2015) {
+        for my $m (1, 2, 3) {
+            for my $d (10, 11, 12, 13) {
+                $tree->new_entry(PFT::Header->new(
+                    title => 'who cares of titles',
+                    date => PFT::Date->new($y, $m, $d),
+                ));
+            }
+        }
+    }
+
+    my @found;
+    @found = $tree->blog_at(PFT::Date->new(undef, undef, 11));
+    is(scalar @found, 2 * 3, "blog_at: right amount for day 11");
+    is(scalar @found, grep($_->header->date->d == 11, @found),
+        "blog_at: all of day 11"
+    );
+
+    @found = $tree->blog_at(PFT::Date->new(undef, 3, undef));
+    is(scalar @found, 2 * 4, "blog_at: right amount for month 3");
+    is(scalar @found, grep($_->header->date->m == 3, @found),
+        "blog_at: all of month 3"
+    );
+
+    @found = $tree->blog_at(PFT::Date->new(2014, undef, undef));
+    is(scalar @found, 3 * 4, "blog_at: right amount for year 2014");
+    is(scalar @found, grep($_->header->date->y == 2014, @found),
+        "blog_at: all of year 2014"
+    );
+};
+
+# Testing slug detection
 do {
     my $p = $tree->new_entry(PFT::Header->new(
         title => 'foo-öar-baz',
