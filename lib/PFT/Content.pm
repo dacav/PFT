@@ -404,6 +404,25 @@ sub _blog_from_path {
     })
 }
 
+sub _path_to_date {
+    my($self, $path) = @_;
+
+    my $rel = File::Spec->abs2rel($path, $self->dir_blog);
+    return undef if index($rel, File::Spec->updir) >= 0;
+
+    my($ym, $dt) = File::Spec->splitdir($rel);
+
+    PFT::Date->new(
+        substr($ym, 0, 4),
+        substr($ym, 5, 2),
+        defined($dt) ? substr($dt, 0, 2) : do {
+            $ym =~ /^\d{4}-\d{2}.month$/
+                or confess "Unexpected $ym for $path";
+            undef
+        }
+    )
+}
+
 =item blog_back
 
 Go back in blog history, return the corresponding entry.
@@ -477,23 +496,8 @@ sub detect_date {
             ref $content || $content, ' is not not PFT::Content::File'
     }
 
-    my $path = $content->path;
-
-    return undef unless ($content->isa('PFT::Content::Blog'));
-
-    my $rel = File::Spec->abs2rel($path, $self->dir_blog);
-    die $rel if index($rel, File::Spec->updir) >= 0;
-    my($ym, $dt) = File::Spec->splitdir($rel);
-    die if $content->isa('PFT::Content::Month') && defined $dt;
-
-    PFT::Date->new(
-        substr($ym, 0, 4),
-        substr($ym, 5, 2),
-        defined($dt) ? substr($dt, 0, 2) : do {
-            $ym =~ /^\d{4}-\d{2}.month$/ or confess "Unexpected $ym";
-            undef
-        }
-    )
+    return undef unless $content->isa('PFT::Content::Blog');
+    $self->_path_to_date($content->path) or die 'blog/month without date?';
 }
 
 =item detect_slug
