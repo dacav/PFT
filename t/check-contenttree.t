@@ -38,12 +38,13 @@ do {
     is($tree->detect_date($p), undef, 'Path-to-date, no date')
 };
 
-# Testing blog_at
+# Testing blog_at and blog_back
 do {
+    my @entered;
     for my $y (2014, 2015) {
         for my $m (1, 2, 3) {
             for my $d (10, 11, 12, 13) {
-                $tree->new_entry(PFT::Header->new(
+                push @entered, $tree->new_entry(PFT::Header->new(
                     title => 'who cares of titles',
                     date => PFT::Date->new($y, $m, $d),
                 ));
@@ -69,6 +70,24 @@ do {
     is(scalar @found, grep($_->header->date->y == 2014, @found),
         "blog_at: all of year 2014"
     );
+
+    for (my $i = 0; $i < @entered; $i ++) {
+        @found = $tree->blog_back($i);
+        is(scalar @found, 1, "blog_back($i) has one entry");
+        cmp_ok($found[0] => cmp => $entered[-$i], "blog_back($i) compares well");
+    }
+
+    # We add this, so 2015/3/12 (one day before last entry) has two entries.
+    push @entered, $tree->new_entry(PFT::Header->new(
+        title => 'I care of titles!',
+        date => PFT::Date->new(2015, 3, 12),
+    ));
+
+    @found = $tree->blog_back(1);
+    is(scalar @found, 2, "blog_back(1) with additional entry");
+    cmp_ok($found[0] => cmp => $entered[-2], 'compares well');
+    cmp_ok($found[1] => cmp => $entered[-1], 'compares really well');
+
 };
 
 # Testing slug detection
