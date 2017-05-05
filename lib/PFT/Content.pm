@@ -425,14 +425,20 @@ sub _path_to_date {
 
 =item blog_back
 
-Go back in blog history, return the corresponding entry.
+Go back in blog history of a number of days, return the entries
+corresponding to that date.
 
-Expects one optional argument as the number of steps backward in history.
-If such argument is not provided, it defaults to 0, returning the most
-recent entry.
+Expects one optional argument as the number of backward days in the blog
+history. If such argument is not provided, it defaults to 0, returning the
+entries of the latest edit day.
 
-Returns a PFT::Content::Blog object, or C<undef> if the blog does not have
-that many entries.
+Please note that only days containing entries really count. If a blog had
+one entry today, no entry for yesterday and one the day before yesterday,
+C<blog_back(0)> will return today's entry, and C<blog_back(1)> will return
+the entry of two days ago.
+
+Returns a list PFT::Content::Blog object, possibly empty if the blog does
+not have that many days.
 
 =cut
 
@@ -442,13 +448,35 @@ sub blog_back {
 
     confess 'Negative back?' if $back < 0;
 
-    my @globs = PFT::Util::locale_glob(
-        File::Spec->catfile($self->dir_blog, '*', '*')
-    );
+    my @paths_and_dates =
+        sort { $b->[1] <=> $a->[1] }
+        map [$_, $self->_path_to_date($_)],
+        PFT::Util::locale_glob(
+            File::Spec->catfile($self->dir_blog, '*', '*')
+        );
 
-    return undef if $back > scalar(@globs) - 1;
+    my %dates;
+    my @out;
+    $back ++;   # Instead of doing $seen_dates == $back + 1 at every loop
+    foreach (@paths_and_dates) {
+        my($path, $date) = @$_;
+        $dates{$date}++;
 
-    $self->_blog_from_path((sort { $b cmp $a } @globs)[$back])
+        my $seen_dates = keys %dates;
+        if ($seen_dates == $back) {
+            my $hdr = eval { PFT::Header->load($path) }
+                or confess "Loading header of $path: " . $@ =~ s/ at .*$//rs;
+
+            push @out => PFT::Content::Blog->new({
+                tree => $self,
+                path => $path,
+                name => $hdr->title,
+            });
+        }
+        last if $seen_dates > $back;
+    }
+
+    @out;
 }
 
 =item blog_at
