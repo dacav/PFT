@@ -392,16 +392,53 @@ sub attachments_ls {
         $self->_blob_ls($self->dir_attachments)
 }
 
+sub _blog_from_path {
+    my($self, $path) = @_;
+    my $h = eval { PFT::Header->load($path) };
+    $h or carp("Loading $path: " . $@ =~ s/ at .*$//rs);
+
+    PFT::Content::Blog->new({
+        tree => $self,
+        path => $path,
+        name => $h ? $h->title : '?',
+    })
+}
+
+sub _path_to_date {
+    my($self, $path) = @_;
+
+    my $rel = File::Spec->abs2rel($path, $self->dir_blog);
+    return undef if index($rel, File::Spec->updir) >= 0;
+
+    my($ym, $dt) = File::Spec->splitdir($rel);
+
+    PFT::Date->new(
+        substr($ym, 0, 4),
+        substr($ym, 5, 2),
+        defined($dt) ? substr($dt, 0, 2) : do {
+            $ym =~ /^\d{4}-\d{2}.month$/
+                or confess "Unexpected $ym for $path";
+            undef
+        }
+    )
+}
+
 =item blog_back
 
-Go back in blog history, return the corresponding entry.
+Go back in blog history of a number of days, return the entries
+corresponding to that date.
 
-Expects one optional argument as the number of steps backward in history.
-If such argument is not provided, it defaults to 0, returning the most
-recent entry.
+Expects one optional argument as the number of backward days in the blog
+history. If such argument is not provided, it defaults to 0, returning the
+entries of the latest edit day.
 
-Returns a PFT::Content::Blog object, or C<undef> if the blog does not have
-that many entries.
+Please note that only days containing entries really count. If a blog had
+one entry today, no entry for yesterday and one the day before yesterday,
+C<blog_back(0)> will return today's entry, and C<blog_back(1)> will return
+the entry of two days ago.
+
+Returns a list PFT::Content::Blog object, possibly empty if the blog does
+not have that many days.
 
 =cut
 
@@ -411,22 +448,61 @@ sub blog_back {
 
     confess 'Negative back?' if $back < 0;
 
-    my @globs = PFT::Util::locale_glob(
-        File::Spec->catfile($self->dir_blog, '*', '*')
+    my @paths_and_dates =
+        sort { $b->[1] <=> $a->[1] }
+        map [$_, $self->_path_to_date($_)],
+        PFT::Util::locale_glob(
+            File::Spec->catfile($self->dir_blog, '*', '*')
+        );
+
+    my %dates;
+    my @out;
+    $back ++;   # Instead of doing $seen_dates == $back + 1 at every loop
+    foreach (@paths_and_dates) {
+        my($path, $date) = @$_;
+        $dates{$date}++;
+
+        my $seen_dates = keys %dates;
+        if ($seen_dates == $back) {
+            my $hdr = eval { PFT::Header->load($path) }
+                or confess "Loading header of $path: " . $@ =~ s/ at .*$//rs;
+
+            push @out => PFT::Content::Blog->new({
+                tree => $self,
+                path => $path,
+                name => $hdr->title,
+            });
+        }
+        last if $seen_dates > $back;
+    }
+
+    @out;
+}
+
+=item blog_at
+
+Go back in blog history to a certain date.
+
+Expects as argument a C<PFT::Date> item indicating a date to seek for blog
+entries.
+
+Returns a possibly empty list of C<PFT::Content::Blog> objects corresponding
+to the zero, one or more entries in the specified date.
+
+=cut
+
+sub blog_at {
+    my($self, $date) = @_;
+
+    confess "Expecting date" unless defined($date) && $date->isa('PFT::Date');
+
+    my $y = defined($date->y) ? sprintf('%04d', $date->y) : '*';
+    my $m = defined($date->m) ? sprintf('%02d', $date->m) : '*';
+    my $d = defined($date->d) ? sprintf('%02d', $date->d) : '*';
+
+    map $self->_blog_from_path($_), PFT::Util::locale_glob(
+        File::Spec->catfile($self->dir_blog, "$y-$m", "$d-*")
     );
-
-    return undef if $back > scalar(@globs) - 1;
-
-    my $path = (sort { $b cmp $a } @globs)[$back];
-
-    my $h = eval { PFT::Header->load($path) };
-    $h or carp("Loading $path: " . $@ =~ s/ at .*$//rs);
-
-    PFT::Content::Blog->new({
-        tree => $self,
-        path => $path,
-        name => $h ? $h->title : '?',
-    })
 }
 
 =item detect_date
@@ -448,23 +524,8 @@ sub detect_date {
             ref $content || $content, ' is not not PFT::Content::File'
     }
 
-    my $path = $content->path;
-
-    return undef unless ($content->isa('PFT::Content::Blog'));
-
-    my $rel = File::Spec->abs2rel($path, $self->dir_blog);
-    die $rel if index($rel, File::Spec->updir) >= 0;
-    my($ym, $dt) = File::Spec->splitdir($rel);
-    die if $content->isa('PFT::Content::Month') && defined $dt;
-
-    PFT::Date->new(
-        substr($ym, 0, 4),
-        substr($ym, 5, 2),
-        defined($dt) ? substr($dt, 0, 2) : do {
-            $ym =~ /^\d{4}-\d{2}.month$/ or confess "Unexpected $ym";
-            undef
-        }
-    )
+    return undef unless $content->isa('PFT::Content::Blog');
+    $self->_path_to_date($content->path) or die 'blog/month without date?';
 }
 
 =item detect_slug
