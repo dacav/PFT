@@ -191,7 +191,7 @@ sub _resolve_local_blog {
             $node = $node->prev;
         }
         $node;
-    } elsif ($method =~ /^(d|date)$/n) {
+    } elsif ($method =~ /^(?:d|date)$/) {
         confess "Incomplete date" if 3 > grep defined, @args;
         push @args, '.*' if 3 == @args;
         my $pattern = sprintf 'b:%04d-%02d-%02d:%s', @args;

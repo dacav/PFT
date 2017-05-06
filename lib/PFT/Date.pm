@@ -113,8 +113,8 @@ sub from_spec {
     if (local $_ = $params{m}) {
         if (/^\d{1,2}$/) {
             $params{m} = int($_)
-        } elsif (m/^(j(?:a|u[nl])|[fsond]|ma[ry]|a[pu]).*/) {
-            $params{m} = $MONTHS{$1}
+        } elsif (m/^(j(?:a|u[nl])|[fsond]|ma[ry]|a[pu]).*/i) {
+            $params{m} = $MONTHS{lc $1}
         } else {
             croak "Invalid month: $_";
         }

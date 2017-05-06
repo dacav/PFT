@@ -57,6 +57,11 @@ use overload
         my($name, $path) = @{$self}{'name', 'path'};
         ref($self) . "({name => \"$name\", path => \"$path\"})"
     },
+   'cmp' => sub {
+        my($self, $oth, $swap) = @_;
+        my $out = $self->{path} cmp $oth->{path};
+        $swap ? -$out : $out;
+    },
 ;
 
 sub new {
