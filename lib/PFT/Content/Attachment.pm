@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with PFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-package PFT::Content::Attachment v1.1.0;
+package PFT::Content::Attachment v1.1.2;
 
 =encoding utf8
 

@@ -1,6 +1,6 @@
 %global module PFT
 Name:           perl-%{module}
-Version:        1.1.0
+Version:        1.1.2
 Release:        1%{?dist}
 Summary:        Hacker friendly static blog generator, core library
 
@@ -84,6 +84,12 @@ LC_ALL="en_US.utf8" make test
 %license LICENSE
 
 %changelog
+* Tue Feb 28 2017 dacav <dacav@openmailbox.org> - 1.1.2-1
+- Release 1.1.2
+
+* Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.1.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
 * Tue Dec 27 2016 <dacav@openmailbox.org> - 1.1.0-1
 - Release 1.1.0
 
