@@ -25,3 +25,7 @@ Revision history for App-PFT
 
 1.1.2   2017-01-20
         More bugfixes
+
+1.2.0   2017-05-06
+        Improved/fixed direct content query
+        Fixed installation under Debian Jessie
