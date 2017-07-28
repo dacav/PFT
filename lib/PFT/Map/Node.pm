@@ -196,6 +196,8 @@ sub virtual { !shift->{cont}->exists }
 
 Returns the type of the content. Short for C<ref($node-E<gt>content)>
 
+This has nothing to do with HTTP content-type header (nor with HTTP at all).
+
 =cut
 
 sub content_type { ref(shift->content) }
