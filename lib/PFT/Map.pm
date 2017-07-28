@@ -83,9 +83,10 @@ sub _resolve {
         for my $symbol ($node->symbols) {
             my $resolved = eval {
                 my @rs = $index->resolve($node, $symbol);
-                if (@rs > 1) {
+                if (@rs != 1) {
                     local $" = ', ';
-                    croak "Ambiguously resolved, matching { @rs }\n";
+                    croak @rs ? "Ambiguous resolution { @rs }"
+                              : "No matching item";
                 }
                 $rs[0]
             };
@@ -101,7 +102,7 @@ sub _resolve {
             }
             else {
                 $node->add_outlink(undef);
-                my $reason = ($@ ? $@ =~ s/\v.*//rs : undef);
+                my $reason = ($@ ? $@ =~ s/ at .*$//rs : undef);
                 $node->add_symbol_unres($symbol => $reason);
             }
         }
