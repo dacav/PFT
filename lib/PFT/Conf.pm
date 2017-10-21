@@ -120,7 +120,10 @@ configuration file.
 =cut
 
 use Exporter 'import';
-our @EXPORT_OK = qw/pod_autogen/;
+our @EXPORT_OK = qw(
+    pod_autogen
+    bash_completion_autogen
+);
 our $CONF_NAME = 'pft.yaml';
 
 # %CONF_RECIPE maps configuration names to an array.
@@ -255,7 +258,11 @@ sub pod_autogen {
             "Defaults to C<$info->[$IDX_DEFAULT]>", ''
     }
 
-    return join "\n", @out, '=back';# '', '=cut';
+    join "\n", @out, '=back';# '', '=cut';
+}
+
+sub bash_completion_autogen {
+    '--' . join "\n--", keys %CONF_RECIPE;
 }
 
 sub new_default {
