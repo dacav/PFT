@@ -8,3 +8,4 @@ perl:
 env:
   - LC_ALL=en_US.utf8
   - LC_ALL=POSIX
+  - LC_ALL=de_DE.ISO8859-1
