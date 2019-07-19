@@ -171,6 +171,9 @@ my %CONF_RECIPE = do {
         'site-encoding'   => [1, '=s', $Encode::Locale::ENCODING_LOCALE,
             'Charset of the generated web pages'
         ],
+        'site-feedfile'  => [0, '=s', 'feed.rss',
+            'File name of the RSS XML to be published by "pft gen-rss"',
+        ],
         'publish-method'  => [1, '=s', 'rsync+ssh',
             'Method used for publishing'
         ],
