@@ -53,7 +53,7 @@ sub check_coherent {
 
     my $map = PFT::Map->new($tree);
 
-    my @entries = $map->blog_recent($exp_blog + 1);
+    my @entries = $map->blog_recent($exp_blog);
     is(scalar @entries, $exp_blog, "Exactly $exp_blog entry");
     foreach (1 .. $exp_blog) {
         cmp_ok($map->blog_recent($_), 'eq', $entries[$_ - 1], " ...Coherent entry $_");
