@@ -65,8 +65,11 @@ sub list_files {
     my @out;
 
     while (@todo) {
-        my $dn = pop @todo;
-        opendir my $d, encode(locale_fs => $dn) or die "Opening $dn: $!";
+        my $dn = encode(locale_fs => pop @todo);
+
+        next unless -d "$dn";
+
+        opendir(my $d, $dn) or die "Opening $dn: $!";
         my @content = map decode(locale_fs => $_) => readdir $d;
         foreach (File::Spec->no_upwards(@content)) {
             if (-d (my $dir = File::Spec->catdir($dn, $_))) {
