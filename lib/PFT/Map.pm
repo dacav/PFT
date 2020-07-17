@@ -114,16 +114,21 @@ sub _mknod {
     my $self = shift;
     my($cntnt, $hdr) = @_;
 
+    my $id = $self->index->content_id(@_);
     my $node = PFT::Map::Node->new(
-        $self->{next} ++,
-        (my $id = $self->index->content_id(@_)),
+        $self->{next}++,
+        $id,
         @_,
     );
 
     if ($cntnt and $cntnt->isa('PFT::Content::Entry') and $cntnt->exists) {
         push @{$self->{toresolve}}, $node
     }
-    die if exists $self->{idx}{$id};
+    if (exists $self->{idx}{$id}) {
+        say STDERR
+            "Duplicated item identifier: ", $id,
+            ". One or more entries will be shadowed."
+    }
     $self->{idx}{$id} = $node;
 }
 
